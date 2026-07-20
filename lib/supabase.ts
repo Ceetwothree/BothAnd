@@ -13,5 +13,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // For server-side use (with auth context)
 export function createServerClient() {
-  return createClient(supabaseUrl, supabaseAnonKey)
+  return createClient(supabaseUrl!, supabaseAnonKey!)
 }
