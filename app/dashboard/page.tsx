@@ -87,7 +87,7 @@ export default function DashboardPage() {
         return
       }
 
-      const { data, error: createError } = await supabase
+      const { error: createError } = await supabase
         .from('records')
         .insert({
           container_id: containerId,
