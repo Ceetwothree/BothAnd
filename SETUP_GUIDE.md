@@ -44,8 +44,7 @@ This is the forum MVP for BothAnd. Public-facing forum with member dashboard for
 This creates:
 - All 6 tables (users, orgs, containers, records, responses, etc.)
 - Row-Level Security policies on every table
-- The default "themission" org
-- A public forum container
+- No seed orgs -- the first real signup creates its own org via `/orgs/new`
 
 ### 1.2 Enable Realtime (optional)
 
