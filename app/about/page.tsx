@@ -101,12 +101,68 @@ export default function AboutPage() {
               tracking enough of the flow to know whether a program is working.
             </p>
             <p>
+              The clearest example of that mismatch happened right inside PATH: one site had
+              boxes of donated items sitting unused, while another had exactly what it needed a
+              few miles away, with no way to know it -- a men&apos;s center holding donated
+              feminine hygiene products, a women&apos;s center holding donated men&apos;s
+              clothing. Nothing wrong with how either site was run -- just no shared way to see
+              across them.
+            </p>
+            <p>
               BothAnd is what that analysis turned into -- one shared foundation, with each piece
               switched on only if an organization actually needs it. A group that just wants a
               forum and a meetup calendar can ignore the rest completely. If donation tracking
               becomes useful six months later, it&apos;s already there to turn on -- not a
-              migration to a different, more expensive tool.
+              migration to a different, more expensive tool. Trading surplus between groups
+              working toward similar goals is still ahead of us, but it&apos;s the direction this
+              is built toward: making it easier for mutual aid to go where it needs to go,
+              without asking anyone to adopt a whole new ecosystem to get there.
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="lp-pairs">
+        <div className="lp-wrap">
+          <div className="lp-heading">
+            <p className="lp-eyebrow">You shouldn&apos;t have to choose</p>
+            <h2>The tradeoffs everyone tells you to expect. We built around them instead.</h2>
+            <p className="lp-heading-lead">
+              Built for NGOs from small to large, community groups, mutual aid groups, and
+              churches doing charity work -- the organizations usually told to expect these
+              tradeoffs.
+            </p>
+          </div>
+          <div className="lp-pair-list">
+            <div className="lp-pair">
+              <h3>
+                A mission. <span className="lp-and">And</span> a budget.
+              </h3>
+              <p>
+                Everything here runs free at small scale, so the cost of the software never has
+                to compete with the budget your mission actually depends on.
+              </p>
+            </div>
+            <div className="lp-pair">
+              <h3>
+                Simple to join. <span className="lp-and">And</span> genuinely secure.
+              </h3>
+              <p>
+                Signing up takes a minute. Underneath, every read and write is checked against
+                who you are and which organization you belong to -- enforced by the database
+                itself, not bolted on in the app.
+              </p>
+            </div>
+            <div className="lp-pair">
+              <h3>
+                Your organization. <span className="lp-and">And</span> everyone else&apos;s.
+              </h3>
+              <p>
+                One account can belong to as many organizations as you&apos;re actually part of.
+                Switch between them without logging out, without a second signup, without
+                anyone&apos;s data mixing with anyone else&apos;s.
+              </p>
+            </div>
           </div>
         </div>
       </section>

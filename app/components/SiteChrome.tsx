@@ -192,6 +192,8 @@ const SITE_CSS = `
         color: var(--site-gold);
         flex-shrink: 0;
       }
+      .lp-how-next { font-size: 0.95rem; color: var(--site-ink-muted); max-width: 60ch; margin: 0 0 1.5rem; }
+      .lp-how-next strong { color: var(--site-ink-soft); }
       .lp-how-cta-line { font-size: 1.05rem; color: var(--site-ink); font-weight: 600; margin: 0 0 1rem; }
 
       .lp-closing { padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 7vw, 5rem); text-align: center; }

@@ -82,51 +82,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="lp-pairs">
-        <div className="lp-wrap">
-          <div className="lp-heading">
-            <p className="lp-eyebrow">You shouldn&apos;t have to choose</p>
-            <h2>The tradeoffs everyone tells you to expect. We built around them instead.</h2>
-            <p className="lp-heading-lead">
-              Built for NGOs from small to large, community groups, mutual aid groups, and
-              churches doing charity work -- the organizations usually told to expect these
-              tradeoffs.
-            </p>
-          </div>
-          <div className="lp-pair-list">
-            <div className="lp-pair">
-              <h3>
-                A mission. <span className="lp-and">And</span> a budget.
-              </h3>
-              <p>
-                Everything here runs free at small scale, so the cost of the software never has
-                to compete with the budget your mission actually depends on.
-              </p>
-            </div>
-            <div className="lp-pair">
-              <h3>
-                Simple to join. <span className="lp-and">And</span> genuinely secure.
-              </h3>
-              <p>
-                Signing up takes a minute. Underneath, every read and write is checked against
-                who you are and which organization you belong to -- enforced by the database
-                itself, not bolted on in the app.
-              </p>
-            </div>
-            <div className="lp-pair">
-              <h3>
-                Your organization. <span className="lp-and">And</span> everyone else&apos;s.
-              </h3>
-              <p>
-                One account can belong to as many organizations as you&apos;re actually part of.
-                Switch between them without logging out, without a second signup, without
-                anyone&apos;s data mixing with anyone else&apos;s.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <HowItWorks />
 
       <section className="lp-closing">
@@ -252,6 +207,12 @@ function HowItWorks() {
             ))}
           </div>
         </div>
+
+        <p className="lp-how-next">
+          <strong>Coming next:</strong> trade surplus between groups working toward similar goals,
+          so donations end up where they&apos;re actually needed -- not just where they first
+          landed.
+        </p>
 
         <p className="lp-how-cta-line">Sign up and start planning, tracking, and posting.</p>
         <div className="lp-cta-row">
