@@ -209,7 +209,7 @@ function HowItWorks() {
         </div>
 
         <p className="lp-how-next">
-          <strong>Coming next:</strong> trade surplus between groups working toward similar goals,
+          <strong>Eventually:</strong> trade surplus between groups working toward similar goals,
           so donations end up where they&apos;re actually needed -- not just where they first
           landed.
         </p>
