@@ -83,6 +83,11 @@ export default function JoinByInvitePage({ params }: { params: { code: string } 
         />
       )}
       <h1>You&apos;re invited to join {preview.name}</h1>
+      {preview.mission_statement && (
+        <p style={{ marginTop: '0.75rem', fontStyle: 'italic', color: '#475569' }}>
+          {preview.mission_statement}
+        </p>
+      )}
       {error && <div style={{ color: 'red', marginTop: '1rem' }}>{error}</div>}
       <button
         onClick={handleJoin}

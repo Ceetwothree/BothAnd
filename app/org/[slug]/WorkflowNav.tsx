@@ -10,6 +10,7 @@ const TABS: { href: string; label: string }[] = [
   { href: '/catalog', label: 'Catalog' },
   { href: '/journal', label: 'Journal' },
   { href: '/course', label: 'Course' },
+  { href: '/about', label: 'About' },
 ]
 
 export default function WorkflowNav({ slug }: { slug: string }) {
