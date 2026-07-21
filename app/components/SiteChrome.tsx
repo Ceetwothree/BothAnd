@@ -132,6 +132,12 @@ const SITE_CSS = `
       .lp-hero-inner { max-width: 840px; }
       .lp-hero h1 { font-size: clamp(2.3rem, 5.2vw, 3.7rem); line-height: 1.12; }
       .lp-lead { margin: 1.75rem 0 0; max-width: 62ch; font-size: 1.2rem; line-height: 1.6; color: var(--site-ink-soft); }
+
+      /* Compact hero -- smaller and quieter than the full pitch version,
+         so a signed-in visitor landing here for the 50th time isn't
+         re-shouted at by a huge headline every time. */
+      .lp-hero-compact { padding: clamp(1.5rem, 4vw, 2.5rem) 0 clamp(1.75rem, 4vw, 2.75rem); }
+      .lp-hero-small { font-size: clamp(1.4rem, 2.6vw, 1.9rem); line-height: 1.3; }
       .lp-cta-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2.25rem; }
       .lp-cta-row-center { justify-content: center; }
 
@@ -163,15 +169,30 @@ const SITE_CSS = `
       .lp-prose { max-width: 62ch; display: flex; flex-direction: column; gap: 1.35rem; }
       .lp-prose p { font-size: 1.07rem; color: var(--site-ink-soft); margin: 0; }
 
-      .lp-workflows { padding: clamp(2.5rem, 6vw, 4rem) 0; background: var(--site-paper-raised); border-top: 1px solid var(--site-paper-line); border-bottom: 1px solid var(--site-paper-line); }
-      .lp-workflow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2.25rem; margin-top: 2rem; }
-      .lp-workflow-item { border-left: 2px solid var(--site-gold-soft); padding-left: 1rem; }
-      .lp-workflow-item h4 { font-family: "Iowan Old Style", Georgia, serif; font-weight: 600; font-size: 1.05rem; margin: 0 0 0.4rem; color: var(--site-ink); }
-      .lp-workflow-item p { margin: 0; font-size: 0.92rem; color: var(--site-ink-muted); line-height: 1.55; }
+      .lp-how { padding: clamp(2rem, 6vw, 3.5rem) 0 clamp(2.5rem, 6vw, 4rem); background: var(--site-paper-raised); border-top: 1px solid var(--site-paper-line); border-bottom: 1px solid var(--site-paper-line); }
+      .lp-how-heading { max-width: 640px; font-size: clamp(1.4rem, 2.6vw, 1.8rem); line-height: 1.3; margin-top: 0; }
 
-      .lp-diagram { max-width: 420px; margin: 2.5rem auto 0.5rem; }
-      .lp-diagram svg { width: 100%; height: auto; display: block; }
-      .lp-diagram text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+      .lp-how-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin: 2rem 0 1.75rem; }
+      .lp-how-step { display: flex; flex-direction: column; align-items: flex-start; gap: 0.6rem; max-width: 220px; }
+      .lp-how-step p { margin: 0; font-size: 0.95rem; color: var(--site-ink-soft); line-height: 1.4; }
+      .lp-how-step-main p { font-weight: 600; color: var(--site-ink); }
+      .lp-how-arrow { font-size: 1.5rem; color: var(--site-gold); flex-shrink: 0; }
+      @media (max-width: 700px) {
+        .lp-how-arrow { display: none; }
+      }
+      .lp-how-actions { display: flex; flex-wrap: wrap; gap: 1.75rem; }
+      .lp-how-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--site-gold-soft);
+        color: var(--site-gold);
+        flex-shrink: 0;
+      }
+      .lp-how-cta-line { font-size: 1.05rem; color: var(--site-ink); font-weight: 600; margin: 0 0 1rem; }
 
       .lp-closing { padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 7vw, 5rem); text-align: center; }
       .lp-closing h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); max-width: 620px; margin: 0 auto; }
