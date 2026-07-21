@@ -106,6 +106,23 @@ const SITE_CSS = `
         transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
       }
       .lp-btn:focus-visible { outline: 2px solid var(--site-teal); outline-offset: 2px; }
+
+      .lp-yourorgs { padding: 0.5rem 0 2rem; }
+      .lp-yourorgs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+      .lp-yourorgs-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border: 1px solid var(--site-paper-line);
+        border-radius: 6px;
+        background: var(--site-paper-raised);
+        text-decoration: none;
+        color: var(--site-ink);
+        transition: border-color 0.15s ease;
+      }
+      .lp-yourorgs-item:hover { border-color: var(--site-ink-muted); }
+      .lp-yourorgs-item small { color: var(--site-ink-muted); }
       .lp-btn-primary { background: var(--site-teal); color: var(--site-teal-ink); }
       .lp-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
       .lp-btn-ghost { background: transparent; color: var(--site-ink); border-color: var(--site-paper-line); }
