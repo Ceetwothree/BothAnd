@@ -3,7 +3,7 @@
 // Keep this in sync with the CHECK constraints on orgs.banner_template / orgs.accent_color in schema.sql.
 
 export type BannerTemplateId = 'logo-left' | 'centered' | 'full-banner'
-export type AccentColorId = 'slate' | 'blue' | 'green' | 'purple' | 'amber' | 'rose'
+export type AccentColorId = 'pine' | 'indigo' | 'plum' | 'ochre' | 'clay' | 'ink'
 
 export interface OrgBranding {
   name: string
@@ -18,13 +18,18 @@ export const BANNER_TEMPLATES: { id: BannerTemplateId; label: string; descriptio
   { id: 'full-banner', label: 'Full banner', description: 'Logo image fills the header as a banner' },
 ]
 
+// Drawn from the same considered, muted palette as BothAnd's own site
+// theme (app/globals.css) -- pine and ochre are literally the site's own
+// teal/gold -- rather than the generic default-Tailwind rainbow this
+// replaced, so an org's page reads as part of the same design family even
+// though the color itself is what makes each org's branding its own.
 export const ACCENT_COLORS: { id: AccentColorId; label: string; hex: string }[] = [
-  { id: 'slate', label: 'Slate', hex: '#475569' },
-  { id: 'blue', label: 'Blue', hex: '#2563eb' },
-  { id: 'green', label: 'Green', hex: '#059669' },
-  { id: 'purple', label: 'Purple', hex: '#7c3aed' },
-  { id: 'amber', label: 'Amber', hex: '#d97706' },
-  { id: 'rose', label: 'Rose', hex: '#e11d48' },
+  { id: 'pine', label: 'Pine', hex: '#1F6F5C' },
+  { id: 'indigo', label: 'Indigo', hex: '#3B5470' },
+  { id: 'plum', label: 'Plum', hex: '#6B4271' },
+  { id: 'ochre', label: 'Ochre', hex: '#A8761F' },
+  { id: 'clay', label: 'Clay', hex: '#B0512E' },
+  { id: 'ink', label: 'Ink', hex: '#40474D' },
 ]
 
 export function accentHex(id: string): string {

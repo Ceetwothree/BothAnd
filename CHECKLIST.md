@@ -20,8 +20,6 @@
   - [ ] `containers`
   - [ ] `records`
   - [ ] `responses`
-- [ ] Verify "themission" org exists
-- [ ] Verify "Forum" container exists in themission org
 
 ### 2. Vercel Setup
 - [ ] Go to https://vercel.com/new
@@ -34,14 +32,13 @@
 - [ ] Visit your Vercel URL
 
 ### 3. Test the Deployment
-- [ ] Visit public home page → see "The Mission" forum
 - [ ] Visit `/signup` → test signup flow
 - [ ] Create an account (use test email)
 - [ ] Verify you're logged in
-- [ ] Visit `/dashboard` → create a test post
-- [ ] Go back to home → verify post appears publicly
-- [ ] Logout → verify public forum still visible
-- [ ] Create another account → test two-user scenario
+- [ ] Visit `/orgs/new` → create a test org, verify you land in it as admin
+- [ ] Create a post on the org's Board → verify it appears
+- [ ] Logout → verify public orgs are still browsable at `/browse`
+- [ ] Create another account → test two-user scenario (join the org, post as a member)
 
 ## Post-Deployment (Optional)
 
@@ -103,7 +100,7 @@ Once deployed, give advisors this link:
 https://your-vercel-url/signup
 ```
 
-They sign up → automatically added to "themission" org → can see public forum → can create posts from dashboard.
+They sign up → create or join an organization (via `/orgs/new` or `/browse`) → can post to its Board.
 
 ## Timeline
 

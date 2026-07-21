@@ -30,8 +30,11 @@ CREATE TABLE orgs (
   logo_url TEXT,
   banner_template TEXT NOT NULL DEFAULT 'centered'
     CHECK (banner_template IN ('logo-left', 'centered', 'full-banner')),
-  accent_color TEXT NOT NULL DEFAULT 'slate'
-    CHECK (accent_color IN ('slate', 'blue', 'green', 'purple', 'amber', 'rose')),
+  -- Drawn from the same considered palette as BothAnd's own site theme
+  -- (app/globals.css) -- pine/ochre are literally the site's teal/gold --
+  -- rather than a generic default-Tailwind rainbow.
+  accent_color TEXT NOT NULL DEFAULT 'ink'
+    CHECK (accent_color IN ('pine', 'indigo', 'plum', 'ochre', 'clay', 'ink')),
   -- Multi-org identity: public orgs are browsable/self-joinable,
   -- private orgs are invite-link only (distinct from containers.visibility)
   is_public BOOLEAN NOT NULL DEFAULT false,
@@ -550,26 +553,8 @@ CREATE POLICY logos_admin_update ON storage.objects
     )
   );
 
--- ============================================
--- SEED DATA (optional, for dev/testing)
--- ============================================
-
--- Create initial org "themission" (public, so it stays browsable/joinable)
-INSERT INTO orgs (id, name, slug, is_public, invite_code)
-VALUES (
-  '550e8400-e29b-41d4-a716-446655440000'::uuid,
-  'The Mission',
-  'themission',
-  true,
-  replace(gen_random_uuid()::text, '-', '')
-);
-
--- Create forum container (public)
-INSERT INTO containers (id, org_id, kind, name, visibility)
-VALUES (
-  '550e8400-e29b-41d4-a716-446655440001'::uuid,
-  '550e8400-e29b-41d4-a716-446655440000'::uuid,
-  'board',
-  'Forum',
-  'public'
-);
+-- No seed data: a raw INSERT here would bypass create_org_with_admin(),
+-- the only path that also inserts an admin membership -- exactly what
+-- happened to the old seeded "themission" org, which could never have an
+-- admin and had to be deleted. Create any demo org through the normal
+-- signup + create_org_with_admin() flow instead.
