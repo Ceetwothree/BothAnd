@@ -3,8 +3,6 @@
 // Known limitations (see PR description for the full list):
 // - records has no dedicated date/time column yet, so "when" lives in the
 //   description text for now -- needs a proper `starts_at` column later.
-// - responses has no DELETE policy yet, so RSVPs are add-only: no un-RSVP
-//   until a migration adds one.
 // - "staff can create events" is a UI-level guard only; the underlying
 //   records_write RLS policy allows any active member, same gap the forum
 //   already has today.
@@ -33,7 +31,8 @@ export default function EventsPage() {
   const [user, setUser] = useState<any>(null)
   const [events, setEvents] = useState<EventRecord[]>([])
   const [loadingEvents, setLoadingEvents] = useState(true)
-  const [rsvpedIds, setRsvpedIds] = useState<Set<string>>(new Set())
+  // eventId -> id of the viewer's own rsvp response, so it can be deleted
+  const [myRsvps, setMyRsvps] = useState<Record<string, string>>({})
 
   const [settingUp, setSettingUp] = useState(false)
   const [title, setTitle] = useState('')
@@ -75,13 +74,14 @@ export default function EventsPage() {
       setEvents(rows)
 
       if (user) {
-        const mine = new Set<string>()
+        const mine: Record<string, string> = {}
         for (const r of data as any[]) {
-          if ((r.responses ?? []).some((resp: any) => resp.kind === 'rsvp' && resp.user_id === user.id)) {
-            mine.add(r.id)
-          }
+          const myResponse = (r.responses ?? []).find(
+            (resp: any) => resp.kind === 'rsvp' && resp.user_id === user.id
+          )
+          if (myResponse) mine[r.id] = myResponse.id
         }
-        setRsvpedIds(mine)
+        setMyRsvps(mine)
       }
     }
 
@@ -156,6 +156,20 @@ export default function EventsPage() {
       if (container) await fetchEvents(container.id)
     } catch (err: any) {
       setError(err.message || 'Failed to RSVP')
+    } finally {
+      setRsvpingId(null)
+    }
+  }
+
+  const handleUnRsvp = async (eventId: string, responseId: string) => {
+    setRsvpingId(eventId)
+    setError('')
+    try {
+      const { error: deleteError } = await supabase.from('responses').delete().eq('id', responseId)
+      if (deleteError) throw deleteError
+      if (container) await fetchEvents(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to cancel RSVP')
     } finally {
       setRsvpingId(null)
     }
@@ -250,7 +264,7 @@ export default function EventsPage() {
         ) : (
           events.map((ev) => {
             const full = ev.capacity != null && ev.rsvp_count >= ev.capacity
-            const alreadyRsvped = rsvpedIds.has(ev.id)
+            const myRsvpId = myRsvps[ev.id]
 
             return (
               <article
@@ -275,8 +289,13 @@ export default function EventsPage() {
                   )}
                 </small>
                 <div style={{ marginTop: '0.75rem' }}>
-                  {!canRsvp ? null : alreadyRsvped ? (
-                    <span>You&apos;re RSVP&apos;d</span>
+                  {!canRsvp ? null : myRsvpId ? (
+                    <>
+                      <span style={{ marginRight: '0.75rem' }}>You&apos;re RSVP&apos;d</span>
+                      <button onClick={() => handleUnRsvp(ev.id, myRsvpId)} disabled={rsvpingId === ev.id}>
+                        {rsvpingId === ev.id ? 'Cancelling...' : 'Cancel RSVP'}
+                      </button>
+                    </>
                   ) : full ? (
                     <button disabled>Event full</button>
                   ) : (

@@ -152,6 +152,20 @@ export default function CatalogPage() {
     }
   }
 
+  const handleWithdrawClaim = async (itemId: string, claimId: string) => {
+    setBusyId(itemId)
+    setError('')
+    try {
+      const { error: deleteError } = await supabase.from('responses').delete().eq('id', claimId)
+      if (deleteError) throw deleteError
+      if (container) await fetchItems(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to withdraw request')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   const handleSetState = async (itemId: string, state: string) => {
     setBusyId(itemId)
     setError('')
@@ -244,7 +258,7 @@ export default function CatalogPage() {
         ) : (
           items.map((item) => {
             const isOwner = user && item.owner_id === user.id
-            const alreadyClaimed = user && item.claims.some((c) => c.user_id === user.id)
+            const myClaim = user ? item.claims.find((c) => c.user_id === user.id) : undefined
 
             return (
               <article
@@ -267,8 +281,16 @@ export default function CatalogPage() {
 
                 {!isOwner && canList && item.state === 'open' && (
                   <div style={{ marginTop: '0.75rem' }}>
-                    {alreadyClaimed ? (
-                      <span>You&apos;ve requested this item</span>
+                    {myClaim ? (
+                      <>
+                        <span style={{ marginRight: '0.75rem' }}>You&apos;ve requested this item</span>
+                        <button
+                          onClick={() => handleWithdrawClaim(item.id, myClaim.id)}
+                          disabled={busyId === item.id}
+                        >
+                          {busyId === item.id ? 'Withdrawing...' : 'Withdraw'}
+                        </button>
+                      </>
                     ) : (
                       <button onClick={() => handleClaim(item.id)} disabled={busyId === item.id}>
                         {busyId === item.id ? 'Requesting...' : 'I want this'}

@@ -4,9 +4,8 @@
 // tracking beyond "have I submitted for this lesson yet" -- lowest-demand
 // workflow of the four, not worth over-building sight unseen.
 //
-// Same responses-have-no-DELETE/UPDATE-policy gap as Events' RSVPs: once
-// submitted, a submission can't be edited or resubmitted until a future
-// migration adds that policy.
+// "Editing" a submission is delete-then-resubmit rather than an inline
+// edit form -- simpler, and reuses the same insert flow.
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -20,7 +19,7 @@ interface LessonRecord {
   title: string | null
   body: string | null
   created_at: string
-  mySubmission: string | null
+  mySubmission: { id: string; body: string } | null
 }
 
 export default function CoursePage() {
@@ -66,7 +65,7 @@ export default function CoursePage() {
         const mine = (r.responses ?? []).find(
           (resp: any) => resp.kind === 'submission' && resp.user_id === user?.id
         )
-        return { ...r, mySubmission: mine?.body ?? null }
+        return { ...r, mySubmission: mine ? { id: mine.id, body: mine.body } : null }
       })
       setLessons(rows)
     }
@@ -144,6 +143,20 @@ export default function CoursePage() {
       if (container) await fetchLessons(container.id)
     } catch (err: any) {
       setError(err.message || 'Failed to submit')
+    } finally {
+      setSubmittingId(null)
+    }
+  }
+
+  const handleDeleteSubmission = async (lessonId: string, submissionId: string) => {
+    setSubmittingId(lessonId)
+    setError('')
+    try {
+      const { error: deleteError } = await supabase.from('responses').delete().eq('id', submissionId)
+      if (deleteError) throw deleteError
+      if (container) await fetchLessons(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete submission')
     } finally {
       setSubmittingId(null)
     }
@@ -241,9 +254,17 @@ export default function CoursePage() {
               {canSubmit && (
                 <div style={{ marginTop: '0.75rem' }}>
                   {lesson.mySubmission ? (
-                    <p>
-                      <strong>Your submission:</strong> {lesson.mySubmission}
-                    </p>
+                    <>
+                      <p>
+                        <strong>Your submission:</strong> {lesson.mySubmission.body}
+                      </p>
+                      <button
+                        onClick={() => handleDeleteSubmission(lesson.id, lesson.mySubmission!.id)}
+                        disabled={submittingId === lesson.id}
+                      >
+                        {submittingId === lesson.id ? 'Deleting...' : 'Delete and resubmit'}
+                      </button>
+                    </>
                   ) : (
                     <>
                       <textarea
