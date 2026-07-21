@@ -22,9 +22,27 @@ export function canManageMembers(role: OrgRole | null | undefined): boolean {
   return atLeast(role, 'admin')
 }
 
-// Positioned for when events/catalog workflows ship -- not enforced
-// anywhere yet, since there's no staff-only action to gate.
+// Matches containers_admin_write RLS exactly (admin-of-org only, not
+// staff). This gates *creating a workflow's container* (Events, Catalog,
+// Journal, Course setup) -- separate from creating records inside one,
+// which uses the looser per-workflow checks below. Mixing these up means a
+// staff member's "Set up Events" click would hit an RLS rejection.
+export function canManageContainers(role: OrgRole | null | undefined): boolean {
+  return atLeast(role, 'admin')
+}
+
+// UI-level guard only -- records_write RLS currently allows any active
+// member to create a record regardless of role, so this doesn't yet block
+// anything at the database layer. Positioned for when that policy is
+// tightened.
 export function canManageEvents(role: OrgRole | null | undefined): boolean {
+  return atLeast(role, 'staff')
+}
+
+// Same rank as canManageEvents today (staff+) but kept as its own function
+// rather than reused, since course-authoring permissions are plausible to
+// diverge from event-organizing permissions later.
+export function canManageCourse(role: OrgRole | null | undefined): boolean {
   return atLeast(role, 'staff')
 }
 

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useOrgBySlug, Org } from '@/lib/orgs'
 import { OrgContext } from './OrgContext'
 import OrgSwitcher from '../../components/OrgSwitcher'
+import WorkflowNav from './WorkflowNav'
 
 export default function OrgLayout({
   children,
@@ -50,6 +51,7 @@ export default function OrgLayout({
     >
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
         <OrgSwitcher currentOrg={mergedOrg} />
+        <WorkflowNav slug={mergedOrg.slug} />
         {children}
       </div>
     </OrgContext.Provider>

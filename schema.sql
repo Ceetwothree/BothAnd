@@ -380,6 +380,17 @@ CREATE POLICY responses_write ON responses
     )
   );
 
+-- Lets a user remove or edit their own response (RSVP, claim, submission,
+-- comment) -- without this, none of those are ever undoable or editable
+-- once made.
+CREATE POLICY responses_delete_own ON responses
+  FOR DELETE
+  USING (user_id = auth.uid()::uuid);
+
+CREATE POLICY responses_update_own ON responses
+  FOR UPDATE
+  USING (user_id = auth.uid()::uuid);
+
 -- ============================================
 -- FUNCTIONS (RPC)
 -- ============================================
