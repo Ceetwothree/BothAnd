@@ -29,8 +29,6 @@
 - [ ] Add environment variables:
   - [ ] `NEXT_PUBLIC_SUPABASE_URL` = your Supabase URL
   - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon key
-  - [ ] `NEXT_PUBLIC_SITE_URL` = (auto-filled or your domain)
-  - [ ] `NEXT_PUBLIC_DEFAULT_ORG_SLUG` = `themission`
 - [ ] Deploy
 - [ ] Wait for deployment to complete (~1-2 mins)
 - [ ] Visit your Vercel URL
