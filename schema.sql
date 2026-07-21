@@ -175,6 +175,16 @@ CREATE POLICY memberships_admin_manage ON memberships
     )
   );
 
+-- A freshly signed-up user can create their own first membership,
+-- but only as a plain active member -- never self-granted admin/staff
+CREATE POLICY memberships_self_insert ON memberships
+  FOR INSERT
+  WITH CHECK (
+    user_id = auth.uid()::uuid
+    AND role = 'member'
+    AND status = 'active'
+  );
+
 -- CONTAINERS: Visibility rules
 -- Public: anyone can read
 -- Org: members can read
@@ -339,9 +349,9 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('logos', 'logos', true)
 ON CONFLICT (id) DO NOTHING;
 
-CREATE POLICY logos_public_read ON storage.objects
-  FOR SELECT
-  USING (bucket_id = 'logos');
+-- No SELECT policy needed: public buckets serve objects via the public URL
+-- without going through storage RLS. A SELECT policy would only enable
+-- bucket-wide listing via the storage API, which the app never uses.
 
 CREATE POLICY logos_admin_upload ON storage.objects
   FOR INSERT
