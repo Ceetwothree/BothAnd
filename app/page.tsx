@@ -2,14 +2,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useUserOrgs, UserOrgMembership } from '@/lib/orgs'
 import { SiteHeader, SiteFooter, SiteStyles } from './components/SiteChrome'
 
 export default function Home() {
-  const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [checkingUser, setCheckingUser] = useState(true)
   const { orgs, loading: loadingOrgs } = useUserOrgs()
@@ -25,194 +23,45 @@ export default function Home() {
     checkUser()
   }, [])
 
-  // A signed-in visitor with exactly one org has nowhere else to go -- send
-  // them straight there instead of making them click through a picker.
-  useEffect(() => {
-    if (!checkingUser && user && !loadingOrgs && orgs.length === 1) {
-      router.replace(`/org/${orgs[0].org.slug}`)
-    }
-  }, [checkingUser, user, loadingOrgs, orgs, router])
-
-  if (checkingUser || (user && loadingOrgs) || (user && orgs.length === 1)) {
-    return (
-      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '4rem 2rem' }}>
-        <p style={{ color: 'var(--site-ink-muted)' }}>Loading...</p>
-        <SiteStyles />
-      </div>
-    )
-  }
-
-  if (user) {
-    return <SignedInHub orgs={orgs} />
-  }
-
-  return <MarketingHome />
-}
-
-function SignedInHub({ orgs }: { orgs: UserOrgMembership[] }) {
+  // "/" is the one stable home -- clicking the BothAnd wordmark from
+  // anywhere always lands here, logged in or not. No auto-redirect into an
+  // org: that used to strand signed-in visitors with no way back to this
+  // page at all. Signed-in visitors get a "Your organizations" section up
+  // top instead, one click from their org, with the rest of the page (the
+  // pitch, the workflow diagram, the About link) still reachable below it.
   return (
     <div className="lp-root">
       <SiteHeader
         right={
-          <>
-            <Link href="/about" className="lp-nav-link">
-              About
-            </Link>
-            <Link href="/browse" className="lp-nav-link">
-              Browse
-            </Link>
-            <Link href="/orgs/new" className="lp-nav-link">
-              Create org
-            </Link>
-            <button onClick={() => supabase.auth.signOut()} className="lp-btn lp-btn-ghost">
-              Log out
-            </button>
-          </>
-        }
-      />
-
-      <div className="lp-wrap" style={{ paddingBottom: '4rem' }}>
-        <section style={{ marginTop: '1rem' }}>
-          <h1 style={{ fontSize: '1.5rem', color: 'var(--site-ink)', marginBottom: '1rem' }}>
-            Your organizations
-          </h1>
-          {orgs.length === 0 ? (
-            <div
-              style={{
-                border: '1px solid var(--site-paper-line)',
-                borderRadius: '8px',
-                padding: '2rem',
-                color: 'var(--site-ink-muted)',
-              }}
-            >
-              <p style={{ marginTop: 0 }}>You&apos;re not part of any organization yet.</p>
-              <p style={{ marginBottom: 0 }}>
-                <Link href="/browse" style={{ color: 'var(--site-teal)' }}>
-                  Browse public organizations
-                </Link>{' '}
-                or{' '}
-                <Link href="/orgs/new" style={{ color: 'var(--site-teal)' }}>
-                  create your own
-                </Link>
-                .
-              </p>
-            </div>
+          checkingUser ? null : user ? (
+            <>
+              <Link href="/about" className="lp-nav-link">
+                About
+              </Link>
+              <Link href="/browse" className="lp-nav-link">
+                Browse
+              </Link>
+              <Link href="/orgs/new" className="lp-nav-link">
+                Create org
+              </Link>
+              <button onClick={() => supabase.auth.signOut()} className="lp-btn lp-btn-ghost">
+                Log out
+              </button>
+            </>
           ) : (
-            <div style={{ display: 'grid', gap: '0.75rem' }}>
-              {orgs.map(({ org, role }) => (
-                <Link
-                  key={org.id}
-                  href={`/org/${org.slug}`}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '1rem 1.25rem',
-                    border: '1px solid var(--site-paper-line)',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <strong style={{ color: 'var(--site-ink)' }}>{org.name}</strong>
-                  <small style={{ color: 'var(--site-ink-muted)' }}>{role}</small>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-      <SiteStyles />
-    </div>
-  )
-}
-
-const WORKFLOWS = [
-  {
-    name: 'Board',
-    copy: 'A public or members-only feed for updates, announcements, and discussion.',
-  },
-  {
-    name: 'Events',
-    copy: 'Post events, take RSVPs, and cap attendance when space is limited.',
-  },
-  {
-    name: 'Catalog',
-    copy: 'List items and supplies that members can claim.',
-  },
-  {
-    name: 'Journal',
-    copy: 'Private, per-person entries -- visible only to their author and your admins.',
-  },
-  {
-    name: 'Course',
-    copy: 'Lay out lessons and collect submissions for any training you run.',
-  },
-]
-
-// A center hub ("your organization") with the five workflows as spokes --
-// the same "one foundation, pieces you switch on" idea as the origin story,
-// drawn instead of stated. Plain SVG shapes (circles/lines/text), not
-// hand-authored path data, so it stays simple to read and maintain.
-function WorkflowDiagram() {
-  const nodes = [
-    { label: 'Board', x: 280, y: 80 },
-    { label: 'Events', x: 470, y: 218 },
-    { label: 'Catalog', x: 398, y: 442 },
-    { label: 'Journal', x: 162, y: 442 },
-    { label: 'Course', x: 90, y: 218 },
-  ]
-
-  return (
-    <div className="lp-diagram">
-      <svg viewBox="0 0 560 560" role="img" aria-label="Your organization at the center, with Board, Events, Catalog, Journal, and Course as optional pieces around it">
-        {nodes.map((n) => (
-          <line
-            key={`line-${n.label}`}
-            x1={280}
-            y1={280}
-            x2={n.x}
-            y2={n.y}
-            stroke="var(--site-gold)"
-            strokeOpacity={0.35}
-            strokeWidth={2}
-          />
-        ))}
-        {nodes.map((n) => (
-          <g key={n.label}>
-            <circle cx={n.x} cy={n.y} r={54} fill="var(--site-gold-soft)" stroke="var(--site-gold)" strokeWidth={1.5} />
-            <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="middle" fontSize={16} fontWeight={600} fill="var(--site-ink)">
-              {n.label}
-            </text>
-          </g>
-        ))}
-        <circle cx={280} cy={280} r={72} fill="var(--site-teal)" />
-        <text x={280} y={272} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
-          Your
-        </text>
-        <text x={280} y={292} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
-          organization
-        </text>
-      </svg>
-    </div>
-  )
-}
-
-function MarketingHome() {
-  return (
-    <div className="lp-root">
-      <SiteHeader
-        right={
-          <>
-            <Link href="/about" className="lp-nav-link">
-              About
-            </Link>
-            <Link href="/login" className="lp-nav-link">
-              Log in
-            </Link>
-          </>
+            <>
+              <Link href="/about" className="lp-nav-link">
+                About
+              </Link>
+              <Link href="/login" className="lp-nav-link">
+                Log in
+              </Link>
+            </>
+          )
         }
       />
+
+      {!checkingUser && user && <YourOrgsSection orgs={orgs} loading={loadingOrgs} />}
 
       <section className="lp-hero">
         <div className="lp-wrap">
@@ -318,6 +167,104 @@ function MarketingHome() {
 
       <SiteFooter />
       <SiteStyles />
+    </div>
+  )
+}
+
+function YourOrgsSection({ orgs, loading }: { orgs: UserOrgMembership[]; loading: boolean }) {
+  return (
+    <section className="lp-yourorgs">
+      <div className="lp-wrap">
+        <p className="lp-eyebrow">Welcome back</p>
+        {loading ? (
+          <p style={{ color: 'var(--site-ink-muted)', margin: 0 }}>Loading your organizations...</p>
+        ) : orgs.length === 0 ? (
+          <p style={{ color: 'var(--site-ink-muted)', margin: 0 }}>
+            You&apos;re not part of any organization yet -- browse public ones or create your own
+            below.
+          </p>
+        ) : (
+          <div className="lp-yourorgs-grid">
+            {orgs.map(({ org, role }) => (
+              <Link key={org.id} href={`/org/${org.slug}`} className="lp-yourorgs-item">
+                <strong>{org.name}</strong>
+                <small>{role}</small>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+const WORKFLOWS = [
+  {
+    name: 'Board',
+    copy: 'A public or members-only feed for updates, announcements, and discussion.',
+  },
+  {
+    name: 'Events',
+    copy: 'Post events, take RSVPs, and cap attendance when space is limited.',
+  },
+  {
+    name: 'Catalog',
+    copy: 'List items and supplies that members can claim.',
+  },
+  {
+    name: 'Journal',
+    copy: 'Private, per-person entries -- visible only to their author and your admins.',
+  },
+  {
+    name: 'Course',
+    copy: 'Lay out lessons and collect submissions for any training you run.',
+  },
+]
+
+// A center hub ("your organization") with the five workflows as spokes --
+// the same "one foundation, pieces you switch on" idea as the origin story,
+// drawn instead of stated. Plain SVG shapes (circles/lines/text), not
+// hand-authored path data, so it stays simple to read and maintain.
+function WorkflowDiagram() {
+  const nodes = [
+    { label: 'Board', x: 280, y: 80 },
+    { label: 'Events', x: 470, y: 218 },
+    { label: 'Catalog', x: 398, y: 442 },
+    { label: 'Journal', x: 162, y: 442 },
+    { label: 'Course', x: 90, y: 218 },
+  ]
+
+  return (
+    <div className="lp-diagram">
+      <svg viewBox="0 0 560 560" role="img" aria-label="Your organization at the center, with Board, Events, Catalog, Journal, and Course as optional pieces around it">
+        {nodes.map((n) => (
+          <line
+            key={`line-${n.label}`}
+            x1={280}
+            y1={280}
+            x2={n.x}
+            y2={n.y}
+            stroke="var(--site-gold)"
+            strokeOpacity={0.35}
+            strokeWidth={2}
+          />
+        ))}
+        {nodes.map((n) => (
+          <g key={n.label}>
+            <circle cx={n.x} cy={n.y} r={54} fill="var(--site-gold-soft)" stroke="var(--site-gold)" strokeWidth={1.5} />
+            <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="middle" fontSize={16} fontWeight={600} fill="var(--site-ink)">
+              {n.label}
+            </text>
+          </g>
+        ))}
+        <circle cx={280} cy={280} r={72} fill="var(--site-teal)" />
+        <text x={280} y={272} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
+          Your
+        </text>
+        <text x={280} y={292} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
+          organization
+        </text>
+      </svg>
     </div>
   )
 }
