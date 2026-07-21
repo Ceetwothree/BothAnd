@@ -39,6 +39,13 @@ export function canManageEvents(role: OrgRole | null | undefined): boolean {
   return atLeast(role, 'staff')
 }
 
+// Same rank as canManageEvents today (staff+) but kept as its own function
+// rather than reused, since course-authoring permissions are plausible to
+// diverge from event-organizing permissions later.
+export function canManageCourse(role: OrgRole | null | undefined): boolean {
+  return atLeast(role, 'staff')
+}
+
 export function canPost(role: OrgRole | null | undefined): boolean {
   return atLeast(role, 'member')
 }
