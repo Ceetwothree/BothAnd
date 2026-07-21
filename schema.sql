@@ -35,7 +35,23 @@ CREATE TABLE orgs (
   -- Multi-org identity: public orgs are browsable/self-joinable,
   -- private orgs are invite-link only (distinct from containers.visibility)
   is_public BOOLEAN NOT NULL DEFAULT false,
-  invite_code TEXT UNIQUE
+  invite_code TEXT UNIQUE,
+  -- Org identity beyond branding: a short mission statement (home page +
+  -- invite preview) and a longer about_text (the org's /about page).
+  mission_statement TEXT,
+  about_text TEXT,
+  -- Social/contact links -- either null or a real https URL/email, not
+  -- freeform, matching the constrained-not-freeform branding fields above.
+  facebook_url TEXT
+    CHECK (facebook_url IS NULL OR facebook_url LIKE 'https://%'),
+  instagram_url TEXT
+    CHECK (instagram_url IS NULL OR instagram_url LIKE 'https://%'),
+  x_url TEXT
+    CHECK (x_url IS NULL OR x_url LIKE 'https://%'),
+  website_url TEXT
+    CHECK (website_url IS NULL OR website_url LIKE 'https://%'),
+  contact_email TEXT
+    CHECK (contact_email IS NULL OR contact_email LIKE '%@%')
 );
 
 -- ============================================
@@ -480,13 +496,13 @@ GRANT EXECUTE ON FUNCTION join_org_by_invite_code(TEXT) TO authenticated;
 -- commits, without exposing invite_code itself or needing a listable RLS
 -- policy on orgs (which would let anyone enumerate every private org).
 CREATE OR REPLACE FUNCTION get_org_preview_by_invite_code(p_code TEXT)
-RETURNS TABLE(id UUID, name TEXT, slug TEXT, logo_url TEXT, banner_template TEXT, accent_color TEXT)
+RETURNS TABLE(id UUID, name TEXT, slug TEXT, logo_url TEXT, banner_template TEXT, accent_color TEXT, mission_statement TEXT)
 LANGUAGE sql
 SECURITY DEFINER
 SET search_path = public
 STABLE
 AS $$
-  SELECT id, name, slug, logo_url, banner_template, accent_color
+  SELECT id, name, slug, logo_url, banner_template, accent_color, mission_statement
   FROM orgs
   WHERE invite_code = p_code;
 $$;

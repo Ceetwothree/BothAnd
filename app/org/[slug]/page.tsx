@@ -120,6 +120,18 @@ export default function OrgHomePage() {
     <div>
       <header style={{ marginBottom: '2rem' }}>
         <Banner org={org} />
+        {org.mission_statement && (
+          <p
+            style={{
+              marginTop: '1rem',
+              fontSize: '1.1rem',
+              fontStyle: 'italic',
+              color: '#475569',
+            }}
+          >
+            {org.mission_statement}
+          </p>
+        )}
         {(canManageOrgSettings(role) || canManageMembers(role)) && (
           <nav style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem' }}>
             {canManageMembers(role) && <Link href={`/org/${org.slug}/members`}>Members</Link>}

@@ -10,6 +10,13 @@ export interface Org extends OrgBranding {
   id: string
   slug: string
   is_public: boolean
+  mission_statement: string | null
+  about_text: string | null
+  facebook_url: string | null
+  instagram_url: string | null
+  x_url: string | null
+  website_url: string | null
+  contact_email: string | null
 }
 
 export interface UserOrgMembership {
@@ -17,7 +24,8 @@ export interface UserOrgMembership {
   role: OrgRole
 }
 
-const ORG_FIELDS = 'id, name, slug, logo_url, banner_template, accent_color, is_public'
+const ORG_FIELDS =
+  'id, name, slug, logo_url, banner_template, accent_color, is_public, mission_statement, about_text, facebook_url, instagram_url, x_url, website_url, contact_email'
 
 // The viewer's orgs, for the top-level hub and the org switcher.
 export function useUserOrgs() {
@@ -182,6 +190,7 @@ export interface OrgInvitePreview {
   logo_url: string | null
   banner_template: string
   accent_color: string
+  mission_statement: string | null
 }
 
 export async function getOrgPreviewByInviteCode(code: string): Promise<OrgInvitePreview | null> {
