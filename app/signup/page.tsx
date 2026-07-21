@@ -1,18 +1,20 @@
 // app/signup/page.tsx
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-export default function SignupPage() {
+function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/'
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,7 +36,8 @@ export default function SignupPage() {
       if (signupError) throw signupError
 
       if (data.user) {
-        // Create user record
+        // Create user record. Organization membership isn't set up here --
+        // a signed-up user has no org yet; they join or create one after.
         const { error: userError } = await supabase.from('users').insert({
           id: data.user.id,
           email: data.user.email,
@@ -42,24 +45,8 @@ export default function SignupPage() {
 
         if (userError) console.error('Error creating user record:', userError)
 
-        // Add to default org
-        const { data: org } = await supabase
-          .from('orgs')
-          .select('id')
-          .eq('slug', process.env.NEXT_PUBLIC_DEFAULT_ORG_SLUG)
-          .single()
-
-        if (org) {
-          await supabase.from('memberships').insert({
-            user_id: data.user.id,
-            org_id: org.id,
-            role: 'member',
-            status: 'active',
-          })
-        }
-
-        // Redirect to dashboard or login page
-        router.push('/login?message=Check+your+email+to+confirm+your+account')
+        const loginRedirect = redirectTo !== '/' ? `&redirect=${encodeURIComponent(redirectTo)}` : ''
+        router.push(`/login?message=Check+your+email+to+confirm+your+account${loginRedirect}`)
       }
     } catch (err: any) {
       setError(err.message || 'Signup failed')
@@ -123,8 +110,19 @@ export default function SignupPage() {
         </button>
       </form>
       <p style={{ marginTop: '1rem' }}>
-        Already have an account? <Link href="/login">Login</Link>
+        Already have an account?{' '}
+        <Link href={`/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>
+          Login
+        </Link>
       </p>
     </div>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div style={{ maxWidth: '400px', margin: '4rem auto', padding: '2rem' }}>Loading...</div>}>
+      <SignupForm />
+    </Suspense>
   )
 }

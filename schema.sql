@@ -31,7 +31,11 @@ CREATE TABLE orgs (
   banner_template TEXT NOT NULL DEFAULT 'centered'
     CHECK (banner_template IN ('logo-left', 'centered', 'full-banner')),
   accent_color TEXT NOT NULL DEFAULT 'slate'
-    CHECK (accent_color IN ('slate', 'blue', 'green', 'purple', 'amber', 'rose'))
+    CHECK (accent_color IN ('slate', 'blue', 'green', 'purple', 'amber', 'rose')),
+  -- Multi-org identity: public orgs are browsable/self-joinable,
+  -- private orgs are invite-link only (distinct from containers.visibility)
+  is_public BOOLEAN NOT NULL DEFAULT false,
+  invite_code TEXT UNIQUE
 );
 
 -- ============================================
@@ -120,7 +124,7 @@ CREATE POLICY users_self ON users
   FOR ALL
   USING (auth.uid()::uuid = id);
 
--- ORGS: Can read if member; can create own
+-- ORGS: Can read if member, or if the org is public (browsable/joinable)
 CREATE POLICY orgs_member_read ON orgs
   FOR SELECT
   USING (
@@ -132,11 +136,14 @@ CREATE POLICY orgs_member_read ON orgs
     )
   );
 
-CREATE POLICY orgs_insert ON orgs
-  FOR INSERT
-  WITH CHECK (created_by = auth.uid()::uuid);
+CREATE POLICY orgs_public_read ON orgs
+  FOR SELECT
+  USING (is_public = true);
 
--- ORGS: Only admins can update branding (logo/template/color) or org details
+-- No direct INSERT policy: org creation goes through create_org_with_admin()
+-- only, so an org row can never exist without an admin membership alongside it.
+
+-- ORGS: Only admins can update branding, public/private, invite code, etc.
 CREATE POLICY orgs_admin_update ON orgs
   FOR UPDATE
   USING (
@@ -175,14 +182,21 @@ CREATE POLICY memberships_admin_manage ON memberships
     )
   );
 
--- A freshly signed-up user can create their own first membership,
--- but only as a plain active member -- never self-granted admin/staff
+-- Any user can join a PUBLIC org directly, but only as a plain active
+-- member -- never self-granted admin/staff. Joining a PRIVATE org must go
+-- through join_org_by_invite_code() instead, since this policy has no way
+-- to verify an invite code was actually presented.
 CREATE POLICY memberships_self_insert ON memberships
   FOR INSERT
   WITH CHECK (
     user_id = auth.uid()::uuid
     AND role = 'member'
     AND status = 'active'
+    AND EXISTS (
+      SELECT 1 FROM orgs
+      WHERE orgs.id = memberships.org_id
+      AND orgs.is_public = true
+    )
   );
 
 -- CONTAINERS: Visibility rules
@@ -340,6 +354,109 @@ CREATE POLICY responses_write ON responses
   );
 
 -- ============================================
+-- FUNCTIONS (RPC)
+-- ============================================
+-- SECURITY DEFINER: these bypass RLS internally by design, so each one
+-- does exactly one narrow, auth.uid()-scoped thing and nothing else.
+
+-- Atomically creates an org, grants its creator admin membership, and
+-- gives it a default board container. Client inserts for orgs/memberships
+-- are otherwise closed off specifically so this is the only path to an
+-- org existing -- a partial failure (e.g. slug collision) rolls back the
+-- whole call rather than leaving an adminless org behind.
+CREATE OR REPLACE FUNCTION create_org_with_admin(
+  p_name TEXT,
+  p_slug TEXT,
+  p_is_public BOOLEAN DEFAULT false
+)
+RETURNS orgs
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org orgs;
+  v_uid UUID := auth.uid()::uuid;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  INSERT INTO orgs (name, slug, created_by, is_public, invite_code)
+  VALUES (p_name, p_slug, v_uid, p_is_public, replace(gen_random_uuid()::text, '-', ''))
+  RETURNING * INTO v_org;
+
+  INSERT INTO memberships (user_id, org_id, role, status)
+  VALUES (v_uid, v_org.id, 'admin', 'active');
+
+  INSERT INTO containers (org_id, kind, name, visibility, created_by)
+  VALUES (
+    v_org.id, 'board', 'Board',
+    (CASE WHEN p_is_public THEN 'public' ELSE 'org' END)::visibility,
+    v_uid
+  );
+
+  RETURN v_org;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION create_org_with_admin(TEXT, TEXT, BOOLEAN) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_org_with_admin(TEXT, TEXT, BOOLEAN) TO authenticated;
+
+-- The only way to join a PRIVATE org: validates the invite code
+-- server-side before inserting, which memberships_self_insert cannot do
+-- on its own since RLS has no way to check what code the client presented.
+CREATE OR REPLACE FUNCTION join_org_by_invite_code(p_code TEXT)
+RETURNS memberships
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_org_id UUID;
+  v_uid UUID := auth.uid()::uuid;
+  v_membership memberships;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  SELECT id INTO v_org_id FROM orgs WHERE invite_code = p_code;
+  IF v_org_id IS NULL THEN
+    RAISE EXCEPTION 'Invalid or expired invite code';
+  END IF;
+
+  INSERT INTO memberships (user_id, org_id, role, status)
+  VALUES (v_uid, v_org_id, 'member', 'active')
+  ON CONFLICT (user_id, org_id) DO UPDATE SET status = 'active'
+  RETURNING * INTO v_membership;
+
+  RETURN v_membership;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION join_org_by_invite_code(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION join_org_by_invite_code(TEXT) TO authenticated;
+
+-- Lets /join/[code] show "You're invited to join X" before the user
+-- commits, without exposing invite_code itself or needing a listable RLS
+-- policy on orgs (which would let anyone enumerate every private org).
+CREATE OR REPLACE FUNCTION get_org_preview_by_invite_code(p_code TEXT)
+RETURNS TABLE(id UUID, name TEXT, slug TEXT, logo_url TEXT, banner_template TEXT, accent_color TEXT)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT id, name, slug, logo_url, banner_template, accent_color
+  FROM orgs
+  WHERE invite_code = p_code;
+$$;
+
+REVOKE ALL ON FUNCTION get_org_preview_by_invite_code(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION get_org_preview_by_invite_code(TEXT) TO authenticated;
+
+-- ============================================
 -- STORAGE (org logos)
 -- ============================================
 -- Objects are stored at path "{org_id}/{filename}" so RLS can scope
@@ -383,9 +500,15 @@ CREATE POLICY logos_admin_update ON storage.objects
 -- SEED DATA (optional, for dev/testing)
 -- ============================================
 
--- Create initial org "themission"
-INSERT INTO orgs (id, name, slug) 
-VALUES ('550e8400-e29b-41d4-a716-446655440000'::uuid, 'The Mission', 'themission');
+-- Create initial org "themission" (public, so it stays browsable/joinable)
+INSERT INTO orgs (id, name, slug, is_public, invite_code)
+VALUES (
+  '550e8400-e29b-41d4-a716-446655440000'::uuid,
+  'The Mission',
+  'themission',
+  true,
+  replace(gen_random_uuid()::text, '-', '')
+);
 
 -- Create forum container (public)
 INSERT INTO containers (id, org_id, kind, name, visibility)
