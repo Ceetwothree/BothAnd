@@ -1,0 +1,30 @@
+/* BothAnd's own site theme (the marketing chrome around the app -- distinct
+   from per-org branding in lib/branding.ts, which stays scoped to each org's
+   own pages). Prefixed --site- so the two token sets are never confused. */
+:root {
+  --site-paper: #eff1ea;
+  --site-paper-raised: #ffffff;
+  --site-paper-line: #dde1d6;
+  --site-ink: #16211d;
+  --site-ink-soft: #2a352f;
+  --site-ink-muted: #57635c;
+  --site-teal: #1f6f5c;
+  --site-teal-ink: #ffffff;
+  --site-gold: #a8761f;
+  --site-gold-soft: #efe3c8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --site-paper: #141a17;
+    --site-paper-raised: #1b2420;
+    --site-paper-line: #2a352e;
+    --site-ink: #ece8dd;
+    --site-ink-soft: #cdd3c9;
+    --site-ink-muted: #93a09a;
+    --site-teal: #4bb99a;
+    --site-teal-ink: #0f1815;
+    --site-gold: #dcab55;
+    --site-gold-soft: #3a3325;
+  }
+}
