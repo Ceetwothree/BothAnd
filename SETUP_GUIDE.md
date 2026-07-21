@@ -1,13 +1,13 @@
-# BothAnd MVP — Setup & Deployment Guide
+# BothAnd — Setup & Deployment Guide
 
 ## Overview
 
-This is the forum MVP for BothAnd. Public-facing forum with member dashboard for creating posts. The full schema is in place, but only forum workflows are surfaced in the UI.
+BothAnd is a multi-org coordination platform: one account, any number of organizations. Each org gets its own branding, mission/about page, social links, and a set of workflows (Board, Events, Catalog, Journal, Course) that members opt into as needed.
 
 ## What's Included
 
-- **Frontend:** Next.js 14 (React) with public forum view and member dashboard
-- **Backend:** Next.js API routes
+- **Frontend:** Next.js 14 (React) — a BothAnd-branded marketing site (`/`, `/about`) plus per-org pages themed with that org's own accent color
+- **Backend:** Next.js API routes + direct Supabase client calls
 - **Database:** PostgreSQL via Supabase with Row-Level Security (RLS)
 - **Auth:** Supabase Auth (email/password)
 - **Deployment:** Vercel
@@ -42,9 +42,8 @@ This is the forum MVP for BothAnd. Public-facing forum with member dashboard for
 5. Paste into the SQL editor and click **Run**
 
 This creates:
-- All 6 tables (users, orgs, containers, records, responses, etc.)
-- Row-Level Security policies on every table
-- No seed orgs -- the first real signup creates its own org via `/orgs/new`
+- All 6 tables (users, orgs, containers, records, responses, memberships) plus RLS policies and RPC functions on every table
+- No seed orgs — the first real signup creates its own org via `/orgs/new`, which is also the only path that gives an org an admin (a raw `INSERT` into `orgs` does not)
 
 ### 1.2 Enable Realtime (optional)
 
@@ -111,52 +110,50 @@ npm run dev
 
 ## Step 5: Invite Your First Users
 
-### Create Invite Code (Manual for MVP)
+### Create an Organization
 
-Since you don't have an invite system yet, advisors can:
-1. Go to `/signup`
-2. Sign up with their email
-3. They're automatically added to "themission" org as members
+1. Go to `/signup` and create an account
+2. Go to `/orgs/new` to create your organization — you become its admin automatically
+3. In **Settings**, set a mission statement, about text, social/contact links, branding, and generate an invite link (for private orgs) or toggle the org public (browsable/self-joinable at `/browse`)
+
+### Invite People
+
+Share your org's invite link (from Settings) or, if the org is public, just point people at `/browse`. Either way they land on `/join/[code]` or the org's own page, sign up if needed, and join.
 
 ### Test the Flow
 
-1. **Public view** (anyone):
-   - Visit home page → see public forum posts
-
-2. **Member view** (logged in):
-   - Login → go to `/dashboard`
-   - Create a post → it appears on public forum
-
-3. **Admin view** (you only, for now):
-   - In Supabase console, manually update your membership role to `admin`
-   - Future: implement admin controls in UI
+1. **Public view** (anyone, logged out): visit `/` → see the BothAnd marketing homepage; visit `/browse` → see public orgs
+2. **Member view** (logged in): create a post on the org's Board, RSVP to an Event, claim a Catalog item
+3. **Admin view**: visit `/org/[slug]/members` to change roles or deactivate a member; visit `/org/[slug]/settings` for branding/mission/social/invite-link management
 
 ## Schema Mapping (For Your Reference)
 
 | Feature | Tables | Notes |
 |---------|--------|-------|
-| Forum posts | records (kind=post) | Anyone can read public; members can post |
-| Comments | responses (kind=comment) | Same visibility as parent post |
-| User identity | users, memberships | Global users, org-level roles |
-| Permissions | RLS policies + org_id | Row-Level Security handles isolation |
+| Orgs, branding, mission/about/social | orgs | `create_org_with_admin()` is the only way an org gets an admin |
+| Membership & roles | memberships | admin > staff > member, plus active/inactive status |
+| Board posts | records (kind=post) + responses (kind=comment) | Visibility follows the container |
+| Events | records (kind=event) + responses (kind=rsvp) | RSVP is delete-able (un-RSVP) |
+| Catalog | records (kind=item) + responses (kind=claim) | No quantity tracking yet — one listing, one claim |
+| Journal | records (kind=entry), container visibility=owner | Per-user, plus the container's creator and org admins |
+| Course | records (kind=lesson) + responses (kind=submission) | Submission is delete-able (resubmit) |
+| Permissions | RLS policies + `lib/permissions.ts` | Row-Level Security handles isolation; the lib file centralizes role checks in the UI |
 
 ## What's Ready for Later
 
-These workflows are structurally in the database but no UI yet:
-- **Inventory** (kind=inventory, movements)
-- **Events** (kind=event, capacity tracking)
-- **Journal** (kind=journal, owner-only)
-- **Requests** (kind=item, open/fulfilled flow)
-- **Lessons** (kind=lesson, progression tracking)
-
-To add them: create new container types and record types, build UI components, wire to existing API.
+Known gaps, not yet built:
+- **Catalog rework** — a real gallery/search/item-detail experience and quantity tracking, replacing today's plain claimable-item list
+- **Cross-org trading** — letting orgs trade surplus donations with each other (see the About page's origin story for why this matters)
+- **Database-level role gating** — `records_write` RLS currently lets any active member create a record regardless of role; today's "staff-only" actions are UI-level checks only
+- **Real contact/social links on the marketing site itself** — the footer intentionally has none yet rather than shipping dead placeholder links
 
 ## Security Notes
 
 1. **RLS is the enforcement layer** — all data isolation happens at the database, not just the app
 2. **Never expose the service role key** — only use the anon key (already in env template)
-3. **Test tenancy before adding real data** — if you add another org later, verify RLS blocks cross-org reads
-4. **Email is soft-verified** — Supabase Auth requires clicking a confirmation link. For MVP, you can disable this in Supabase settings (Auth → Providers → Email).
+3. **Test tenancy before adding real data** — verify RLS blocks cross-org reads before onboarding real orgs
+4. **Email is soft-verified** — Supabase Auth requires clicking a confirmation link. You can disable this in Supabase settings (Auth → Providers → Email) if that's not the flow you want.
+5. **Leaked password protection is off by default** — worth enabling in Supabase Auth settings before real users sign up (flagged by Supabase's own security advisor)
 
 ## Troubleshooting
 
@@ -165,25 +162,24 @@ To add them: create new container types and record types, build UI components, w
 - Make sure user is logged in (check browser console)
 
 ### Posts not appearing
-- Verify container exists and is public (check Supabase `containers` table)
+- Verify the container exists and its visibility matches what you expect (check Supabase `containers` table)
 - Check RLS policies allow read access to that container
 
-### Can't login after signup
+### Can't log in after signup
 - Verify user was created in `users` table
-- Check `memberships` table — user should be linked to org
+- Check `memberships` table — user should be linked to an org
 
 ### Deployment fails
 - Check Vercel build logs for errors
 - Ensure all env vars are set in Vercel project settings
-- Make sure schema.sql was fully executed in Supabase
+- Make sure `schema.sql` was fully executed in Supabase
 
 ## Next Steps
 
-1. **Get feedback from advisors** — can they sign up, see posts, create posts?
-2. **Iterate on forum UI** — does the look/feel match what you want?
-3. **Add invite codes** — implement actual invite link generation (not just open signup)
-4. **Add admin moderation** — ability to pin/approve posts
-5. **Start on Inventory** — once forum feels solid, add the marketplace
+1. **Get feedback from real users** — can they sign up, create/join an org, and use its workflows?
+2. **Rework Catalog** — gallery/search/detail experience, quantity tracking
+3. **Add real contact/social links** once you have actual accounts to point them at
+4. **Revisit database-level role gating** for staff-only actions
 
 ## Questions?
 

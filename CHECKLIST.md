@@ -73,24 +73,21 @@ After you clone/download:
 bothand/
 ├── schema.sql              # Run this in Supabase first
 ├── SETUP_GUIDE.md          # Full deployment instructions
-├── README.md               # Project overview
+├── README.md               # Project overview -- see it for the full file tree
 ├── package.json            # npm install this
 ├── next.config.js          # Next.js config
 ├── tsconfig.json           # TypeScript config
 ├── .env.example            # Copy to .env.local locally
 ├── .gitignore
 ├── vercel.json
-├── lib/
-│   └── supabase.ts         # Supabase client
+├── lib/                    # Supabase client, org/permission/branding helpers
 ├── app/
-│   ├── layout.tsx          # Root layout
-│   ├── page.tsx            # Home + public forum
-│   ├── login/page.tsx      # Login
-│   ├── signup/page.tsx     # Signup
-│   ├── dashboard/page.tsx  # Member dashboard
-│   └── api/
-│       ├── auth/...        # Auth routes
-│       └── forum/...       # Forum routes
+│   ├── layout.tsx, globals.css  # Root layout + BothAnd's own site theme tokens
+│   ├── page.tsx, about/page.tsx # Marketing homepage + About page
+│   ├── login/, signup/, browse/, orgs/new/, join/[code]/
+│   ├── components/         # Shared marketing chrome + org branding/switcher
+│   ├── org/[slug]/         # Board, Events, Catalog, Journal, Course, About, Members, Settings
+│   └── api/forum/...       # Forum post/comment routes
 ```
 
 ## Advisor Signup Link
