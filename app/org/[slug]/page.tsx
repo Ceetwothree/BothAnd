@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import Banner from '../../components/Banner'
 import { useOrg } from './OrgContext'
-import { canManageOrgSettings, canPost } from '@/lib/permissions'
+import { canManageOrgSettings, canManageMembers, canPost } from '@/lib/permissions'
 import { joinPublicOrg } from '@/lib/orgs'
 
 export default function OrgHomePage() {
@@ -120,9 +120,10 @@ export default function OrgHomePage() {
     <div>
       <header style={{ marginBottom: '2rem' }}>
         <Banner org={org} />
-        {canManageOrgSettings(role) && (
-          <nav style={{ marginTop: '0.75rem' }}>
-            <Link href={`/org/${org.slug}/settings`}>Settings</Link>
+        {(canManageOrgSettings(role) || canManageMembers(role)) && (
+          <nav style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem' }}>
+            {canManageMembers(role) && <Link href={`/org/${org.slug}/members`}>Members</Link>}
+            {canManageOrgSettings(role) && <Link href={`/org/${org.slug}/settings`}>Settings</Link>}
           </nav>
         )}
       </header>

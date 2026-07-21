@@ -151,6 +151,20 @@ CREATE POLICY users_self ON users
   FOR ALL
   USING (auth.uid()::uuid = id);
 
+-- USERS: an org admin can additionally read (SELECT-only, OR'd with
+-- users_self above) the profile of anyone who is a member of an org they
+-- administer -- otherwise a member-management UI would show every member's
+-- email as null except the viewer's own.
+CREATE POLICY users_org_admin_read ON users
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM memberships m
+      WHERE m.user_id = users.id
+      AND is_org_admin(m.org_id)
+    )
+  );
+
 -- ORGS: Can read if member, or if the org is public (browsable/joinable)
 CREATE POLICY orgs_member_read ON orgs
   FOR SELECT
@@ -185,6 +199,14 @@ CREATE POLICY memberships_read ON memberships
 
 CREATE POLICY memberships_admin_manage ON memberships
   FOR INSERT
+  WITH CHECK (is_org_admin(org_id));
+
+-- Admins can change a member's role or deactivate/reactivate them. Mirrors
+-- orgs_admin_update: same is_org_admin() gate, no narrower column scoping
+-- since an org admin already has full authority over org_id here.
+CREATE POLICY memberships_admin_update ON memberships
+  FOR UPDATE
+  USING (is_org_admin(org_id))
   WITH CHECK (is_org_admin(org_id));
 
 -- Any user can join a PUBLIC org directly, but only as a plain active

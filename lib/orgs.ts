@@ -206,3 +206,46 @@ export async function regenerateInviteCode(orgId: string): Promise<string> {
   if (error) throw error
   return newCode
 }
+
+export interface OrgMember {
+  id: string // membership id
+  user_id: string
+  role: OrgRole
+  status: string
+  created_at: string
+  email: string | null
+}
+
+// Requires the users_org_admin_read policy (viewer must be an org admin) to
+// see anything but their own email in the embedded users(email) -- for
+// anyone else it silently returns null rather than erroring.
+export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
+  const { data, error } = await supabase
+    .from('memberships')
+    .select('id, user_id, role, status, created_at, users(email)')
+    .eq('org_id', orgId)
+    .order('created_at')
+
+  if (error) throw error
+  return (data as any[]).map((m) => ({
+    id: m.id,
+    user_id: m.user_id,
+    role: m.role as OrgRole,
+    status: m.status,
+    created_at: m.created_at,
+    email: m.users?.email ?? null,
+  }))
+}
+
+export async function updateMemberRole(membershipId: string, role: OrgRole): Promise<void> {
+  const { error } = await supabase.from('memberships').update({ role }).eq('id', membershipId)
+  if (error) throw error
+}
+
+export async function setMemberStatus(
+  membershipId: string,
+  status: 'active' | 'inactive'
+): Promise<void> {
+  const { error } = await supabase.from('memberships').update({ status }).eq('id', membershipId)
+  if (error) throw error
+}

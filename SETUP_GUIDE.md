@@ -67,8 +67,6 @@ In Supabase console:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_DEFAULT_ORG_SLUG=themission
 ```
 
 ### 2.3 For Vercel Deployment
@@ -88,8 +86,6 @@ You'll add these same variables in Vercel's environment settings during deployme
 1. In the deployment settings, paste your environment variables:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_SITE_URL` → set to your Vercel URL (e.g., `https://themission.vercel.app`)
-   - `NEXT_PUBLIC_DEFAULT_ORG_SLUG` → `themission`
 
 2. Click **Deploy**
 
