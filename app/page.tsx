@@ -63,20 +63,13 @@ export default function Home() {
 
       {!checkingUser && user && <YourOrgsSection orgs={orgs} loading={loadingOrgs} />}
 
-      <section className="lp-hero">
+      <section className="lp-hero lp-hero-compact">
         <div className="lp-wrap">
           <div className="lp-hero-inner">
-            <p className="lp-eyebrow lp-fade-up lp-d1">Free-tier coordination infrastructure</p>
-            <h1 className="lp-fade-up lp-d2">
-              Run on a shoestring.
-              <br />
-              <span className="lp-and">And</span> still run well.
+            <p className="lp-eyebrow lp-fade-up lp-d1">Free tools for community groups</p>
+            <h1 className="lp-hero-small lp-fade-up lp-d2">
+              A site for your group. <span className="lp-and">And</span> everything it needs.
             </h1>
-            <p className="lp-lead lp-fade-up lp-d3">
-              BothAnd is free coordination software for organizations that can&apos;t afford
-              software -- one account, as many organizations as you&apos;re part of, each with
-              real access control and its own set of tools.
-            </p>
             <div className="lp-cta-row lp-fade-up lp-d3">
               <Link href="/signup" className="lp-btn lp-btn-primary">
                 Create your organization
@@ -134,20 +127,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="lp-workflows">
-        <div className="lp-wrap">
-          <p className="lp-eyebrow">What&apos;s inside, once you&apos;re in an organization</p>
-          <WorkflowDiagram />
-          <div className="lp-workflow-grid">
-            {WORKFLOWS.map((w) => (
-              <div className="lp-workflow-item" key={w.name}>
-                <h4>{w.name}</h4>
-                <p>{w.copy}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
       <section className="lp-closing">
         <div className="lp-wrap">
@@ -198,73 +178,88 @@ function YourOrgsSection({ orgs, loading }: { orgs: UserOrgMembership[]; loading
   )
 }
 
-const WORKFLOWS = [
-  {
-    name: 'Board',
-    copy: 'A public or members-only feed for updates, announcements, and discussion.',
-  },
-  {
-    name: 'Events',
-    copy: 'Post events, take RSVPs, and cap attendance when space is limited.',
-  },
-  {
-    name: 'Catalog',
-    copy: 'List items and supplies that members can claim.',
-  },
-  {
-    name: 'Journal',
-    copy: 'Private, per-person entries -- visible only to their author and your admins.',
-  },
-  {
-    name: 'Course',
-    copy: 'Lay out lessons and collect submissions for any training you run.',
-  },
+function IconCircle({ children }: { children: React.ReactNode }) {
+  return <div className="lp-how-icon">{children}</div>
+}
+
+const SiteIcon = (
+  <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="6" y="8" width="36" height="32" rx="3" />
+    <line x1="6" y1="18" x2="42" y2="18" />
+    <circle cx="13" cy="13" r="1.4" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="13" r="1.4" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+const CalendarIcon = (
+  <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="6" y="10" width="36" height="30" rx="3" />
+    <line x1="6" y1="19" x2="42" y2="19" />
+    <rect x="14" y="4" width="3" height="8" rx="1.5" fill="currentColor" stroke="none" />
+    <rect x="31" y="4" width="3" height="8" rx="1.5" fill="currentColor" stroke="none" />
+  </svg>
+)
+
+const BoxIcon = (
+  <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="8,16 16,6 32,6 40,16" />
+    <rect x="8" y="16" width="32" height="24" rx="2" />
+    <line x1="24" y1="16" x2="24" y2="40" />
+  </svg>
+)
+
+const ChatIcon = (
+  <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M8 10 h32 a4 4 0 0 1 4 4 v14 a4 4 0 0 1 -4 4 H20 l-8 8 v-8 H8 a4 4 0 0 1 -4 -4 v-14 a4 4 0 0 1 4 -4 z" />
+    <line x1="13" y1="18" x2="35" y2="18" />
+    <line x1="13" y1="24" x2="29" y2="24" />
+  </svg>
+)
+
+const ACTIONS = [
+  { icon: CalendarIcon, label: 'Plan events & volunteer shifts' },
+  { icon: BoxIcon, label: 'Track inventory, and give it away when it’s needed' },
+  { icon: ChatIcon, label: 'Post updates and keep your group in the loop' },
 ]
 
-// A center hub ("your organization") with the five workflows as spokes --
-// the same "one foundation, pieces you switch on" idea as the origin story,
-// drawn instead of stated. Plain SVG shapes (circles/lines/text), not
-// hand-authored path data, so it stays simple to read and maintain.
-function WorkflowDiagram() {
-  const nodes = [
-    { label: 'Board', x: 280, y: 80 },
-    { label: 'Events', x: 470, y: 218 },
-    { label: 'Catalog', x: 398, y: 442 },
-    { label: 'Journal', x: 162, y: 442 },
-    { label: 'Course', x: 90, y: 218 },
-  ]
-
+// The casual, concrete version of the pitch -- what you actually do with
+// it, not the feature names (those still exist per-workflow once you're in
+// an org). Plain geometric SVG icons, not hand-authored illustration.
+function HowItWorks() {
   return (
-    <div className="lp-diagram">
-      <svg viewBox="0 0 560 560" role="img" aria-label="Your organization at the center, with Board, Events, Catalog, Journal, and Course as optional pieces around it">
-        {nodes.map((n) => (
-          <line
-            key={`line-${n.label}`}
-            x1={280}
-            y1={280}
-            x2={n.x}
-            y2={n.y}
-            stroke="var(--site-gold)"
-            strokeOpacity={0.35}
-            strokeWidth={2}
-          />
-        ))}
-        {nodes.map((n) => (
-          <g key={n.label}>
-            <circle cx={n.x} cy={n.y} r={54} fill="var(--site-gold-soft)" stroke="var(--site-gold)" strokeWidth={1.5} />
-            <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="middle" fontSize={16} fontWeight={600} fill="var(--site-ink)">
-              {n.label}
-            </text>
-          </g>
-        ))}
-        <circle cx={280} cy={280} r={72} fill="var(--site-teal)" />
-        <text x={280} y={272} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
-          Your
-        </text>
-        <text x={280} y={292} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
-          organization
-        </text>
-      </svg>
-    </div>
+    <section className="lp-how">
+      <div className="lp-wrap">
+        <p className="lp-eyebrow">How it works</p>
+        <h2 className="lp-how-heading">
+          Create a site for your group. <span className="lp-and">And</span> do the things you
+          actually need to do.
+        </h2>
+
+        <div className="lp-how-flow">
+          <div className="lp-how-step lp-how-step-main">
+            <IconCircle>{SiteIcon}</IconCircle>
+            <p>Create a site for your community group</p>
+          </div>
+          <div className="lp-how-arrow" aria-hidden="true">
+            &rarr;
+          </div>
+          <div className="lp-how-actions">
+            {ACTIONS.map((a) => (
+              <div className="lp-how-step" key={a.label}>
+                <IconCircle>{a.icon}</IconCircle>
+                <p>{a.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="lp-how-cta-line">Sign up and start planning, tracking, and posting.</p>
+        <div className="lp-cta-row">
+          <Link href="/signup" className="lp-btn lp-btn-primary">
+            Create your organization
+          </Link>
+        </div>
+      </div>
+    </section>
   )
 }
