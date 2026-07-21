@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useUserOrgs, UserOrgMembership } from '@/lib/orgs'
+import { SiteHeader, SiteFooter, SiteStyles } from './components/SiteChrome'
 
 export default function Home() {
   const router = useRouter()
@@ -36,6 +37,7 @@ export default function Home() {
     return (
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '4rem 2rem' }}>
         <p style={{ color: 'var(--site-ink-muted)' }}>Loading...</p>
+        <SiteStyles />
       </div>
     )
   }
@@ -47,24 +49,15 @@ export default function Home() {
   return <MarketingHome />
 }
 
-function SiteHeader({ right }: { right: React.ReactNode }) {
-  return (
-    <header className="lp-header">
-      <Link href="/" className="lp-wordmark">
-        Both<span className="lp-and">And</span>
-      </Link>
-      <nav className="lp-nav">{right}</nav>
-      <LandingStyles />
-    </header>
-  )
-}
-
 function SignedInHub({ orgs }: { orgs: UserOrgMembership[] }) {
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 2rem 4rem' }}>
+    <div className="lp-root">
       <SiteHeader
         right={
           <>
+            <Link href="/about" className="lp-nav-link">
+              About
+            </Link>
             <Link href="/browse" className="lp-nav-link">
               Browse
             </Link>
@@ -78,55 +71,58 @@ function SignedInHub({ orgs }: { orgs: UserOrgMembership[] }) {
         }
       />
 
-      <section style={{ marginTop: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', color: 'var(--site-ink)', marginBottom: '1rem' }}>
-          Your organizations
-        </h1>
-        {orgs.length === 0 ? (
-          <div
-            style={{
-              border: '1px solid var(--site-paper-line)',
-              borderRadius: '8px',
-              padding: '2rem',
-              color: 'var(--site-ink-muted)',
-            }}
-          >
-            <p style={{ marginTop: 0 }}>You&apos;re not part of any organization yet.</p>
-            <p style={{ marginBottom: 0 }}>
-              <Link href="/browse" style={{ color: 'var(--site-teal)' }}>
-                Browse public organizations
-              </Link>{' '}
-              or{' '}
-              <Link href="/orgs/new" style={{ color: 'var(--site-teal)' }}>
-                create your own
-              </Link>
-              .
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {orgs.map(({ org, role }) => (
-              <Link
-                key={org.id}
-                href={`/org/${org.slug}`}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '1rem 1.25rem',
-                  border: '1px solid var(--site-paper-line)',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                }}
-              >
-                <strong style={{ color: 'var(--site-ink)' }}>{org.name}</strong>
-                <small style={{ color: 'var(--site-ink-muted)' }}>{role}</small>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
+      <div className="lp-wrap" style={{ paddingBottom: '4rem' }}>
+        <section style={{ marginTop: '1rem' }}>
+          <h1 style={{ fontSize: '1.5rem', color: 'var(--site-ink)', marginBottom: '1rem' }}>
+            Your organizations
+          </h1>
+          {orgs.length === 0 ? (
+            <div
+              style={{
+                border: '1px solid var(--site-paper-line)',
+                borderRadius: '8px',
+                padding: '2rem',
+                color: 'var(--site-ink-muted)',
+              }}
+            >
+              <p style={{ marginTop: 0 }}>You&apos;re not part of any organization yet.</p>
+              <p style={{ marginBottom: 0 }}>
+                <Link href="/browse" style={{ color: 'var(--site-teal)' }}>
+                  Browse public organizations
+                </Link>{' '}
+                or{' '}
+                <Link href="/orgs/new" style={{ color: 'var(--site-teal)' }}>
+                  create your own
+                </Link>
+                .
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              {orgs.map(({ org, role }) => (
+                <Link
+                  key={org.id}
+                  href={`/org/${org.slug}`}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '1rem 1.25rem',
+                    border: '1px solid var(--site-paper-line)',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                  }}
+                >
+                  <strong style={{ color: 'var(--site-ink)' }}>{org.name}</strong>
+                  <small style={{ color: 'var(--site-ink-muted)' }}>{role}</small>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+      <SiteStyles />
     </div>
   )
 }
@@ -154,23 +150,69 @@ const WORKFLOWS = [
   },
 ]
 
+// A center hub ("your organization") with the five workflows as spokes --
+// the same "one foundation, pieces you switch on" idea as the origin story,
+// drawn instead of stated. Plain SVG shapes (circles/lines/text), not
+// hand-authored path data, so it stays simple to read and maintain.
+function WorkflowDiagram() {
+  const nodes = [
+    { label: 'Board', x: 280, y: 80 },
+    { label: 'Events', x: 470, y: 218 },
+    { label: 'Catalog', x: 398, y: 442 },
+    { label: 'Journal', x: 162, y: 442 },
+    { label: 'Course', x: 90, y: 218 },
+  ]
+
+  return (
+    <div className="lp-diagram">
+      <svg viewBox="0 0 560 560" role="img" aria-label="Your organization at the center, with Board, Events, Catalog, Journal, and Course as optional pieces around it">
+        {nodes.map((n) => (
+          <line
+            key={`line-${n.label}`}
+            x1={280}
+            y1={280}
+            x2={n.x}
+            y2={n.y}
+            stroke="var(--site-gold)"
+            strokeOpacity={0.35}
+            strokeWidth={2}
+          />
+        ))}
+        {nodes.map((n) => (
+          <g key={n.label}>
+            <circle cx={n.x} cy={n.y} r={54} fill="var(--site-gold-soft)" stroke="var(--site-gold)" strokeWidth={1.5} />
+            <text x={n.x} y={n.y} textAnchor="middle" dominantBaseline="middle" fontSize={16} fontWeight={600} fill="var(--site-ink)">
+              {n.label}
+            </text>
+          </g>
+        ))}
+        <circle cx={280} cy={280} r={72} fill="var(--site-teal)" />
+        <text x={280} y={272} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
+          Your
+        </text>
+        <text x={280} y={292} textAnchor="middle" dominantBaseline="middle" fontSize={15} fontWeight={600} fill="var(--site-teal-ink)">
+          organization
+        </text>
+      </svg>
+    </div>
+  )
+}
+
 function MarketingHome() {
   return (
     <div className="lp-root">
-      <div className="lp-wrap">
-        <SiteHeader
-          right={
-            <>
-              <Link href="/login" className="lp-nav-link">
-                Log in
-              </Link>
-              <Link href="/signup" className="lp-btn lp-btn-primary">
-                Create an organization
-              </Link>
-            </>
-          }
-        />
-      </div>
+      <SiteHeader
+        right={
+          <>
+            <Link href="/about" className="lp-nav-link">
+              About
+            </Link>
+            <Link href="/login" className="lp-nav-link">
+              Log in
+            </Link>
+          </>
+        }
+      />
 
       <section className="lp-hero">
         <div className="lp-wrap">
@@ -203,6 +245,11 @@ function MarketingHome() {
           <div className="lp-heading">
             <p className="lp-eyebrow">You shouldn&apos;t have to choose</p>
             <h2>The tradeoffs everyone tells you to expect. We built around them instead.</h2>
+            <p className="lp-heading-lead">
+              Built for NGOs from small to large, community groups, mutual aid groups, and
+              churches doing charity work -- the organizations usually told to expect these
+              tradeoffs.
+            </p>
           </div>
           <div className="lp-pair-list">
             <div className="lp-pair">
@@ -238,59 +285,10 @@ function MarketingHome() {
         </div>
       </section>
 
-      <section className="lp-origin">
-        <div className="lp-wrap">
-          <div className="lp-heading lp-heading-wide">
-            <p className="lp-eyebrow">Where this started</p>
-            <h2>
-              Either/or thinking makes false choices feel necessary.
-              <br />
-              <span className="lp-and">Both/and</span> is usually where the real solutions come
-              from.
-            </h2>
-          </div>
-          <div className="lp-prose">
-            <p>
-              That pattern showed up first in the private sector. A team would build a tool to
-              get one piece of content approved and passed to the next team in a pipeline --
-              solving its own problem well, with no real concept of the pipeline around it, let
-              alone the enterprise it sat inside. Multiply that by every team solving its own
-              version of the same problem, and you get a lot of tools that don&apos;t talk to
-              each other and a lot of duplicated cost.
-            </p>
-            <p>
-              The nonprofit and community-group world has the same pattern, only sharper. SaaS
-              platforms for volunteer management, for meetups, for inventory and donation
-              tracking -- they already exist. They&apos;re just priced for organizations that can
-              budget for software, and most NGOs and community groups don&apos;t have an IT team
-              standing by to build something custom instead. What&apos;s left is a lot of
-              spreadsheets, a lot of Facebook groups doing a database&apos;s job, and a lot of
-              cumulative inefficiency across the whole sector -- without any single organization
-              having done anything wrong.
-            </p>
-            <p>
-              That pattern turned concrete while building a tool for one NGO alongside PATH and
-              Blueprint LA, in partnership with UCLA. Looking back across five years and
-              seventeen of Blueprint LA&apos;s projects, the same handful of needs kept
-              resurfacing under different names: a branded page for the organization, a way to
-              sign up volunteers and members, scheduling for meetups and shifts, taking donations
-              of cash or goods, asking for the donations actually needed, distributing them, and
-              tracking enough of the flow to know whether a program is working.
-            </p>
-            <p>
-              BothAnd is what that analysis turned into -- one shared foundation, with each piece
-              switched on only if an organization actually needs it. A group that just wants a
-              forum and a meetup calendar can ignore the rest completely. If donation tracking
-              becomes useful six months later, it&apos;s already there to turn on -- not a
-              migration to a different, more expensive tool.
-            </p>
-          </div>
-        </div>
-      </section>
-
       <section className="lp-workflows">
         <div className="lp-wrap">
           <p className="lp-eyebrow">What&apos;s inside, once you&apos;re in an organization</p>
+          <WorkflowDiagram />
           <div className="lp-workflow-grid">
             {WORKFLOWS.map((w) => (
               <div className="lp-workflow-item" key={w.name}>
@@ -318,136 +316,8 @@ function MarketingHome() {
         </div>
       </section>
 
-      <footer className="lp-footer">
-        <div className="lp-wrap lp-footer-inner">
-          <Link href="/" className="lp-wordmark">
-            Both<span className="lp-and">And</span>
-          </Link>
-          <span className="lp-footer-tag">
-            Coordination infrastructure for organizations that can&apos;t afford software.
-          </span>
-        </div>
-      </footer>
+      <SiteFooter />
+      <SiteStyles />
     </div>
-  )
-}
-
-// Shared, plain (unscoped) <style> tag -- deliberately not styled-jsx, so it
-// doesn't depend on any compiler config. Classes are all `lp-`-prefixed so
-// they can't collide with other pages' styles; safe to render from both
-// SiteHeader and MarketingHome since duplicate <style> tags with identical
-// rules are harmless.
-function LandingStyles() {
-  return (
-    <style>{`
-      .lp-root { background: var(--site-paper); color: var(--site-ink); }
-      .lp-wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3rem); }
-
-      .lp-root h1, .lp-root h2, .lp-root h3 {
-        font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
-        font-weight: 500;
-        text-wrap: balance;
-        margin: 0;
-        color: var(--site-ink);
-      }
-
-      .lp-and { font-style: italic; color: var(--site-gold); }
-
-      .lp-eyebrow {
-        font-size: 0.75rem;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--site-ink-muted);
-        margin: 0 0 0.9rem;
-      }
-
-      .lp-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1.5rem;
-        padding: 1.75rem 0 1.25rem;
-      }
-
-      .lp-wordmark {
-        font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-        font-size: 1.25rem;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-        text-decoration: none;
-        color: var(--site-ink);
-      }
-
-      .lp-nav { display: flex; align-items: center; gap: 1.75rem; font-size: 0.95rem; }
-      .lp-nav-link { text-decoration: none; color: var(--site-ink-soft); }
-      .lp-nav-link:hover { color: var(--site-ink); }
-
-      .lp-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 3px;
-        padding: 0.7rem 1.35rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        text-decoration: none;
-        border: 1px solid transparent;
-        cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-      }
-      .lp-btn:focus-visible { outline: 2px solid var(--site-teal); outline-offset: 2px; }
-      .lp-btn-primary { background: var(--site-teal); color: var(--site-teal-ink); }
-      .lp-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-      .lp-btn-ghost { background: transparent; color: var(--site-ink); border-color: var(--site-paper-line); }
-      .lp-btn-ghost:hover { border-color: var(--site-ink-muted); }
-
-      .lp-hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 clamp(3rem, 8vw, 6rem); }
-      .lp-hero-inner { max-width: 840px; }
-      .lp-hero h1 { font-size: clamp(2.3rem, 5.2vw, 3.7rem); line-height: 1.12; }
-      .lp-lead { margin: 1.75rem 0 0; max-width: 62ch; font-size: 1.2rem; line-height: 1.6; color: var(--site-ink-soft); }
-      .lp-cta-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2.25rem; }
-      .lp-cta-row-center { justify-content: center; }
-
-      .lp-fade-up { opacity: 0; transform: translateY(10px); animation: lpFadeUp 0.7s ease forwards; }
-      .lp-d1 { animation-delay: 0.05s; }
-      .lp-d2 { animation-delay: 0.18s; }
-      .lp-d3 { animation-delay: 0.31s; }
-      @keyframes lpFadeUp { to { opacity: 1; transform: translateY(0); } }
-      @media (prefers-reduced-motion: reduce) {
-        .lp-fade-up { animation: none; opacity: 1; transform: none; }
-      }
-
-      .lp-pairs { padding: clamp(2rem, 6vw, 4rem) 0 clamp(2.5rem, 6vw, 4.5rem); }
-      .lp-heading { max-width: 640px; margin-bottom: 2.5rem; }
-      .lp-heading-wide { max-width: 760px; }
-      .lp-heading h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); line-height: 1.25; }
-      .lp-pair-list { display: flex; flex-direction: column; }
-      .lp-pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.6rem; padding: 2rem 0; border-top: 1px solid var(--site-paper-line); }
-      .lp-pair:last-child { border-bottom: 1px solid var(--site-paper-line); }
-      @media (min-width: 780px) {
-        .lp-pair { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
-      }
-      .lp-pair h3 { font-size: clamp(1.25rem, 2.2vw, 1.55rem); line-height: 1.3; }
-      .lp-pair p { margin: 0; color: var(--site-ink-soft); max-width: 48ch; }
-
-      .lp-origin { padding: clamp(3rem, 7vw, 5rem) 0 clamp(3.5rem, 7vw, 5.5rem); border-top: 1px solid var(--site-paper-line); }
-      .lp-origin h2 { font-size: clamp(1.75rem, 3.6vw, 2.4rem); line-height: 1.28; }
-      .lp-prose { max-width: 62ch; display: flex; flex-direction: column; gap: 1.35rem; }
-      .lp-prose p { font-size: 1.07rem; color: var(--site-ink-soft); margin: 0; }
-
-      .lp-workflows { padding: clamp(2.5rem, 6vw, 4rem) 0; background: var(--site-paper-raised); border-top: 1px solid var(--site-paper-line); border-bottom: 1px solid var(--site-paper-line); }
-      .lp-workflow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2.25rem; margin-top: 2rem; }
-      .lp-workflow-item { border-left: 2px solid var(--site-gold-soft); padding-left: 1rem; }
-      .lp-workflow-item h4 { font-family: "Iowan Old Style", Georgia, serif; font-weight: 600; font-size: 1.05rem; margin: 0 0 0.4rem; color: var(--site-ink); }
-      .lp-workflow-item p { margin: 0; font-size: 0.92rem; color: var(--site-ink-muted); line-height: 1.55; }
-
-      .lp-closing { padding: clamp(2.5rem, 6vw, 4rem) 0 clamp(3rem, 7vw, 5rem); text-align: center; }
-      .lp-closing h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); max-width: 620px; margin: 0 auto; }
-
-      .lp-footer { padding: 2rem 0 3rem; border-top: 1px solid var(--site-paper-line); }
-      .lp-footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-      .lp-footer-tag { font-size: 0.85rem; color: var(--site-ink-muted); }
-    `}</style>
   )
 }
