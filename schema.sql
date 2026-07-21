@@ -108,6 +108,33 @@ CREATE TABLE responses (
 );
 
 -- ============================================
+-- HELPER FUNCTIONS (used by RLS policies)
+-- ============================================
+-- SECURITY DEFINER so its internal query bypasses RLS -- a policy on
+-- memberships that queried memberships directly caused Postgres to detect
+-- infinite recursion (evaluating the policy requires the subquery, which
+-- requires evaluating the policy again). Routing the check through a
+-- function that runs with elevated privileges internally breaks the cycle.
+CREATE OR REPLACE FUNCTION is_org_admin(p_org_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM memberships
+    WHERE org_id = p_org_id
+    AND user_id = auth.uid()::uuid
+    AND role = 'admin'
+    AND status = 'active'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION is_org_admin(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION is_org_admin(UUID) TO authenticated;
+
+-- ============================================
 -- ROW-LEVEL SECURITY (Tenancy Enforcement)
 -- ============================================
 
@@ -146,41 +173,19 @@ CREATE POLICY orgs_public_read ON orgs
 -- ORGS: Only admins can update branding, public/private, invite code, etc.
 CREATE POLICY orgs_admin_update ON orgs
   FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM memberships
-      WHERE memberships.org_id = orgs.id
-      AND memberships.user_id = auth.uid()::uuid
-      AND memberships.role = 'admin'
-      AND memberships.status = 'active'
-    )
-  );
+  USING (is_org_admin(orgs.id));
 
 -- MEMBERSHIPS: Only admins can manage; members can read their own
 CREATE POLICY memberships_read ON memberships
   FOR SELECT
   USING (
     user_id = auth.uid()::uuid
-    OR EXISTS (
-      SELECT 1 FROM memberships m2
-      WHERE m2.org_id = memberships.org_id
-      AND m2.user_id = auth.uid()::uuid
-      AND m2.role = 'admin'
-      AND m2.status = 'active'
-    )
+    OR is_org_admin(org_id)
   );
 
 CREATE POLICY memberships_admin_manage ON memberships
   FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM memberships m2
-      WHERE m2.org_id = memberships.org_id
-      AND m2.user_id = auth.uid()::uuid
-      AND m2.role = 'admin'
-      AND m2.status = 'active'
-    )
-  );
+  WITH CHECK (is_org_admin(org_id));
 
 -- Any user can join a PUBLIC org directly, but only as a plain active
 -- member -- never self-granted admin/staff. Joining a PRIVATE org must go
