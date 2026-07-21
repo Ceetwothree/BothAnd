@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [containerId, setContainerId] = useState('')
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -48,6 +49,15 @@ export default function DashboardPage() {
           setContainerId(container.id)
           fetchPosts(container.id)
         }
+
+        const { data: membership } = await supabase
+          .from('memberships')
+          .select('role')
+          .eq('org_id', org.id)
+          .eq('user_id', user.id)
+          .single()
+
+        setIsAdmin(membership?.role === 'admin')
       }
     }
 
@@ -120,6 +130,11 @@ export default function DashboardPage() {
           <Link href="/" style={{ marginRight: '1rem' }}>
             Home
           </Link>
+          {isAdmin && (
+            <Link href="/dashboard/settings" style={{ marginRight: '1rem' }}>
+              Settings
+            </Link>
+          )}
           <button onClick={() => supabase.auth.signOut()}>Logout</button>
         </nav>
       </header>

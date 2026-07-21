@@ -4,11 +4,14 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import Banner from './components/Banner'
+import { OrgBranding } from '@/lib/branding'
 
 export default function Home() {
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [org, setOrg] = useState<OrgBranding | null>(null)
 
   useEffect(() => {
     // Check if user is logged in
@@ -24,18 +27,20 @@ export default function Home() {
     const fetchPosts = async () => {
       try {
         // Get default org
-        const { data: org } = await supabase
+        const { data: orgData } = await supabase
           .from('orgs')
-          .select('id')
+          .select('id, name, logo_url, banner_template, accent_color')
           .eq('slug', process.env.NEXT_PUBLIC_DEFAULT_ORG_SLUG)
           .single()
 
-        if (org) {
+        if (orgData) {
+          setOrg(orgData)
+
           // Get forum container
           const { data: container } = await supabase
             .from('containers')
             .select('id')
-            .eq('org_id', org.id)
+            .eq('org_id', orgData.id)
             .eq('kind', 'board')
             .eq('visibility', 'public')
             .single()
@@ -75,8 +80,12 @@ export default function Home() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-      <header style={{ marginBottom: '2rem', borderBottom: '1px solid #ddd', paddingBottom: '1rem' }}>
-        <h1>The Mission</h1>
+      <header style={{ marginBottom: '2rem', paddingBottom: '1rem' }}>
+        {org ? (
+          <Banner org={org} />
+        ) : (
+          <h1>The Mission</h1>
+        )}
         <p>Coordination infrastructure for organizations that can't afford software.</p>
         <nav>
           {user ? (

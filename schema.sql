@@ -25,7 +25,13 @@ CREATE TABLE orgs (
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
   created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ DEFAULT now(),
+  -- Branding: constrained to a fixed set of templates/colors, not freeform
+  logo_url TEXT,
+  banner_template TEXT NOT NULL DEFAULT 'centered'
+    CHECK (banner_template IN ('logo-left', 'centered', 'full-banner')),
+  accent_color TEXT NOT NULL DEFAULT 'slate'
+    CHECK (accent_color IN ('slate', 'blue', 'green', 'purple', 'amber', 'rose'))
 );
 
 -- ============================================
@@ -129,6 +135,19 @@ CREATE POLICY orgs_member_read ON orgs
 CREATE POLICY orgs_insert ON orgs
   FOR INSERT
   WITH CHECK (created_by = auth.uid()::uuid);
+
+-- ORGS: Only admins can update branding (logo/template/color) or org details
+CREATE POLICY orgs_admin_update ON orgs
+  FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM memberships
+      WHERE memberships.org_id = orgs.id
+      AND memberships.user_id = auth.uid()::uuid
+      AND memberships.role = 'admin'
+      AND memberships.status = 'active'
+    )
+  );
 
 -- MEMBERSHIPS: Only admins can manage; members can read their own
 CREATE POLICY memberships_read ON memberships
@@ -307,6 +326,46 @@ CREATE POLICY responses_write ON responses
       WHERE r.id = responses.record_id
       AND m.user_id = auth.uid()::uuid
       AND m.status = 'active'
+    )
+  );
+
+-- ============================================
+-- STORAGE (org logos)
+-- ============================================
+-- Objects are stored at path "{org_id}/{filename}" so RLS can scope
+-- uploads to admins of that org.
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('logos', 'logos', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY logos_public_read ON storage.objects
+  FOR SELECT
+  USING (bucket_id = 'logos');
+
+CREATE POLICY logos_admin_upload ON storage.objects
+  FOR INSERT
+  WITH CHECK (
+    bucket_id = 'logos'
+    AND EXISTS (
+      SELECT 1 FROM memberships
+      WHERE memberships.org_id = (storage.foldername(name))[1]::uuid
+      AND memberships.user_id = auth.uid()::uuid
+      AND memberships.role = 'admin'
+      AND memberships.status = 'active'
+    )
+  );
+
+CREATE POLICY logos_admin_update ON storage.objects
+  FOR UPDATE
+  USING (
+    bucket_id = 'logos'
+    AND EXISTS (
+      SELECT 1 FROM memberships
+      WHERE memberships.org_id = (storage.foldername(name))[1]::uuid
+      AND memberships.user_id = auth.uid()::uuid
+      AND memberships.role = 'admin'
+      AND memberships.status = 'active'
     )
   );
 
