@@ -4,88 +4,32 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { useUserOrgs } from '@/lib/orgs'
 
 export default function Home() {
-  const [posts, setPosts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [checkingUser, setCheckingUser] = useState(true)
+  const { orgs, loading: loadingOrgs } = useUserOrgs()
 
   useEffect(() => {
-    // Check if user is logged in
     const checkUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       setUser(user)
+      setCheckingUser(false)
     }
     checkUser()
-
-    // Fetch forum posts from default org
-    const fetchPosts = async () => {
-      try {
-        // Get default org
-        const { data: org } = await supabase
-          .from('orgs')
-          .select('id')
-          .eq('slug', process.env.NEXT_PUBLIC_DEFAULT_ORG_SLUG)
-          .single()
-
-        if (org) {
-          // Get forum container
-          const { data: container } = await supabase
-            .from('containers')
-            .select('id')
-            .eq('org_id', org.id)
-            .eq('kind', 'board')
-            .eq('visibility', 'public')
-            .single()
-
-          if (container) {
-            // Get posts
-            const { data, error } = await supabase
-              .from('records')
-              .select(
-                `
-                id,
-                title,
-                body,
-                created_at,
-                owner_id,
-                users!owner_id(email)
-                `
-              )
-              .eq('container_id', container.id)
-              .eq('kind', 'post')
-              .order('created_at', { ascending: false })
-
-            if (!error && data) {
-              setPosts(data)
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching posts:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchPosts()
   }, [])
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
       <header style={{ marginBottom: '2rem', borderBottom: '1px solid #ddd', paddingBottom: '1rem' }}>
-        <h1>The Mission</h1>
-        <p>Coordination infrastructure for organizations that can't afford software.</p>
+        <h1>BothAnd</h1>
+        <p>Coordination infrastructure for organizations that can&apos;t afford software.</p>
         <nav>
           {user ? (
-            <>
-              <Link href="/dashboard" style={{ marginRight: '1rem' }}>
-                Dashboard
-              </Link>
-              <button onClick={() => supabase.auth.signOut()}>Logout</button>
-            </>
+            <button onClick={() => supabase.auth.signOut()}>Logout</button>
           ) : (
             <>
               <Link href="/login" style={{ marginRight: '1rem' }}>
@@ -98,35 +42,58 @@ export default function Home() {
       </header>
 
       <main>
-        <section>
-          <h2>Forum</h2>
-          {loading ? (
-            <p>Loading posts...</p>
-          ) : posts.length === 0 ? (
-            <p>No posts yet. {user && <Link href="/dashboard">Create one</Link>}</p>
-          ) : (
-            <div>
-              {posts.map((post: any) => (
-                <article
-                  key={post.id}
-                  style={{
-                    marginBottom: '1.5rem',
-                    padding: '1rem',
-                    border: '1px solid #eee',
-                    borderRadius: '4px',
-                  }}
-                >
-                  <h3>{post.title}</h3>
-                  <p>{post.body}</p>
-                  <small>
-                    Posted by {post.users?.email || 'Unknown'} on{' '}
-                    {new Date(post.created_at).toLocaleDateString()}
-                  </small>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+        {checkingUser ? (
+          <p>Loading...</p>
+        ) : user ? (
+          <>
+            <section style={{ marginBottom: '2rem' }}>
+              <h2>Your organizations</h2>
+              {loadingOrgs ? (
+                <p>Loading...</p>
+              ) : orgs.length === 0 ? (
+                <p>You&apos;re not part of any organization yet.</p>
+              ) : (
+                <div>
+                  {orgs.map(({ org, role }) => (
+                    <Link
+                      key={org.id}
+                      href={`/org/${org.slug}`}
+                      style={{
+                        display: 'block',
+                        marginBottom: '0.75rem',
+                        padding: '1rem',
+                        border: '1px solid #eee',
+                        borderRadius: '4px',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <strong>{org.name}</strong> <small>({role})</small>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section>
+              <Link href="/browse" style={{ marginRight: '1rem' }}>
+                Browse public organizations
+              </Link>
+              <Link href="/orgs/new">Create an organization</Link>
+            </section>
+          </>
+        ) : (
+          <section>
+            <p>
+              BothAnd is free-tier coordination infrastructure for organizations that can&apos;t afford
+              software. One account, many organizations -- join one, or start your own.
+            </p>
+            <p>
+              <Link href="/browse">Browse public organizations</Link> or{' '}
+              <Link href="/signup">sign up</Link> to create your own.
+            </p>
+          </section>
+        )}
       </main>
     </div>
   )

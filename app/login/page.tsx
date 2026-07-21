@@ -1,17 +1,19 @@
 // app/login/page.tsx
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,7 +29,7 @@ export default function LoginPage() {
       if (loginError) throw loginError
 
       if (data.user) {
-        router.push('/dashboard')
+        router.push(redirectTo)
       }
     } catch (err: any) {
       setError(err.message || 'Login failed')
@@ -80,8 +82,19 @@ export default function LoginPage() {
         </button>
       </form>
       <p style={{ marginTop: '1rem' }}>
-        Don't have an account? <Link href="/signup">Sign up</Link>
+        Don&apos;t have an account?{' '}
+        <Link href={`/signup${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>
+          Sign up
+        </Link>
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ maxWidth: '400px', margin: '4rem auto', padding: '2rem' }}>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }
