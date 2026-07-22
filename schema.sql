@@ -106,6 +106,11 @@ CREATE TABLE records (
   body TEXT,
   state record_state NOT NULL DEFAULT 'open',
   capacity INT,
+  -- Only meaningful for kind='event' -- nullable like every other kind-
+  -- specific column here (title/body/capacity), since one table serves
+  -- posts/items/events/entries/lessons.
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

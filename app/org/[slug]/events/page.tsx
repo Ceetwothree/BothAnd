@@ -1,11 +1,13 @@
 // app/org/[slug]/events/page.tsx
 //
 // Known limitations (see PR description for the full list):
-// - records has no dedicated date/time column yet, so "when" lives in the
-//   description text for now -- needs a proper `starts_at` column later.
 // - "staff can create events" is a UI-level guard only; the underlying
 //   records_write RLS policy allows any active member, same gap the forum
 //   already has today.
+// - Waitlisting is derived, not stored: the first `capacity` RSVPs by
+//   created_at are "confirmed," the rest are "waitlisted." Cancelling a
+//   confirmed spot promotes the next-oldest waitlisted RSVP automatically,
+//   since it's just a recompute -- no promotion bookkeeping needed.
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -14,15 +16,50 @@ import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
 import { canManageContainers, canManageEvents, canPost } from '@/lib/permissions'
 
+interface RsvpResponse {
+  id: string
+  kind: string
+  user_id: string
+  created_at: string
+}
+
 interface EventRecord {
   id: string
   title: string | null
   body: string | null
   capacity: number | null
+  starts_at: string | null
+  ends_at: string | null
   created_at: string
   owner_id: string
   users: { email: string } | null
-  rsvp_count: number
+  rsvps: RsvpResponse[]
+}
+
+function rsvpStatus(ev: EventRecord, userId: string | undefined) {
+  const ordered = [...ev.rsvps].sort((a, b) => a.created_at.localeCompare(b.created_at))
+  const confirmed = ev.capacity != null ? ordered.slice(0, ev.capacity) : ordered
+  const waitlisted = ev.capacity != null ? ordered.slice(ev.capacity) : []
+
+  const mine = ordered.find((r) => r.user_id === userId)
+  const mineStatus = !mine ? null : confirmed.includes(mine) ? 'confirmed' : 'waitlisted'
+
+  return {
+    confirmedCount: confirmed.length,
+    waitlistedCount: waitlisted.length,
+    full: ev.capacity != null && confirmed.length >= ev.capacity,
+    myResponseId: mine?.id ?? null,
+    myStatus: mineStatus as 'confirmed' | 'waitlisted' | null,
+  }
+}
+
+// datetime-local gives a value with no timezone offset, which the Date
+// constructor treats as local time per the ES spec -- toISOString() then
+// converts that to the UTC instant actually stored.
+function localInputToIso(value: string): string | null {
+  if (!value) return null
+  const d = new Date(value)
+  return isNaN(d.getTime()) ? null : d.toISOString()
 }
 
 export default function EventsPage() {
@@ -31,12 +68,12 @@ export default function EventsPage() {
   const [user, setUser] = useState<any>(null)
   const [events, setEvents] = useState<EventRecord[]>([])
   const [loadingEvents, setLoadingEvents] = useState(true)
-  // eventId -> id of the viewer's own rsvp response, so it can be deleted
-  const [myRsvps, setMyRsvps] = useState<Record<string, string>>({})
 
   const [settingUp, setSettingUp] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  const [startsAt, setStartsAt] = useState('')
+  const [endsAt, setEndsAt] = useState('')
   const [capacity, setCapacity] = useState('')
   const [creating, setCreating] = useState(false)
   const [rsvpingId, setRsvpingId] = useState<string | null>(null)
@@ -57,32 +94,28 @@ export default function EventsPage() {
       .from('records')
       .select(
         `
-        id, title, body, capacity, created_at, owner_id,
+        id, title, body, capacity, starts_at, ends_at, created_at, owner_id,
         users!owner_id(email),
-        responses(id, kind, user_id)
+        responses(id, kind, user_id, created_at)
         `
       )
       .eq('container_id', containerId)
       .eq('kind', 'event')
-      .order('created_at', { ascending: false })
 
     if (!fetchError && data) {
       const rows = (data as any[]).map((r) => ({
         ...r,
-        rsvp_count: (r.responses ?? []).filter((resp: any) => resp.kind === 'rsvp').length,
+        rsvps: (r.responses ?? []).filter((resp: any) => resp.kind === 'rsvp'),
       }))
+      // Soonest upcoming first; events with no date (shouldn't happen for
+      // new ones, but legacy rows are possible) sort to the end.
+      rows.sort((a, b) => {
+        if (!a.starts_at && !b.starts_at) return 0
+        if (!a.starts_at) return 1
+        if (!b.starts_at) return -1
+        return a.starts_at.localeCompare(b.starts_at)
+      })
       setEvents(rows)
-
-      if (user) {
-        const mine: Record<string, string> = {}
-        for (const r of data as any[]) {
-          const myResponse = (r.responses ?? []).find(
-            (resp: any) => resp.kind === 'rsvp' && resp.user_id === user.id
-          )
-          if (myResponse) mine[r.id] = myResponse.id
-        }
-        setMyRsvps(mine)
-      }
     }
 
     setLoadingEvents(false)
@@ -91,7 +124,7 @@ export default function EventsPage() {
   useEffect(() => {
     if (container) fetchEvents(container.id)
     else setLoadingEvents(false)
-  }, [container, user])
+  }, [container])
 
   const handleSetUp = async () => {
     setSettingUp(true)
@@ -111,8 +144,15 @@ export default function EventsPage() {
     if (!container || !user) return
     setError('')
 
-    if (!title || !body) {
-      setError('Title and description are required')
+    const startsAtIso = localInputToIso(startsAt)
+    if (!title || !body || !startsAtIso) {
+      setError('Title, description, and start time are required')
+      return
+    }
+
+    const endsAtIso = localInputToIso(endsAt)
+    if (endsAtIso && endsAtIso <= startsAtIso) {
+      setError('End time must be after the start time')
       return
     }
 
@@ -126,12 +166,16 @@ export default function EventsPage() {
         body,
         state: 'open',
         capacity: capacity ? parseInt(capacity, 10) : null,
+        starts_at: startsAtIso,
+        ends_at: endsAtIso,
       })
 
       if (createError) throw createError
 
       setTitle('')
       setBody('')
+      setStartsAt('')
+      setEndsAt('')
       setCapacity('')
       await fetchEvents(container.id)
     } catch (err: any) {
@@ -217,7 +261,7 @@ export default function EventsPage() {
               />
             </div>
             <div style={{ marginBottom: '1rem' }}>
-              <label htmlFor="body">Description (include date/time and location):</label>
+              <label htmlFor="body">Description (include location):</label>
               <textarea
                 id="body"
                 value={body}
@@ -226,6 +270,29 @@ export default function EventsPage() {
                 rows={4}
                 style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
               />
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="starts_at">Starts:</label>
+                <input
+                  id="starts_at"
+                  type="datetime-local"
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="ends_at">Ends (optional):</label>
+                <input
+                  id="ends_at"
+                  type="datetime-local"
+                  value={endsAt}
+                  onChange={(e) => setEndsAt(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+                />
+              </div>
             </div>
             <div style={{ marginBottom: '1rem' }}>
               <label htmlFor="capacity">Capacity (optional):</label>
@@ -263,8 +330,10 @@ export default function EventsPage() {
           <p>No events yet.</p>
         ) : (
           events.map((ev) => {
-            const full = ev.capacity != null && ev.rsvp_count >= ev.capacity
-            const myRsvpId = myRsvps[ev.id]
+            const { confirmedCount, waitlistedCount, full, myResponseId, myStatus } = rsvpStatus(
+              ev,
+              user?.id
+            )
 
             return (
               <article
@@ -277,6 +346,12 @@ export default function EventsPage() {
                 }}
               >
                 <h3>{ev.title}</h3>
+                {ev.starts_at && (
+                  <p style={{ fontWeight: 'bold', margin: '0 0 0.5rem' }}>
+                    {new Date(ev.starts_at).toLocaleString()}
+                    {ev.ends_at && <> &ndash; {new Date(ev.ends_at).toLocaleString()}</>}
+                  </p>
+                )}
                 <p style={{ whiteSpace: 'pre-wrap' }}>{ev.body}</p>
                 <small>
                   Posted by {ev.users?.email || 'Unknown'} on{' '}
@@ -284,23 +359,27 @@ export default function EventsPage() {
                   {ev.capacity != null && (
                     <>
                       {' '}
-                      &middot; {ev.rsvp_count}/{ev.capacity} spots filled
+                      &middot; {confirmedCount}/{ev.capacity} confirmed
+                      {waitlistedCount > 0 && <> &middot; {waitlistedCount} waitlisted</>}
                     </>
                   )}
                 </small>
                 <div style={{ marginTop: '0.75rem' }}>
-                  {!canRsvp ? null : myRsvpId ? (
+                  {!canRsvp ? null : myResponseId ? (
                     <>
-                      <span style={{ marginRight: '0.75rem' }}>You&apos;re RSVP&apos;d</span>
-                      <button onClick={() => handleUnRsvp(ev.id, myRsvpId)} disabled={rsvpingId === ev.id}>
+                      <span style={{ marginRight: '0.75rem' }}>
+                        {myStatus === 'waitlisted' ? "You're on the waitlist" : "You're confirmed"}
+                      </span>
+                      <button
+                        onClick={() => handleUnRsvp(ev.id, myResponseId)}
+                        disabled={rsvpingId === ev.id}
+                      >
                         {rsvpingId === ev.id ? 'Cancelling...' : 'Cancel RSVP'}
                       </button>
                     </>
-                  ) : full ? (
-                    <button disabled>Event full</button>
                   ) : (
                     <button onClick={() => handleRsvp(ev.id)} disabled={rsvpingId === ev.id}>
-                      {rsvpingId === ev.id ? 'RSVPing...' : 'RSVP'}
+                      {rsvpingId === ev.id ? 'RSVPing...' : full ? 'Join waitlist' : 'RSVP'}
                     </button>
                   )}
                 </div>

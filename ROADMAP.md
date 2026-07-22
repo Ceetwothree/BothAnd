@@ -32,8 +32,8 @@ Not exhaustive — a snapshot to work from, not a permanent ranking.
 | Typical feature | BothAnd today | Gap |
 |---|---|---|
 | Recurring/templated shift generation (bulk-create a season) | One-off events only, created individually | Yes — the widest gap on this list |
-| Dedicated date/time field | Folded into free-text description | Yes |
-| Min/max capacity + waitlist when full | Capacity is a plain client-side count, no waitlist | Partial |
+| Dedicated date/time field | ~~Have it~~ — `starts_at`/`ends_at` columns, sorted soonest-first | No |
+| Waitlist when full | ~~Have it~~ — derived from RSVP order vs. capacity, no schema needed; confirmed spots auto-promote from the waitlist on cancellation | No |
 | RSVP / cancel | Insert/delete a `rsvp` response | Have it |
 | Automated reminders | None | Yes |
 | Attendance/check-in + hours logged (grant reporting) | None | Yes |
