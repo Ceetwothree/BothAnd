@@ -8,6 +8,12 @@
 //   created_at are "confirmed," the rest are "waitlisted." Cancelling a
 //   confirmed spot promotes the next-oldest waitlisted RSVP automatically,
 //   since it's just a recompute -- no promotion bookkeeping needed.
+// - Attendance (for grant reporting) only covers confirmed RSVPs -- no
+//   walk-in/add-attendee flow for someone who shows up without RSVPing.
+//   It's a staff/admin action on someone else's behalf, backed by the
+//   responses_attendance_* RLS policies (self-scoped responses_write etc.
+//   don't apply since the marker isn't the response's own user_id). Hours
+//   are stored in the pre-existing, previously-unused `responses.qty`.
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -22,7 +28,9 @@ interface RsvpResponse {
   id: string
   kind: string
   user_id: string
+  qty: number | null
   created_at: string
+  users: { email: string } | null
 }
 
 interface EventRecord {
@@ -36,6 +44,7 @@ interface EventRecord {
   owner_id: string
   users: { email: string } | null
   rsvps: RsvpResponse[]
+  attendance: RsvpResponse[]
 }
 
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -66,12 +75,21 @@ function rsvpStatus(ev: EventRecord, userId: string | undefined) {
   const mineStatus = !mine ? null : confirmed.includes(mine) ? 'confirmed' : 'waitlisted'
 
   return {
+    confirmed,
     confirmedCount: confirmed.length,
     waitlistedCount: waitlisted.length,
     full: ev.capacity != null && confirmed.length >= ev.capacity,
     myResponseId: mine?.id ?? null,
     myStatus: mineStatus as 'confirmed' | 'waitlisted' | null,
   }
+}
+
+// Prefills the hours field when marking someone attended: the event's own
+// duration if it has one, otherwise blank for manual entry.
+function defaultHours(ev: EventRecord): string {
+  if (!ev.starts_at || !ev.ends_at) return ''
+  const hours = (new Date(ev.ends_at).getTime() - new Date(ev.starts_at).getTime()) / (1000 * 60 * 60)
+  return hours > 0 ? String(Math.round(hours * 10) / 10) : ''
 }
 
 export default function EventsPage() {
@@ -90,6 +108,11 @@ export default function EventsPage() {
   const [creating, setCreating] = useState(false)
   const [rsvpingId, setRsvpingId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  // Keyed by `${eventId}:${userId}` -- tracks which attendance row is
+  // mid-request, and the current hours-input draft for each.
+  const [attendanceSaving, setAttendanceSaving] = useState<string | null>(null)
+  const [hoursDrafts, setHoursDrafts] = useState<Record<string, string>>({})
 
   const [repeating, setRepeating] = useState(false)
   const [repeatWeekdays, setRepeatWeekdays] = useState<number[]>([])
@@ -122,7 +145,7 @@ export default function EventsPage() {
         `
         id, title, body, capacity, starts_at, ends_at, created_at, owner_id,
         users!owner_id(email),
-        responses(id, kind, user_id, created_at)
+        responses(id, kind, user_id, qty, created_at, users!user_id(email))
         `
       )
       .eq('container_id', containerId)
@@ -132,6 +155,7 @@ export default function EventsPage() {
       const rows = (data as any[]).map((r) => ({
         ...r,
         rsvps: (r.responses ?? []).filter((resp: any) => resp.kind === 'rsvp'),
+        attendance: (r.responses ?? []).filter((resp: any) => resp.kind === 'attended'),
       }))
       // Soonest upcoming first; events with no date (shouldn't happen for
       // new ones, but legacy rows are possible) sort to the end.
@@ -265,6 +289,59 @@ export default function EventsPage() {
       setError(err.message || 'Failed to cancel RSVP')
     } finally {
       setRsvpingId(null)
+    }
+  }
+
+  const handleMarkAttended = async (eventId: string, attendeeUserId: string, hours: string) => {
+    const key = `${eventId}:${attendeeUserId}`
+    setAttendanceSaving(key)
+    setError('')
+    try {
+      const { error: attendError } = await supabase.from('responses').insert({
+        record_id: eventId,
+        user_id: attendeeUserId,
+        kind: 'attended',
+        qty: hours ? parseFloat(hours) : null,
+      })
+      if (attendError) throw attendError
+      if (container) await fetchEvents(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to mark attendance')
+    } finally {
+      setAttendanceSaving(null)
+    }
+  }
+
+  const handleUnmarkAttended = async (eventId: string, responseId: string) => {
+    const key = `${eventId}:${responseId}`
+    setAttendanceSaving(key)
+    setError('')
+    try {
+      const { error: deleteError } = await supabase.from('responses').delete().eq('id', responseId)
+      if (deleteError) throw deleteError
+      if (container) await fetchEvents(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to unmark attendance')
+    } finally {
+      setAttendanceSaving(null)
+    }
+  }
+
+  const handleSaveHours = async (eventId: string, responseId: string, hours: string) => {
+    const key = `${eventId}:${responseId}`
+    setAttendanceSaving(key)
+    setError('')
+    try {
+      const { error: updateError } = await supabase
+        .from('responses')
+        .update({ qty: hours ? parseFloat(hours) : null })
+        .eq('id', responseId)
+      if (updateError) throw updateError
+      if (container) await fetchEvents(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to save hours')
+    } finally {
+      setAttendanceSaving(null)
     }
   }
 
@@ -464,10 +541,10 @@ export default function EventsPage() {
           <p>No events yet.</p>
         ) : (
           events.map((ev) => {
-            const { confirmedCount, waitlistedCount, full, myResponseId, myStatus } = rsvpStatus(
-              ev,
-              user?.id
-            )
+            const { confirmed, confirmedCount, waitlistedCount, full, myResponseId, myStatus } =
+              rsvpStatus(ev, user?.id)
+            const attendanceByUser = new Map(ev.attendance.map((a) => [a.user_id, a]))
+            const totalHours = ev.attendance.reduce((sum, a) => sum + (a.qty ?? 0), 0)
 
             return (
               <article
@@ -517,6 +594,65 @@ export default function EventsPage() {
                     </button>
                   )}
                 </div>
+
+                {canCreate && confirmed.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: '1rem',
+                      paddingTop: '0.75rem',
+                      borderTop: '1px solid #f0f0f0',
+                    }}
+                  >
+                    <strong>Attendance</strong>
+                    {totalHours > 0 && <span> &middot; {totalHours} hour{totalHours === 1 ? '' : 's'} logged</span>}
+                    {confirmed.map((rsvp) => {
+                      const attended = attendanceByUser.get(rsvp.user_id)
+                      const key = `${ev.id}:${attended ? attended.id : rsvp.user_id}`
+                      const draft = hoursDrafts[key] ?? (attended ? String(attended.qty ?? '') : defaultHours(ev))
+
+                      return (
+                        <div
+                          key={rsvp.user_id}
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
+                        >
+                          <label style={{ flex: 1 }}>
+                            <input
+                              type="checkbox"
+                              checked={!!attended}
+                              disabled={attendanceSaving === key}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  handleMarkAttended(ev.id, rsvp.user_id, draft)
+                                } else if (attended) {
+                                  handleUnmarkAttended(ev.id, attended.id)
+                                }
+                              }}
+                              style={{ marginRight: '0.5rem' }}
+                            />
+                            {rsvp.users?.email || 'Unknown'}
+                          </label>
+                          {attended && (
+                            <>
+                              <input
+                                type="number"
+                                min={0}
+                                step={0.5}
+                                value={draft}
+                                onChange={(e) =>
+                                  setHoursDrafts((prev) => ({ ...prev, [key]: e.target.value }))
+                                }
+                                onBlur={() => handleSaveHours(ev.id, attended.id, draft)}
+                                disabled={attendanceSaving === key}
+                                style={{ width: '5rem', padding: '0.25rem' }}
+                              />
+                              <span>hrs</span>
+                            </>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </article>
             )
           })

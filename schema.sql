@@ -119,7 +119,10 @@ CREATE TABLE records (
 -- RESPONSES (comments, claims, RSVPs, submissions)
 -- ============================================
 
-CREATE TYPE response_kind AS ENUM ('comment', 'claim', 'rsvp', 'submission');
+-- 'attended' is marked by a staff/admin *on behalf of* another member
+-- (qty holds hours worked, for grant reporting), unlike every other kind
+-- here where the response's own user_id is always the actor.
+CREATE TYPE response_kind AS ENUM ('comment', 'claim', 'rsvp', 'submission', 'attended');
 
 CREATE TABLE responses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -467,6 +470,54 @@ CREATE POLICY responses_delete_own ON responses
 CREATE POLICY responses_update_own ON responses
   FOR UPDATE
   USING (user_id = auth.uid()::uuid);
+
+-- Attendance is marked by staff/admin on behalf of another member, so the
+-- self-scoped policies above don't apply -- these are separate permissive
+-- policies (OR'd with the ones above by Postgres, not a replacement).
+CREATE POLICY responses_attendance_write ON responses
+  FOR INSERT
+  WITH CHECK (
+    kind = 'attended'
+    AND EXISTS (
+      SELECT 1 FROM records r
+      JOIN containers c ON c.id = r.container_id
+      JOIN memberships m ON m.org_id = c.org_id
+      WHERE r.id = responses.record_id
+      AND m.user_id = auth.uid()::uuid
+      AND m.role IN ('admin', 'staff')
+      AND m.status = 'active'
+    )
+  );
+
+CREATE POLICY responses_attendance_update ON responses
+  FOR UPDATE
+  USING (
+    kind = 'attended'
+    AND EXISTS (
+      SELECT 1 FROM records r
+      JOIN containers c ON c.id = r.container_id
+      JOIN memberships m ON m.org_id = c.org_id
+      WHERE r.id = responses.record_id
+      AND m.user_id = auth.uid()::uuid
+      AND m.role IN ('admin', 'staff')
+      AND m.status = 'active'
+    )
+  );
+
+CREATE POLICY responses_attendance_delete ON responses
+  FOR DELETE
+  USING (
+    kind = 'attended'
+    AND EXISTS (
+      SELECT 1 FROM records r
+      JOIN containers c ON c.id = r.container_id
+      JOIN memberships m ON m.org_id = c.org_id
+      WHERE r.id = responses.record_id
+      AND m.user_id = auth.uid()::uuid
+      AND m.role IN ('admin', 'staff')
+      AND m.status = 'active'
+    )
+  );
 
 -- ============================================
 -- FUNCTIONS (RPC)
