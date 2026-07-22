@@ -189,7 +189,12 @@ CREATE POLICY users_org_admin_read ON users
     )
   );
 
--- ORGS: Can read if member, or if the org is public (browsable/joinable)
+-- ORGS: Can read if member, or if the org is public (browsable/joinable).
+-- (A stray `orgs_read USING (true)` policy existed on the live project for
+-- a time -- applied directly, never reflected here -- and made every org
+-- row, invite_code included, readable by anyone with no login at all. Fixed
+-- live via the fix_tenant_isolation_rls_drift migration; this file was
+-- already correct, so nothing here changed, only the live DB did.)
 CREATE POLICY orgs_member_read ON orgs
   FOR SELECT
   USING (
@@ -252,18 +257,27 @@ CREATE POLICY memberships_self_insert ON memberships
 
 -- CONTAINERS: Visibility rules
 -- Public: anyone can read
--- Org: members can read
--- Restricted: only explicit members + admin can read
+-- Org / restricted: active members can read (restricted is a defined
+-- visibility value that no workflow actually sets today, so it's folded
+-- into the same active-membership check as 'org' rather than left with no
+-- read policy at all -- the latter would silently make any future
+-- restricted container unreadable by anyone, including its own org).
 -- Owner: only creator + admin can read
+--
+-- (containers_org and containers_restricted existed on the live project
+-- with no membership check at all -- and containers_insert allowed any
+-- authenticated user to create a container under any org, no admin check.
+-- Fixed live via fix_tenant_isolation_rls_drift; this file already
+-- documented the intended checks below.)
 
-CREATE POLICY containers_public_read ON containers
+CREATE POLICY containers_public ON containers
   FOR SELECT
   USING (visibility = 'public');
 
 CREATE POLICY containers_org_read ON containers
   FOR SELECT
   USING (
-    visibility = 'org'
+    visibility IN ('org', 'restricted')
     AND EXISTS (
       SELECT 1 FROM memberships
       WHERE memberships.org_id = containers.org_id
@@ -299,40 +313,63 @@ CREATE POLICY containers_admin_write ON containers
     )
   );
 
--- RECORDS: Inherit container visibility
-CREATE POLICY records_read ON records
+-- RECORDS: Inherit container visibility. Split into one policy per case
+-- (rather than one big USING with ORs) so each is independently readable
+-- and matches how these actually ended up applied live.
+--
+-- (records_org and records_insert existed on the live project with no
+-- membership check at all -- any authenticated user could read any org's
+-- records in an 'org'-visibility container, or insert a record into any
+-- container regardless of membership. Fixed live via
+-- fix_tenant_isolation_rls_drift.)
+
+CREATE POLICY records_public ON records
   FOR SELECT
   USING (
-    -- Public container
     EXISTS (
       SELECT 1 FROM containers
       WHERE containers.id = records.container_id
       AND containers.visibility = 'public'
     )
-    OR
-    -- Org container, user is member
+  );
+
+CREATE POLICY records_org_read ON records
+  FOR SELECT
+  USING (
     EXISTS (
-      SELECT 1 FROM containers
-      JOIN memberships ON memberships.org_id = containers.org_id
-      WHERE containers.id = records.container_id
-      AND containers.visibility = 'org'
-      AND memberships.user_id = auth.uid()::uuid
-      AND memberships.status = 'active'
+      SELECT 1 FROM containers c
+      JOIN memberships m ON m.org_id = c.org_id
+      WHERE c.id = records.container_id
+      AND c.visibility IN ('org', 'restricted')
+      AND m.user_id = auth.uid()::uuid
+      AND m.status = 'active'
     )
-    OR
-    -- Owner container, user is creator or admin
+  );
+
+-- A user can always read a record they own, regardless of the container's
+-- visibility -- not a cross-tenant leak, just "you can see what you wrote."
+CREATE POLICY records_owner ON records
+  FOR SELECT
+  USING (owner_id = auth.uid()::uuid);
+
+-- Owner-visibility container: the container's creator or an org admin can
+-- see every record in it, not just their own (see journal/page.tsx, the
+-- only workflow that uses 'owner' visibility today).
+CREATE POLICY records_owner_visibility ON records
+  FOR SELECT
+  USING (
     EXISTS (
-      SELECT 1 FROM containers
-      WHERE containers.id = records.container_id
-      AND containers.visibility = 'owner'
+      SELECT 1 FROM containers c
+      WHERE c.id = records.container_id
+      AND c.visibility = 'owner'
       AND (
-        records.owner_id = auth.uid()::uuid
-        OR containers.created_by = auth.uid()::uuid
+        c.created_by = auth.uid()::uuid
         OR EXISTS (
-          SELECT 1 FROM memberships
-          WHERE memberships.org_id = containers.org_id
-          AND memberships.user_id = auth.uid()::uuid
-          AND memberships.role = 'admin'
+          SELECT 1 FROM memberships m
+          WHERE m.org_id = c.org_id
+          AND m.user_id = auth.uid()::uuid
+          AND m.role = 'admin'
+          AND m.status = 'active'
         )
       )
     )
@@ -351,7 +388,7 @@ CREATE POLICY records_write ON records
     )
   );
 
-CREATE POLICY records_update_owner ON records
+CREATE POLICY records_update ON records
   FOR UPDATE
   USING (owner_id = auth.uid()::uuid);
 
@@ -359,7 +396,17 @@ CREATE POLICY records_delete_owner ON records
   FOR DELETE
   USING (owner_id = auth.uid()::uuid);
 
--- RESPONSES: Same visibility as their parent record + container
+-- RESPONSES: Same visibility as their parent record + container.
+--
+-- (responses_read existed on the live project as just
+-- `EXISTS (SELECT 1 FROM records WHERE records.id = responses.record_id)`
+-- -- true for any response whose parent record exists at all, i.e. every
+-- response on the platform was readable by anyone. responses_insert
+-- likewise had no membership check. Fixed live via
+-- fix_tenant_isolation_rls_drift; this file's admin-or-active-member OR
+-- below was also its own latent bug -- any active member, not just an
+-- admin, satisfied it -- now AND'd correctly, and a container-creator
+-- branch was added to mirror records_owner_visibility above.)
 CREATE POLICY responses_read ON responses
   FOR SELECT
   USING (
@@ -370,7 +417,7 @@ CREATE POLICY responses_read ON responses
       AND (
         c.visibility = 'public'
         OR (
-          c.visibility = 'org'
+          c.visibility IN ('org', 'restricted')
           AND EXISTS (
             SELECT 1 FROM memberships
             WHERE memberships.org_id = c.org_id
@@ -382,11 +429,13 @@ CREATE POLICY responses_read ON responses
           c.visibility = 'owner'
           AND (
             r.owner_id = auth.uid()::uuid
+            OR c.created_by = auth.uid()::uuid
             OR EXISTS (
               SELECT 1 FROM memberships
               WHERE memberships.org_id = c.org_id
               AND memberships.user_id = auth.uid()::uuid
-              AND (memberships.role = 'admin' OR memberships.status = 'active')
+              AND memberships.role = 'admin'
+              AND memberships.status = 'active'
             )
           )
         )
