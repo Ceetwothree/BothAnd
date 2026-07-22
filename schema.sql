@@ -350,6 +350,10 @@ CREATE POLICY records_update_owner ON records
   FOR UPDATE
   USING (owner_id = auth.uid()::uuid);
 
+CREATE POLICY records_delete_owner ON records
+  FOR DELETE
+  USING (owner_id = auth.uid()::uuid);
+
 -- RESPONSES: Same visibility as their parent record + container
 CREATE POLICY responses_read ON responses
   FOR SELECT
@@ -494,6 +498,47 @@ $$;
 
 REVOKE ALL ON FUNCTION join_org_by_invite_code(TEXT) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION join_org_by_invite_code(TEXT) TO authenticated;
+
+-- Self-service leave: soft-deactivates the caller's own membership. Blocks
+-- the sole remaining active admin from leaving, since that would strand
+-- the org with no one able to manage it.
+CREATE OR REPLACE FUNCTION leave_org(p_org_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid()::uuid;
+  v_role org_role;
+  v_active_admin_count INT;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  SELECT role INTO v_role FROM memberships
+  WHERE org_id = p_org_id AND user_id = v_uid AND status = 'active';
+
+  IF v_role IS NULL THEN
+    RAISE EXCEPTION 'Not an active member of this organization';
+  END IF;
+
+  IF v_role = 'admin' THEN
+    SELECT count(*) INTO v_active_admin_count FROM memberships
+    WHERE org_id = p_org_id AND role = 'admin' AND status = 'active';
+
+    IF v_active_admin_count <= 1 THEN
+      RAISE EXCEPTION 'You are the only admin -- promote someone else before leaving';
+    END IF;
+  END IF;
+
+  UPDATE memberships SET status = 'inactive' WHERE org_id = p_org_id AND user_id = v_uid;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION leave_org(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION leave_org(UUID) TO authenticated;
 
 -- Lets /join/[code] show "You're invited to join X" before the user
 -- commits, without exposing invite_code itself or needing a listable RLS
