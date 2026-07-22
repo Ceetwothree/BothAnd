@@ -38,3 +38,23 @@
 h1, h2, h3, h4 {
   font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
 }
+
+/* react-datepicker ships unstyled-for-us defaults -- these just make its
+   input match the plain text/number inputs already used everywhere else
+   (full width, same padding), not a full re-theme of the calendar popup. */
+.bothand-datepicker {
+  display: block;
+  width: 100%;
+}
+.bothand-datepicker .react-datepicker-wrapper,
+.bothand-datepicker .react-datepicker__input-container {
+  display: block;
+  width: 100%;
+}
+.bothand-datepicker input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  font: inherit;
+  box-sizing: border-box;
+}
