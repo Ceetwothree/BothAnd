@@ -114,6 +114,14 @@ CREATE TABLE records (
   -- Only meaningful for kind='item' -- same nullable, kind-specific-column
   -- pattern as starts_at/ends_at above.
   photo_url TEXT,
+  -- category is a fixed set (meaningful filtering needs consistent
+  -- values, unlike free text); location is free text since orgs' physical
+  -- layouts vary too much for a fixed list. Also kind='item' only.
+  category TEXT CHECK (category IS NULL OR category IN (
+    'Furniture', 'Clothing', 'Electronics', 'Household', 'Food', 'Tools',
+    'Kids & Baby', 'Books & Media', 'Other'
+  )),
+  location TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

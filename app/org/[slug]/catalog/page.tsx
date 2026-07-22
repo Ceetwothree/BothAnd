@@ -3,8 +3,9 @@
 // Known limitations (see PR description for the full list):
 // - No quantity/stock tracking -- each listing is a single claimable item.
 //   A real "movements" table for stock counts is a separate future migration.
-// - No search/filter -- still a plain (now gridded) list of everything in
-//   the container.
+// - Search/filter is client-side over the already-fetched list (matches
+//   the app's existing "fetch everything, render" pattern -- no pagination
+//   exists anywhere yet), not a server-side query.
 // - records_update RLS only lets the *owner* of a record change its
 //   state, so a claim can't flip the item to "claimed" directly -- claiming
 //   inserts a `claim` response (a request), and the owner decides and marks
@@ -21,6 +22,7 @@ import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
 import { canManageContainers, canPost } from '@/lib/permissions'
+import { CATALOG_CATEGORIES } from '@/lib/catalog'
 
 interface Claim {
   id: string
@@ -34,6 +36,8 @@ interface ItemRecord {
   body: string | null
   state: string
   photo_url: string | null
+  category: string | null
+  location: string | null
   created_at: string
   owner_id: string
   users: { email: string } | null
@@ -50,10 +54,15 @@ export default function CatalogPage() {
   const [settingUp, setSettingUp] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  const [category, setCategory] = useState('')
+  const [location, setLocation] = useState('')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [creating, setCreating] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
 
   const canSetUp = canManageContainers(role)
   const canList = canPost(role)
@@ -69,7 +78,7 @@ export default function CatalogPage() {
       .from('records')
       .select(
         `
-        id, title, body, state, photo_url, created_at, owner_id,
+        id, title, body, state, photo_url, category, location, created_at, owner_id,
         users!owner_id(email),
         responses(id, kind, user_id, users!user_id(email))
         `
@@ -143,12 +152,16 @@ export default function CatalogPage() {
         body,
         state: 'open',
         photo_url: photoUrl,
+        category: category || null,
+        location: location || null,
       })
 
       if (createError) throw createError
 
       setTitle('')
       setBody('')
+      setCategory('')
+      setLocation('')
       setPhotoFile(null)
       await fetchItems(container.id)
     } catch (err: any) {
@@ -206,6 +219,15 @@ export default function CatalogPage() {
     }
   }
 
+  const query = searchQuery.trim().toLowerCase()
+  const filteredItems = items.filter((item) => {
+    if (categoryFilter && item.category !== categoryFilter) return false
+    if (!query) return true
+    return [item.title, item.body, item.location].some((field) =>
+      field?.toLowerCase().includes(query)
+    )
+  })
+
   if (loadingContainer) return <p>Loading...</p>
 
   if (!container) {
@@ -258,6 +280,37 @@ export default function CatalogPage() {
                 style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
               />
             </div>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="category">Category (optional):</label>
+                <br />
+                <select
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+                >
+                  <option value="">No category</option>
+                  {CATALOG_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="location">Location (optional):</label>
+                <br />
+                <input
+                  id="location"
+                  type="text"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="e.g. Back office, Warehouse B"
+                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+                />
+              </div>
+            </div>
             <div style={{ marginBottom: '1rem' }}>
               <label htmlFor="photo">Photo (optional):</label>
               <br />
@@ -293,10 +346,36 @@ export default function CatalogPage() {
       )}
 
       <section>
+        {items.length > 0 && (
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.25rem' }}>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search title, description, location..."
+              style={{ flex: 2, padding: '0.5rem' }}
+            />
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={{ flex: 1, padding: '0.5rem' }}
+            >
+              <option value="">All categories</option>
+              {CATALOG_CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {loadingItems ? (
           <p>Loading items...</p>
         ) : items.length === 0 ? (
           <p>No items yet.</p>
+        ) : filteredItems.length === 0 ? (
+          <p>No items match your search.</p>
         ) : (
           <div
             style={{
@@ -305,7 +384,7 @@ export default function CatalogPage() {
               gap: '1.25rem',
             }}
           >
-            {items.map((item) => {
+            {filteredItems.map((item) => {
               const isOwner = user && item.owner_id === user.id
               const myClaim = user ? item.claims.find((c) => c.user_id === user.id) : undefined
 
@@ -344,6 +423,13 @@ export default function CatalogPage() {
                     <h3 style={{ margin: '0 0 0.25rem' }}>
                       {item.title} <small>({item.state})</small>
                     </h3>
+                    {(item.category || item.location) && (
+                      <p style={{ margin: '0 0 0.5rem' }}>
+                        {item.category && <small>{item.category}</small>}
+                        {item.category && item.location && <small> &middot; </small>}
+                        {item.location && <small>{item.location}</small>}
+                      </p>
+                    )}
                     <p style={{ flex: 1 }}>{item.body}</p>
                     <small>
                       Posted by {item.users?.email || 'Unknown'} on{' '}

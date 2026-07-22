@@ -52,7 +52,7 @@ creating roughly 1,460 individual events a year by hand.
 |---|---|---|
 | First-come-first-served claiming | Claim/withdraw a `claim` response | Have it |
 | Photos per listing | ~~Have it~~ — one photo per listing, uploaded to a new `catalog-photos` storage bucket, member-scoped (not admin-only, unlike org branding) | No |
-| Search/filter by category, keyword, location | None | Yes |
+| Search/filter by category, keyword, location | ~~Have it~~ — keyword search (title/body/location) + a fixed-category dropdown, filtered client-side over the already-fetched list | No |
 | Gallery/grid view | ~~Have it~~ — CSS grid of photo cards, replacing the plain list | No |
 | In-app messaging (poster ↔ claimant) | Only via visible email on claim | Yes |
 | Favorites / saved items | None | Yes |
@@ -107,11 +107,12 @@ pressure); Course competes loosely with free-tier Google Classroom.
 1. ~~Quick, high-leverage fixes~~ — done: forgot-password flow, Board
    comments wired up, self-service leave-org, edit/delete own post.
 2. ~~Events rework~~ — done: real date/time field, waitlist,
-   recurring/templated shift generation, attendance/hours logged. Only
-   walk-in attendance (someone who didn't RSVP) and automated
+   recurring/templated shift generation, attendance/hours logged
+   (including walk-in self-check-in via QR). Only automated
    reminders/calendar view remain, and are low-priority.
-3. **Catalog rework**: photos, search/filter, gallery view, quantity
-   tracking — sets up the cross-org trade feature too.
+3. **Catalog rework** — photos, gallery view, and search/filter are done.
+   Quantity/stock tracking is what's left, and sets up the cross-org trade
+   feature too.
 4. **Cross-org trade** (the aspirational feature) — once Catalog itself is
    solid, since it's built on the same data model.
 5. Journal/Course polish, as time allows — lower urgency.
