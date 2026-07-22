@@ -11,6 +11,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
@@ -53,15 +55,6 @@ function rsvpStatus(ev: EventRecord, userId: string | undefined) {
   }
 }
 
-// datetime-local gives a value with no timezone offset, which the Date
-// constructor treats as local time per the ES spec -- toISOString() then
-// converts that to the UTC instant actually stored.
-function localInputToIso(value: string): string | null {
-  if (!value) return null
-  const d = new Date(value)
-  return isNaN(d.getTime()) ? null : d.toISOString()
-}
-
 export default function EventsPage() {
   const { org, role } = useOrg()
   const { container, loading: loadingContainer, setContainer } = useContainer(org.id, 'events')
@@ -72,8 +65,8 @@ export default function EventsPage() {
   const [settingUp, setSettingUp] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
-  const [startsAt, setStartsAt] = useState('')
-  const [endsAt, setEndsAt] = useState('')
+  const [startsAt, setStartsAt] = useState<Date | null>(null)
+  const [endsAt, setEndsAt] = useState<Date | null>(null)
   const [capacity, setCapacity] = useState('')
   const [creating, setCreating] = useState(false)
   const [rsvpingId, setRsvpingId] = useState<string | null>(null)
@@ -144,17 +137,18 @@ export default function EventsPage() {
     if (!container || !user) return
     setError('')
 
-    const startsAtIso = localInputToIso(startsAt)
-    if (!title || !body || !startsAtIso) {
+    if (!title || !body || !startsAt) {
       setError('Title, description, and start time are required')
       return
     }
 
-    const endsAtIso = localInputToIso(endsAt)
-    if (endsAtIso && endsAtIso <= startsAtIso) {
+    if (endsAt && endsAt <= startsAt) {
       setError('End time must be after the start time')
       return
     }
+
+    const startsAtIso = startsAt.toISOString()
+    const endsAtIso = endsAt ? endsAt.toISOString() : null
 
     setCreating(true)
     try {
@@ -174,8 +168,8 @@ export default function EventsPage() {
 
       setTitle('')
       setBody('')
-      setStartsAt('')
-      setEndsAt('')
+      setStartsAt(null)
+      setEndsAt(null)
       setCapacity('')
       await fetchEvents(container.id)
     } catch (err: any) {
@@ -274,23 +268,33 @@ export default function EventsPage() {
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
               <div style={{ flex: 1 }}>
                 <label htmlFor="starts_at">Starts:</label>
-                <input
+                <br />
+                <DatePicker
                   id="starts_at"
-                  type="datetime-local"
-                  value={startsAt}
-                  onChange={(e) => setStartsAt(e.target.value)}
+                  selected={startsAt}
+                  onChange={(date: Date | null) => setStartsAt(date)}
+                  showTimeSelect
+                  timeIntervals={15}
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  placeholderText="Pick a date and time"
+                  wrapperClassName="bothand-datepicker"
                   required
-                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
                 />
               </div>
               <div style={{ flex: 1 }}>
                 <label htmlFor="ends_at">Ends (optional):</label>
-                <input
+                <br />
+                <DatePicker
                   id="ends_at"
-                  type="datetime-local"
-                  value={endsAt}
-                  onChange={(e) => setEndsAt(e.target.value)}
-                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+                  selected={endsAt}
+                  onChange={(date: Date | null) => setEndsAt(date)}
+                  showTimeSelect
+                  timeIntervals={15}
+                  dateFormat="MMMM d, yyyy h:mm aa"
+                  placeholderText="Pick a date and time"
+                  minDate={startsAt ?? undefined}
+                  wrapperClassName="bothand-datepicker"
+                  isClearable
                 />
               </div>
             </div>
