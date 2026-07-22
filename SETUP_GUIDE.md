@@ -118,13 +118,13 @@ npm run dev
 
 ### Invite People
 
-Share your org's invite link (from Settings) or, if the org is public, just point people at `/browse`. Either way they land on `/join/[code]` or the org's own page, sign up if needed, and join.
+Share your org's invite link (from Settings) — or the QR code rendered right next to it, for printing/displaying — or, if the org is public, just point people at `/browse`. Either way they land on `/join/[code]` or the org's own page, sign up if needed, and join.
 
 ### Test the Flow
 
 1. **Public view** (anyone, logged out): visit `/` → see the BothAnd marketing homepage; visit `/browse` → see public orgs
-2. **Member view** (logged in): create a post on the org's Board, RSVP to an Event, claim a Catalog item
-3. **Admin view**: visit `/org/[slug]/members` to change roles or deactivate a member; visit `/org/[slug]/settings` for branding/mission/social/invite-link management
+2. **Member view** (logged in): create a post on the org's Board and comment on one; RSVP to an Event; claim a Catalog item (try one with quantity > 1); submit a Course lesson
+3. **Admin/staff view**: visit `/org/[slug]/members` to change roles or deactivate a member; visit `/org/[slug]/settings` for branding/mission/social/invite-link management; on Events, mark attendance/hours or reveal an event's check-in QR code; on Course, leave feedback on a submission
 
 ## Schema Mapping (For Your Reference)
 
@@ -132,19 +132,21 @@ Share your org's invite link (from Settings) or, if the org is public, just poin
 |---------|--------|-------|
 | Orgs, branding, mission/about/social | orgs | `create_org_with_admin()` is the only way an org gets an admin |
 | Membership & roles | memberships | admin > staff > member, plus active/inactive status |
-| Board posts | records (kind=post) + responses (kind=comment) | Visibility follows the container |
-| Events | records (kind=event) + responses (kind=rsvp) | RSVP is delete-able (un-RSVP) |
-| Catalog | records (kind=item) + responses (kind=claim) | No quantity tracking yet — one listing, one claim |
+| Board posts | records (kind=post) + responses (kind=comment) | Visibility follows the container; owner can edit/delete their own post |
+| Events | records (kind=event) + responses (kind=rsvp, kind=attended) | Real `starts_at`/`ends_at`; capacity + derived waitlist; recurring generation bulk-inserts independent event rows; attendance/hours via `attended` responses (`qty` = hours), staff-marked or self-check-in via QR |
+| Catalog | records (kind=item, `photo_url`/`category`/`location`/`quantity`) + responses (kind=claim, `qty` = amount claimed) | Gallery grid, search/filter, quantity-aware claiming |
 | Journal | records (kind=entry), container visibility=owner | Per-user, plus the container's creator and org admins |
-| Course | records (kind=lesson) + responses (kind=submission) | Submission is delete-able (resubmit) |
+| Course | records (kind=lesson) + responses (kind=submission, `feedback` set by the author) | Submission is delete-able (resubmit); progress shown as "N of M submitted" |
 | Permissions | RLS policies + `lib/permissions.ts` | Row-Level Security handles isolation; the lib file centralizes role checks in the UI |
 
 ## What's Ready for Later
 
-Known gaps, not yet built:
-- **Catalog rework** — a real gallery/search/item-detail experience and quantity tracking, replacing today's plain claimable-item list
-- **Cross-org trading** — letting orgs trade surplus donations with each other (see the About page's origin story for why this matters)
-- **Database-level role gating** — `records_write` RLS currently lets any active member create a record regardless of role; today's "staff-only" actions are UI-level checks only
+Known gaps, not yet built (see `ROADMAP.md` for the full picture and current priority order):
+- **Cross-org trading** — letting orgs trade surplus donations with each other (see the About page's origin story for why this matters). The next major feature, deliberately not started without a design conversation first since it's inherently cross-tenant.
+- **Catalog: messaging, favorites, notifications** — the rest of the Catalog rework's original wishlist; photos, gallery view, search/filter, and quantity tracking are all done
+- **Board: categories/tags, search, notifications, admin pinning, threaded comments**
+- **Journal & Course polish** — rich text/photos/search for Journal, rich lesson content for Course
+- **Database-level role gating** — `records_write`/`containers_admin_write` RLS currently let any active member create a record/container regardless of role; today's "staff-only" actions are UI-level checks only
 - **Real contact/social links on the marketing site itself** — the footer intentionally has none yet rather than shipping dead placeholder links
 
 ## Security Notes
@@ -177,7 +179,7 @@ Known gaps, not yet built:
 ## Next Steps
 
 1. **Get feedback from real users** — can they sign up, create/join an org, and use its workflows?
-2. **Rework Catalog** — gallery/search/detail experience, quantity tracking
+2. **Scope cross-org trade** — a real design pass (what does "trade" mean concretely, what's the minimum RLS change) before writing any code, per `ROADMAP.md`
 3. **Add real contact/social links** once you have actual accounts to point them at
 4. **Revisit database-level role gating** for staff-only actions
 

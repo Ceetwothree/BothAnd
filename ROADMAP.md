@@ -1,5 +1,37 @@
 # BothAnd — Feature Roadmap
 
+## Status as of July 2026 (project shelved here for now)
+
+Shipped this pass: the entire "quick fixes" batch, the entire Events
+rework, the entire Catalog rework, Course progress tracking + feedback,
+camera capture for photo uploads, and QR codes for both org invites and
+event self-check-in. Along the way, a real tenant-isolation bug was found
+and fixed live (see `SETUP_GUIDE.md`'s Security Notes) — worth reading
+before making further RLS changes, since it's also a reminder that
+`get_advisors` alone isn't sufficient verification for this class of bug.
+
+**Not started, and the natural next steps in priority order:**
+1. **Cross-org trade** — the aspirational feature the whole project is
+   ultimately oriented around (see the About page's origin story). Needs
+   a real design conversation before writing any code, not a silent
+   build — it's inherently cross-tenant, and RLS mistakes here would be
+   exactly the shape of bug just fixed. Start by asking: what does "trade"
+   actually mean (transfer a listing's ownership between orgs? a shared
+   cross-org catalog view? something else?), and what's the minimum RLS
+   change that supports it without loosening anything unrelated.
+2. Catalog's remaining gaps (in-app messaging, favorites, notifications)
+   — lower priority, but notifications specifically double as the
+   mechanism cross-org trade would need, so worth considering together.
+3. Journal & Course polish (rich text/photos/tags/search for Journal,
+   rich lesson content for Course) — lowest urgency, no competitive
+   pressure driving it.
+4. Board: categories/tags, search, notifications, admin pinning,
+   comment threading — never scoped into a suggested-order slot, still
+   open.
+5. Database-level role gating — `records_write`/`containers_admin_write`
+   RLS still allow any active member to write regardless of role; today's
+   role gates (e.g. "staff can create events") are UI-level checks only.
+
 ## Thesis
 
 The long-run bet: an organization running BothAnd shouldn't have a real reason
