@@ -84,10 +84,9 @@ bothand/
 ├── app/
 │   ├── layout.tsx, globals.css  # Root layout + BothAnd's own site theme tokens
 │   ├── page.tsx, about/page.tsx # Marketing homepage + About page
-│   ├── login/, signup/, browse/, orgs/new/, join/[code]/
+│   ├── login/, signup/, forgot-password/, reset-password/, browse/, orgs/new/, join/[code]/
 │   ├── components/         # Shared marketing chrome + org branding/switcher
-│   ├── org/[slug]/         # Board, Events, Catalog, Journal, Course, About, Members, Settings
-│   └── api/forum/...       # Forum post/comment routes
+│   └── org/[slug]/         # Board, Events (+ check-in QR), Catalog, Journal, Course, About, Members, Settings
 ```
 
 ## Advisor Signup Link

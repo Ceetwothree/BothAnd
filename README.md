@@ -13,15 +13,17 @@ BothAnd's own marketing site (the landing page and its About page) is deliberate
 ```
 ├── schema.sql                    # PostgreSQL schema + RLS + RPC functions (run in Supabase)
 ├── SETUP_GUIDE.md                # Step-by-step deployment guide
+├── ROADMAP.md                     # Feature roadmap, competitive gaps, and current status
 ├── package.json                  # Dependencies
 ├── .env.example                  # Environment variables template
 ├── next.config.js                # Next.js config
 ├── lib/
 │   ├── supabase.ts                # Supabase client
-│   ├── orgs.ts                    # Org data/RPC helpers (useUserOrgs, useOrgBySlug, createOrg, member management, ...)
+│   ├── orgs.ts                    # Org data/RPC helpers (useUserOrgs, useOrgBySlug, createOrg, member management, leaveOrg, ...)
 │   ├── containers.ts              # Per-workflow container helpers (useContainer, ensureContainer)
 │   ├── permissions.ts             # Centralized role checks (admin > staff > member)
-│   └── branding.ts                # Banner template + accent color constants (per-org)
+│   ├── branding.ts                # Banner template + accent color constants (per-org)
+│   └── catalog.ts                 # Fixed category list for Catalog listings
 │
 ├── app/
 │   ├── globals.css                # BothAnd's own site theme tokens (--site-*), separate from per-org branding
@@ -30,21 +32,23 @@ BothAnd's own marketing site (the landing page and its About page) is deliberate
 │   ├── browse/page.tsx            # Public org directory
 │   ├── orgs/new/page.tsx          # Create an organization
 │   ├── join/[code]/page.tsx       # Private-org invite link flow (shows the org's mission statement)
-│   ├── login/page.tsx, signup/page.tsx
+│   ├── login/, signup/, forgot-password/, reset-password/
 │   ├── components/
 │   │   ├── SiteChrome.tsx         # Shared header/footer/styles for BothAnd's own pages ("/" and "/about")
 │   │   ├── Banner.tsx             # Org branding banner (3 layouts x 6 accent colors)
 │   │   └── OrgSwitcher.tsx        # Header org switcher (org-scoped pages)
 │   └── org/[slug]/
 │       ├── layout.tsx             # Resolves org by slug, provides OrgContext, workflow nav
-│       ├── page.tsx               # Board (forum) + mission statement
+│       ├── page.tsx               # Board (forum): posts, comments, edit/delete own post
 │       ├── about/page.tsx         # Org's own About page (about text + social/contact links)
-│       ├── events/page.tsx        # Events + RSVP
-│       ├── catalog/page.tsx       # Catalog/marketplace (claim-based, no quantity tracking yet)
+│       ├── events/
+│       │   ├── page.tsx           # Events: date/time, waitlist, recurring generation, attendance/hours, check-in QR
+│       │   └── [eventId]/checkin/page.tsx  # Landing page for an event's self-check-in QR code
+│       ├── catalog/page.tsx       # Catalog: photos (camera capture on mobile), gallery grid, search/filter, quantity tracking
 │       ├── journal/page.tsx       # Private-ish per-user entries
-│       ├── course/page.tsx        # Lessons + submissions
+│       ├── course/page.tsx        # Lessons + submissions, progress tracking, author feedback
 │       ├── members/page.tsx       # Admin: view members, change roles, deactivate/reactivate
-│       └── settings/page.tsx      # Branding, mission/about text, social links, public/private toggle, invite link
+│       └── settings/page.tsx      # Branding, mission/about text, social links, public/private toggle, invite link + QR, leave org
 ```
 
 ## Quick Start
@@ -72,19 +76,22 @@ BothAnd deliberately keeps two separate visual identities, and they're not meant
 - **SECURITY DEFINER functions for anything that needs to bypass RLS safely** → org creation and invite-code joins are atomic and can't be reached by a raw insert (see `create_org_with_admin`, `join_org_by_invite_code` in `schema.sql`)
 - **Centralized permission checks** (`lib/permissions.ts`) → one small file to update as new role distinctions are needed, not scattered `role === 'admin'` checks
 - **No seed data** → a raw `INSERT` into `orgs` bypasses `create_org_with_admin()`, the only path that also creates an admin membership. An earlier seeded org learned this the hard way (orphaned, no admin, had to be deleted) -- create any demo org through the normal signup flow instead.
+- **Kind-specific columns stay nullable on the shared table, not split into per-kind tables** → `starts_at`/`ends_at`/`photo_url`/`category`/`location`/`quantity` on `records`, `qty`/`feedback` on `responses`, are all only meaningful for one `kind` value each. Reusing `qty` for both Catalog claim amounts and Events attendance hours is the same pattern, not a coincidence.
+- **RLS changes get verified by simulating a real request, not by re-reading the policy SQL** → `SET LOCAL ROLE authenticated; SET LOCAL request.jwt.claim.sub = '<uuid>';` inside a transaction, then attempt the read/write an actual non-member or non-privileged member would attempt, then roll back or clean up. This is how the tenant-isolation drift (see Security, below) was actually caught and actually confirmed fixed -- `get_advisors` alone did not and would not have caught it.
 
 ## Workflows
 
-All five container kinds have a UI, plus org-level identity (mission statement, about page, social/contact links) and member management. Known caveats, worth knowing before relying on them:
+All five container kinds have a UI, plus org-level identity (mission statement, about page, social/contact links) and member management. Board, Events, and Catalog have each been through a full competitive-parity rework (see `ROADMAP.md`) — comments, edit/delete, real date/time, waitlist, recurring shift generation, attendance/hours tracking, self-check-in via QR, photos, gallery view, search/filter, and quantity tracking are all built. Course has progress tracking and author feedback on submissions. Known caveats, worth knowing before relying on them:
 
-- **Role gating is UI-level only in places** — `records_write` RLS currently allows any active member to create a record regardless of role, so "staff can create events" etc. isn't enforced at the database layer yet.
-- **Catalog has no quantity/stock tracking** — each listing is a single claimable item, not "N in stock." A real gallery/search/detail UI and quantity tracking are a planned rework, not built yet.
-- **No trading between organizations yet** — the vision (see the About page's origin story) includes letting orgs trade surplus with each other; today, Catalog/inventory is entirely per-org.
+- **Role gating is UI-level only in places** — `records_write`/`containers_admin_write` RLS currently allow any active member to create a record/container regardless of role, so "staff can create events" etc. isn't enforced at the database layer yet.
+- **No trading between organizations yet** — the vision (see the About page's origin story) includes letting orgs trade surplus with each other; today, Catalog/inventory is entirely per-org. This is the next major planned feature, but deliberately not started without a design pass first, since it's inherently cross-tenant (see `ROADMAP.md`'s status section).
+- **Board has no categories/tags/search/notifications/pinning; Journal and Course lack rich text, photos, and search** — none of these are urgent, see `ROADMAP.md`.
 
 ## Key Files to Know
 
 - **schema.sql** — Source of truth for data model, RLS, and RPC functions
-- **SETUP_GUIDE.md** — Deployment instructions
+- **SETUP_GUIDE.md** — Deployment instructions + security notes, including how the tenant-isolation bug was found and fixed
+- **ROADMAP.md** — Feature gaps vs. competing tools, what's shipped, current status, and suggested order for what's next
 - **lib/permissions.ts** — Where role logic lives; extend here, not inline
 - **lib/branding.ts** — Per-org accent colors/banner templates (distinct from `app/globals.css`'s site-wide tokens)
 - **app/components/SiteChrome.tsx** — Shared chrome for BothAnd's own marketing pages
@@ -98,6 +105,8 @@ RLS enforces tenancy at the database layer:
 - Private orgs are indistinguishable from nonexistent orgs to non-members (RLS returns nothing either way)
 - Org admins can read (not write) the profile of anyone who's a member of an org they administer — otherwise a member-management UI would show every member's email as null except the viewer's own
 - All isolation rules live in `schema.sql`, not in application code
+
+**A real tenant-isolation bug was found and fixed in July 2026** — the live Supabase project's actual RLS policies on `orgs`/`containers`/`records`/`responses` had quietly drifted from what `schema.sql` documented, and were considerably more permissive (one `orgs` policy was `USING (true)`, making every org's invite code world-readable with no login). `get_advisors` never flagged it. See `SETUP_GUIDE.md`'s Security Notes for the full account and how it was actually caught — the short version: verify RLS by simulating a real request as a non-member, not by re-reading the policy text.
 
 ## Questions?
 
