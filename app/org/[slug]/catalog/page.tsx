@@ -3,7 +3,7 @@
 // Known limitations (see PR description for the full list):
 // - No quantity/stock tracking -- each listing is a single claimable item.
 //   A real "movements" table for stock counts is a separate future migration.
-// - records_update_owner RLS only lets the *owner* of a record change its
+// - records_update RLS only lets the *owner* of a record change its
 //   state, so a claim can't flip the item to "claimed" directly -- claiming
 //   inserts a `claim` response (a request), and the owner decides and marks
 //   the item claimed/fulfilled themselves. Admin override would need a new

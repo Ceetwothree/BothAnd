@@ -1,12 +1,12 @@
 // app/org/[slug]/journal/page.tsx
 //
 // Privacy note: the journal container is created with visibility='owner'.
-// Per records_read RLS, that means each entry is visible to its own
-// owner, to the container's creator (whoever ran "Set up Journal"), and to
-// any org admin -- not strictly private-per-user. That's the existing
-// schema's definition of "owner" visibility, not something new introduced
-// here. No client-side filtering needed: the query below returns exactly
-// what RLS allows, nothing more.
+// Per the records_owner/records_owner_visibility RLS policies, that means
+// each entry is visible to its own owner, to the container's creator
+// (whoever ran "Set up Journal"), and to any org admin -- not strictly
+// private-per-user. That's the existing schema's definition of "owner"
+// visibility, not something new introduced here. No client-side filtering
+// needed: the query below returns exactly what RLS allows, nothing more.
 'use client'
 
 import { useEffect, useState } from 'react'
