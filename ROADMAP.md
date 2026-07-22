@@ -36,7 +36,7 @@ Not exhaustive — a snapshot to work from, not a permanent ranking.
 | Waitlist when full | ~~Have it~~ — derived from RSVP order vs. capacity, no schema needed; confirmed spots auto-promote from the waitlist on cancellation | No |
 | RSVP / cancel | Insert/delete a `rsvp` response | Have it |
 | Automated reminders | None | Yes |
-| Attendance/check-in + hours logged (grant reporting) | None | Yes |
+| Attendance/check-in + hours logged (grant reporting) | ~~Have it~~ — staff/admin marks confirmed RSVPs attended with hours (a new `attended` response kind, hours in the pre-existing unused `qty` column); per-event total shown. No walk-in/add-attendee flow yet for someone who didn't RSVP | Partial |
 | Group sign-up | None | Yes |
 | Calendar view, save-as-template | None | Yes |
 
@@ -89,10 +89,10 @@ pressure); Course competes loosely with free-tier Google Classroom.
 
 1. ~~Quick, high-leverage fixes~~ — done: forgot-password flow, Board
    comments wired up, self-service leave-org, edit/delete own post.
-2. **Events rework** — the biggest lift, closest to the actual motivating
-   use case. Real date/time field, waitlist, and recurring/templated shift
-   generation are done; attendance/check-in + hours logged (grant
-   reporting) is the one gap still open here.
+2. ~~Events rework~~ — done: real date/time field, waitlist,
+   recurring/templated shift generation, attendance/hours logged. Only
+   walk-in attendance (someone who didn't RSVP) and automated
+   reminders/calendar view remain, and are low-priority.
 3. **Catalog rework**: photos, search/filter, gallery view, quantity
    tracking — sets up the cross-org trade feature too.
 4. **Cross-org trade** (the aspirational feature) — once Catalog itself is
