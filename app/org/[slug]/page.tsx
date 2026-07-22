@@ -21,6 +21,14 @@ export default function OrgHomePage() {
   const [error, setError] = useState('')
   const [joining, setJoining] = useState(false)
 
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editBody, setEditBody] = useState('')
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({})
+  const [commentingId, setCommentingId] = useState<string | null>(null)
+
   const isMember = canPost(role)
 
   const fetchPosts = async (cId: string) => {
@@ -33,14 +41,24 @@ export default function OrgHomePage() {
         body,
         created_at,
         owner_id,
-        users!owner_id(email)
+        users!owner_id(email),
+        responses(id, kind, body, created_at, user_id, users!user_id(email))
         `
       )
       .eq('container_id', cId)
       .eq('kind', 'post')
       .order('created_at', { ascending: false })
 
-    if (!error && data) setPosts(data)
+    if (!error && data) {
+      setPosts(
+        data.map((post: any) => ({
+          ...post,
+          comments: (post.responses ?? [])
+            .filter((r: any) => r.kind === 'comment')
+            .sort((a: any, b: any) => a.created_at.localeCompare(b.created_at)),
+        }))
+      )
+    }
   }
 
   useEffect(() => {
@@ -100,6 +118,76 @@ export default function OrgHomePage() {
       setError(err.message || 'Failed to create post')
     } finally {
       setPosting(false)
+    }
+  }
+
+  const startEdit = (post: any) => {
+    setEditingId(post.id)
+    setEditTitle(post.title)
+    setEditBody(post.body)
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditTitle('')
+    setEditBody('')
+  }
+
+  const handleSaveEdit = async (postId: string) => {
+    setSavingEdit(true)
+    setError('')
+    try {
+      const { error: updateError } = await supabase
+        .from('records')
+        .update({ title: editTitle, body: editBody })
+        .eq('id', postId)
+
+      if (updateError) throw updateError
+      cancelEdit()
+      await fetchPosts(containerId)
+    } catch (err: any) {
+      setError(err.message || 'Failed to save changes')
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const handleDeletePost = async (postId: string) => {
+    if (!window.confirm('Delete this post? This cannot be undone.')) return
+    setDeletingId(postId)
+    setError('')
+    try {
+      const { error: deleteError } = await supabase.from('records').delete().eq('id', postId)
+      if (deleteError) throw deleteError
+      await fetchPosts(containerId)
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete post')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const handleAddComment = async (postId: string) => {
+    const draft = (commentDrafts[postId] ?? '').trim()
+    if (!draft || !user) return
+
+    setCommentingId(postId)
+    setError('')
+    try {
+      const { error: commentError } = await supabase.from('responses').insert({
+        record_id: postId,
+        user_id: user.id,
+        kind: 'comment',
+        body: draft,
+      })
+
+      if (commentError) throw commentError
+      setCommentDrafts((prev) => ({ ...prev, [postId]: '' }))
+      await fetchPosts(containerId)
+    } catch (err: any) {
+      setError(err.message || 'Failed to add comment')
+    } finally {
+      setCommentingId(null)
     }
   }
 
@@ -220,12 +308,84 @@ export default function OrgHomePage() {
                     borderRadius: '4px',
                   }}
                 >
-                  <h3>{post.title}</h3>
-                  <p>{post.body}</p>
+                  {editingId === post.id ? (
+                    <div style={{ marginBottom: '1rem' }}>
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem' }}
+                      />
+                      <textarea
+                        value={editBody}
+                        onChange={(e) => setEditBody(e.target.value)}
+                        rows={4}
+                        style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem' }}
+                      />
+                      <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit}>
+                        {savingEdit ? 'Saving...' : 'Save'}
+                      </button>{' '}
+                      <button type="button" onClick={cancelEdit} disabled={savingEdit}>
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <h3>{post.title}</h3>
+                      <p>{post.body}</p>
+                    </>
+                  )}
                   <small>
                     Posted by {post.users?.email || 'Unknown'} on{' '}
                     {new Date(post.created_at).toLocaleDateString()}
                   </small>
+                  {user && post.owner_id === user.id && editingId !== post.id && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <button type="button" onClick={() => startEdit(post)}>
+                        Edit
+                      </button>{' '}
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePost(post.id)}
+                        disabled={deletingId === post.id}
+                      >
+                        {deletingId === post.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #f0f0f0' }}>
+                    {(post.comments ?? []).map((comment: any) => (
+                      <div key={comment.id} style={{ marginBottom: '0.5rem' }}>
+                        <p style={{ margin: 0 }}>{comment.body}</p>
+                        <small>
+                          {comment.users?.email || 'Unknown'} on{' '}
+                          {new Date(comment.created_at).toLocaleDateString()}
+                        </small>
+                      </div>
+                    ))}
+
+                    {isMember && (
+                      <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="text"
+                          placeholder="Add a comment..."
+                          value={commentDrafts[post.id] ?? ''}
+                          onChange={(e) =>
+                            setCommentDrafts((prev) => ({ ...prev, [post.id]: e.target.value }))
+                          }
+                          style={{ flex: 1, padding: '0.5rem' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleAddComment(post.id)}
+                          disabled={commentingId === post.id || !(commentDrafts[post.id] ?? '').trim()}
+                        >
+                          {commentingId === post.id ? 'Posting...' : 'Comment'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </article>
               ))}
             </div>

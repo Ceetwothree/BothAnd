@@ -8,11 +8,28 @@ import Banner from '../../../components/Banner'
 import { ACCENT_COLORS, AccentColorId, BANNER_TEMPLATES, BannerTemplateId } from '@/lib/branding'
 import { useOrg } from '../OrgContext'
 import { canManageOrgSettings } from '@/lib/permissions'
-import { getInviteCode, regenerateInviteCode } from '@/lib/orgs'
+import { useRouter } from 'next/navigation'
+import { getInviteCode, regenerateInviteCode, leaveOrg } from '@/lib/orgs'
 
 export default function OrgSettingsPage() {
   const { org, role, refreshOrg } = useOrg()
   const canManage = canManageOrgSettings(role)
+  const router = useRouter()
+  const [leaving, setLeaving] = useState(false)
+  const [leaveError, setLeaveError] = useState('')
+
+  const handleLeave = async () => {
+    if (!window.confirm(`Leave ${org.name}? You'll need a new invite to rejoin.`)) return
+    setLeaveError('')
+    setLeaving(true)
+    try {
+      await leaveOrg(org.id)
+      router.push('/')
+    } catch (err: any) {
+      setLeaveError(err.message || 'Failed to leave organization')
+      setLeaving(false)
+    }
+  }
 
   const [logoUrl, setLogoUrl] = useState(org.logo_url)
   const [bannerTemplate, setBannerTemplate] = useState(org.banner_template as BannerTemplateId)
@@ -45,6 +62,16 @@ export default function OrgSettingsPage() {
         <h1>Settings</h1>
         <p>Only org admins can edit settings.</p>
         <Link href={`/org/${org.slug}`}>Back to {org.name}</Link>
+
+        <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #ddd' }}>
+          <h2>Leave organization</h2>
+          {leaveError && <div style={{ color: 'red', marginBottom: '1rem' }}>{leaveError}</div>}
+          <p>
+            <button type="button" onClick={handleLeave} disabled={leaving}>
+              {leaving ? 'Leaving...' : `Leave ${org.name}`}
+            </button>
+          </p>
+        </section>
       </div>
     )
   }
@@ -338,6 +365,15 @@ export default function OrgSettingsPage() {
         <p>
           <small>Regenerating invalidates the old link immediately.</small>
         </p>
+      </section>
+
+      <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #ddd' }}>
+        <h2>Danger zone</h2>
+        {leaveError && <div style={{ color: 'red', marginBottom: '1rem' }}>{leaveError}</div>}
+        <p>Leaving as the sole admin isn&apos;t allowed -- promote someone else first.</p>
+        <button type="button" onClick={handleLeave} disabled={leaving}>
+          {leaving ? 'Leaving...' : `Leave ${org.name}`}
+        </button>
       </section>
     </div>
   )

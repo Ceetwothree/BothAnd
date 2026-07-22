@@ -21,8 +21,8 @@ Not exhaustive — a snapshot to work from, not a permanent ranking.
 | Typical feature | BothAnd today | Gap |
 |---|---|---|
 | Rich text / markdown, images | Plain text title + body | Yes |
-| Threaded comments | **Backend already exists** (`app/api/forum/comments/route.ts`, full GET/POST, RLS-aware) but no UI calls it | Wire up the UI — cheapest, highest-leverage gap on this whole list |
-| Edit/delete your own post | Not possible once posted | Yes |
+| Comments (flat, not threaded) | ~~Have it~~ — wired up directly against Supabase, not the old dead `app/api/forum` routes | Threading still missing |
+| Edit/delete your own post | ~~Have it~~ | No |
 | Categories/tags, search | None | Yes |
 | Notifications (new post/reply) | None | Yes |
 | Pinning by admin | None | Yes |
@@ -75,17 +75,20 @@ pressure); Course competes loosely with free-tier Google Classroom.
 ## Small UX holes (found opportunistically, not from competitor research)
 
 - ~~Logout doesn't update the UI after signing out~~ — fixed.
-- **No "forgot password" flow** — `app/login/page.tsx` has no reset link at
-  all; Supabase Auth supports it, nothing in the UI calls it.
-- **No self-service "leave an org"** — a member can't remove themselves;
-  only an admin can deactivate them via Members.
-- **No edit/delete on your own Board post** once it's posted (same fix as
-  the Board gap above, effectively).
+- ~~No "forgot password" flow~~ — fixed (`/forgot-password` + `/reset-password`).
+- ~~No self-service "leave an org"~~ — fixed (`leave_org()` RPC + a
+  "Leave organization" control on the org's Settings page, for both admins
+  and regular members; blocks the sole remaining admin from leaving).
+- ~~No edit/delete on your own Board post~~ — fixed, along with wiring up
+  Board comments (the old `app/api/forum/*` routes turned out to be dead
+  and broken — `createServerClient()` never carried the caller's session,
+  so the POST route always 401'd. Comments now go through the same direct
+  Supabase-client pattern already used everywhere else, not that API).
 
 ## Suggested order
 
-1. **Quick, high-leverage fixes**: forgot-password flow, wire up Board
-   comments (backend exists), self-service leave-org, edit/delete own post.
+1. ~~Quick, high-leverage fixes~~ — done: forgot-password flow, Board
+   comments wired up, self-service leave-org, edit/delete own post.
 2. **Events rework**: recurring/templated shifts, real date/time field,
    waitlist, attendance/hours tracking — the biggest lift, closest to the
    actual motivating use case.

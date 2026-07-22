@@ -82,6 +82,9 @@ function LoginForm() {
         </button>
       </form>
       <p style={{ marginTop: '1rem' }}>
+        <Link href="/forgot-password">Forgot your password?</Link>
+      </p>
+      <p style={{ marginTop: '1rem' }}>
         Don&apos;t have an account?{' '}
         <Link href={`/signup${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`}>
           Sign up

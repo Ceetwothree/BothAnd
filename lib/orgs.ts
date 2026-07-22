@@ -258,3 +258,10 @@ export async function setMemberStatus(
   const { error } = await supabase.from('memberships').update({ status }).eq('id', membershipId)
   if (error) throw error
 }
+
+// Soft-deactivates the caller's own membership. Throws (with a message safe
+// to show the user) if they're the org's only active admin.
+export async function leaveOrg(orgId: string): Promise<void> {
+  const { error } = await supabase.rpc('leave_org', { p_org_id: orgId })
+  if (error) throw error
+}
