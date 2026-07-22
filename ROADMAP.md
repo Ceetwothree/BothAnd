@@ -57,11 +57,12 @@ creating roughly 1,460 individual events a year by hand.
 | In-app messaging (poster ↔ claimant) | Only via visible email on claim | Yes |
 | Favorites / saved items | None | Yes |
 | Notifications ("tell me when X appears") | None | Yes — also the mechanism cross-org trade would eventually need |
-| Quantity/stock tracking | Single claimable item per listing | Yes |
+| Quantity/stock tracking | ~~Have it~~ — a listing has a quantity (default 1, matching old single-item behavior); each claim requests a specific amount (reuses `responses.qty`, same column Events attendance hours use); a card shows "X of Y available" and disables claiming once fully spoken for | No |
 
-Confirms the earlier call: Catalog needs a real rework (gallery/search/detail,
-not a text list), and it's structurally the same gap that stands between here
-and the aspirational cross-org trade feature.
+Every gap on this list except in-app messaging, favorites, and
+notifications is now closed. Those three (plus the mechanism they'd share)
+are the natural next step, and also what the aspirational cross-org trade
+feature would be built on.
 
 ## Journal & Course — lower competitive pressure
 
@@ -110,9 +111,11 @@ pressure); Course competes loosely with free-tier Google Classroom.
    recurring/templated shift generation, attendance/hours logged
    (including walk-in self-check-in via QR). Only automated
    reminders/calendar view remain, and are low-priority.
-3. **Catalog rework** — photos, gallery view, and search/filter are done.
-   Quantity/stock tracking is what's left, and sets up the cross-org trade
-   feature too.
-4. **Cross-org trade** (the aspirational feature) — once Catalog itself is
-   solid, since it's built on the same data model.
+3. ~~Catalog rework~~ — done: photos, gallery view, search/filter,
+   quantity/stock tracking. In-app messaging, favorites, and
+   notifications remain (lower priority, not part of the original
+   rework's scope) -- notifications specifically is also the mechanism
+   cross-org trade would need.
+4. **Cross-org trade** (the aspirational feature) — now that Catalog
+   itself is solid, since it's built on the same data model.
 5. Journal/Course polish, as time allows — lower urgency.
