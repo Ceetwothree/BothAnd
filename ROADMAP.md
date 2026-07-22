@@ -31,7 +31,7 @@ Not exhaustive — a snapshot to work from, not a permanent ranking.
 
 | Typical feature | BothAnd today | Gap |
 |---|---|---|
-| Recurring/templated shift generation (bulk-create a season) | One-off events only, created individually | Yes — the widest gap on this list |
+| Recurring/templated shift generation (bulk-create a season) | ~~Have it~~ — pick weekdays (or Every day / Weekly quick-picks) + a repeat-until date, capped at 366 occurrences, bulk-inserted as independent event records (no series/template concept, no schema change) | No |
 | Dedicated date/time field | ~~Have it~~ — `starts_at`/`ends_at` columns, sorted soonest-first | No |
 | Waitlist when full | ~~Have it~~ — derived from RSVP order vs. capacity, no schema needed; confirmed spots auto-promote from the waitlist on cancellation | No |
 | RSVP / cancel | Insert/delete a `rsvp` response | Have it |
@@ -89,9 +89,10 @@ pressure); Course competes loosely with free-tier Google Classroom.
 
 1. ~~Quick, high-leverage fixes~~ — done: forgot-password flow, Board
    comments wired up, self-service leave-org, edit/delete own post.
-2. **Events rework**: recurring/templated shifts, real date/time field,
-   waitlist, attendance/hours tracking — the biggest lift, closest to the
-   actual motivating use case.
+2. **Events rework** — the biggest lift, closest to the actual motivating
+   use case. Real date/time field, waitlist, and recurring/templated shift
+   generation are done; attendance/check-in + hours logged (grant
+   reporting) is the one gap still open here.
 3. **Catalog rework**: photos, search/filter, gallery view, quantity
    tracking — sets up the cross-org trade feature too.
 4. **Cross-org trade** (the aspirational feature) — once Catalog itself is
