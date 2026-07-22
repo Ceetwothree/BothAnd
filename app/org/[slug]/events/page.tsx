@@ -8,17 +8,21 @@
 //   created_at are "confirmed," the rest are "waitlisted." Cancelling a
 //   confirmed spot promotes the next-oldest waitlisted RSVP automatically,
 //   since it's just a recompute -- no promotion bookkeeping needed.
-// - Attendance (for grant reporting) only covers confirmed RSVPs -- no
-//   walk-in/add-attendee flow for someone who shows up without RSVPing.
-//   It's a staff/admin action on someone else's behalf, backed by the
-//   responses_attendance_* RLS policies (self-scoped responses_write etc.
-//   don't apply since the marker isn't the response's own user_id). Hours
-//   are stored in the pre-existing, previously-unused `responses.qty`.
+// - Attendance (for grant reporting): staff/admin can mark anyone on this
+//   page attended, on their behalf -- backed by the responses_attendance_*
+//   RLS policies (self-scoped responses_write etc. don't apply since the
+//   marker isn't the response's own user_id). Hours are stored in the
+//   pre-existing, previously-unused `responses.qty`. A member can also
+//   self-check-in via the QR code below (no new RLS needed -- responses_write
+//   already permits inserting your own 'attended' response), which is how a
+//   walk-in who never RSVPed still shows up in the Attendance list below,
+//   flagged "(walk-in, no RSVP)" -- staff can still edit or remove it.
 'use client'
 
 import { useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import { QRCodeSVG } from 'qrcode.react'
 import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
@@ -113,6 +117,9 @@ export default function EventsPage() {
   // mid-request, and the current hours-input draft for each.
   const [attendanceSaving, setAttendanceSaving] = useState<string | null>(null)
   const [hoursDrafts, setHoursDrafts] = useState<Record<string, string>>({})
+
+  // Which event's check-in QR code is currently shown, if any.
+  const [showingCheckinFor, setShowingCheckinFor] = useState<string | null>(null)
 
   const [repeating, setRepeating] = useState(false)
   const [repeatWeekdays, setRepeatWeekdays] = useState<number[]>([])
@@ -545,6 +552,17 @@ export default function EventsPage() {
               rsvpStatus(ev, user?.id)
             const attendanceByUser = new Map(ev.attendance.map((a) => [a.user_id, a]))
             const totalHours = ev.attendance.reduce((sum, a) => sum + (a.qty ?? 0), 0)
+            // Confirmed RSVPs, plus anyone who self-checked-in via the QR
+            // code without ever RSVPing -- otherwise a walk-in's check-in
+            // would exist in the database but never show up for staff to
+            // review, edit hours on, or remove.
+            const confirmedIds = new Set(confirmed.map((r) => r.user_id))
+            const attendeeRows = [
+              ...confirmed.map((r) => ({ user_id: r.user_id, email: r.users?.email ?? null })),
+              ...ev.attendance
+                .filter((a) => !confirmedIds.has(a.user_id))
+                .map((a) => ({ user_id: a.user_id, email: a.users?.email ?? null })),
+            ]
 
             return (
               <article
@@ -595,7 +613,45 @@ export default function EventsPage() {
                   )}
                 </div>
 
-                {canCreate && confirmed.length > 0 && (
+                {canCreate && (
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowingCheckinFor(showingCheckinFor === ev.id ? null : ev.id)}
+                    >
+                      {showingCheckinFor === ev.id ? 'Hide check-in QR' : 'Show check-in QR'}
+                    </button>
+                    {showingCheckinFor === ev.id && (
+                      <div style={{ marginTop: '0.75rem' }}>
+                        <div
+                          style={{
+                            padding: '1rem',
+                            backgroundColor: '#fff',
+                            display: 'inline-block',
+                          }}
+                        >
+                          <QRCodeSVG
+                            value={
+                              typeof window !== 'undefined'
+                                ? `${window.location.origin}/org/${org.slug}/events/${ev.id}/checkin`
+                                : ''
+                            }
+                            size={160}
+                          />
+                        </div>
+                        <p>
+                          <small>
+                            Display or print this at the event. Scanning it lets anyone logged in and
+                            a member of {org.name} check themselves in -- self-reported, not
+                            staff-verified. Review or correct entries below afterward if needed.
+                          </small>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {canCreate && attendeeRows.length > 0 && (
                   <div
                     style={{
                       marginTop: '1rem',
@@ -605,14 +661,14 @@ export default function EventsPage() {
                   >
                     <strong>Attendance</strong>
                     {totalHours > 0 && <span> &middot; {totalHours} hour{totalHours === 1 ? '' : 's'} logged</span>}
-                    {confirmed.map((rsvp) => {
-                      const attended = attendanceByUser.get(rsvp.user_id)
-                      const key = `${ev.id}:${attended ? attended.id : rsvp.user_id}`
+                    {attendeeRows.map((attendee) => {
+                      const attended = attendanceByUser.get(attendee.user_id)
+                      const key = `${ev.id}:${attended ? attended.id : attendee.user_id}`
                       const draft = hoursDrafts[key] ?? (attended ? String(attended.qty ?? '') : defaultHours(ev))
 
                       return (
                         <div
-                          key={rsvp.user_id}
+                          key={attendee.user_id}
                           style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}
                         >
                           <label style={{ flex: 1 }}>
@@ -622,14 +678,15 @@ export default function EventsPage() {
                               disabled={attendanceSaving === key}
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  handleMarkAttended(ev.id, rsvp.user_id, draft)
+                                  handleMarkAttended(ev.id, attendee.user_id, draft)
                                 } else if (attended) {
                                   handleUnmarkAttended(ev.id, attended.id)
                                 }
                               }}
                               style={{ marginRight: '0.5rem' }}
                             />
-                            {rsvp.users?.email || 'Unknown'}
+                            {attendee.email || 'Unknown'}
+                            {!confirmedIds.has(attendee.user_id) && <small> (walk-in, no RSVP)</small>}
                           </label>
                           {attended && (
                             <>

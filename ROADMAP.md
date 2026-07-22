@@ -90,9 +90,17 @@ pressure); Course competes loosely with free-tier Google Classroom.
   of an intermediate "Take Photo or Library" sheet.
 - ~~No QR code for the org invite link~~ — fixed: Settings now renders one
   (`qrcode.react`) next to the invite URL, for printing/displaying so
-  people can scan to join instead of typing a link. Event check-in via QR
-  is a separate, not-yet-decided design question (self-check-in vs.
-  staff-scans) — not built yet.
+  people can scan to join instead of typing a link.
+- ~~No QR check-in for events~~ — fixed: staff can reveal a per-event QR
+  code on the Events page linking to `/org/[slug]/events/[id]/checkin`;
+  any active member who scans it can self-check-in, no staff bottleneck.
+  Chosen model is self-check-in (self-reported, not staff-verified) --
+  needed no new RLS at all, since `responses_write` already permitted
+  inserting your own response of any kind, `attended` included. A
+  self-check-in from someone who never RSVPed now shows up in the
+  existing staff-facing Attendance list flagged "(walk-in, no RSVP)", so
+  staff can still edit hours on or remove any entry, self-checked-in or
+  not, via the `responses_attendance_*` policies already in place.
 
 ## Suggested order
 
