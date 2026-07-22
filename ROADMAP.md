@@ -70,8 +70,12 @@ Journal is an internal utility (no real external "premium alternative"
 pressure); Course competes loosely with free-tier Google Classroom.
 
 - **Journal**: missing rich text/photos, tags, search. Not urgent.
-- **Course**: missing progress tracking (flagged as a known gap when it
-  shipped), grading/feedback on submissions, rich lesson content.
+- **Course**: ~~progress tracking~~ — done ("N of M lessons submitted");
+  ~~grading/feedback on submissions~~ — done (course author leaves
+  feedback per submission via a new `responses.feedback` column and
+  `responses_submission_feedback` RLS policy, same staff/admin-acting-on-
+  someone-else's-response shape as the Events attendance policies). Rich
+  lesson content remains, not urgent.
 
 ## Small UX holes (found opportunistically, not from competitor research)
 

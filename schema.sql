@@ -146,6 +146,10 @@ CREATE TABLE responses (
   kind response_kind NOT NULL,
   body TEXT,
   qty INT,
+  -- Only meaningful for kind='submission' -- set by the course author
+  -- (staff/admin), not the submission's own user_id, via
+  -- responses_submission_feedback below.
+  feedback TEXT,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -523,6 +527,24 @@ CREATE POLICY responses_attendance_delete ON responses
   FOR DELETE
   USING (
     kind = 'attended'
+    AND EXISTS (
+      SELECT 1 FROM records r
+      JOIN containers c ON c.id = r.container_id
+      JOIN memberships m ON m.org_id = c.org_id
+      WHERE r.id = responses.record_id
+      AND m.user_id = auth.uid()::uuid
+      AND m.role IN ('admin', 'staff')
+      AND m.status = 'active'
+    )
+  );
+
+-- A course author (staff/admin) isn't the submission's own user_id
+-- either, so this is a separate permissive policy the same way the
+-- attendance ones above are, scoped to canManageCourse's staff+ rank.
+CREATE POLICY responses_submission_feedback ON responses
+  FOR UPDATE
+  USING (
+    kind = 'submission'
     AND EXISTS (
       SELECT 1 FROM records r
       JOIN containers c ON c.id = r.container_id
