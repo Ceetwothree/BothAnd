@@ -153,7 +153,7 @@ Known gaps, not yet built:
 2. **Never expose the service role key** — only use the anon key (already in env template)
 3. **Test tenancy before adding real data** — verify RLS blocks cross-org reads before onboarding real orgs
 4. **Email is soft-verified** — Supabase Auth requires clicking a confirmation link. You can disable this in Supabase settings (Auth → Providers → Email) if that's not the flow you want.
-5. **Leaked password protection is off by default** — worth enabling in Supabase Auth settings before real users sign up (flagged by Supabase's own security advisor)
+5. **Leaked password protection is off, and staying off for now** — it's a paid-tier Supabase feature, not available on the free plan this project is built to run on. Flagged by Supabase's own security advisor, but a deliberate no-go rather than an oversight -- revisit if/when the project outgrows the free tier and a paid plan is already justified for other reasons.
 
 ## Troubleshooting
 

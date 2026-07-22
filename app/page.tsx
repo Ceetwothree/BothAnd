@@ -23,6 +23,15 @@ export default function Home() {
     checkUser()
   }, [])
 
+  // signOut() clears the Supabase session but doesn't touch this
+  // component's own `user` state -- without a hard reload, the page kept
+  // showing the logged-in header and "Your organizations" until a manual
+  // refresh, even though the session was actually gone.
+  const handleLogOut = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
   // "/" is the one stable home -- clicking the BothAnd wordmark from
   // anywhere always lands here, logged in or not. No auto-redirect into an
   // org: that used to strand signed-in visitors with no way back to this
@@ -44,7 +53,7 @@ export default function Home() {
               <Link href="/orgs/new" className="lp-nav-link">
                 Create org
               </Link>
-              <button onClick={() => supabase.auth.signOut()} className="lp-btn lp-btn-ghost">
+              <button onClick={handleLogOut} className="lp-btn lp-btn-ghost">
                 Log out
               </button>
             </>
