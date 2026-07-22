@@ -10,6 +10,7 @@ import { useOrg } from '../OrgContext'
 import { canManageOrgSettings } from '@/lib/permissions'
 import { useRouter } from 'next/navigation'
 import { getInviteCode, regenerateInviteCode, leaveOrg } from '@/lib/orgs'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function OrgSettingsPage() {
   const { org, role, refreshOrg } = useOrg()
@@ -351,19 +352,27 @@ export default function OrgSettingsPage() {
         <h2>Invite link</h2>
         <p>Share this link to let someone join {org.name}.</p>
         {inviteUrl && (
-          <input
-            type="text"
-            readOnly
-            value={inviteUrl}
-            onClick={(e) => (e.target as HTMLInputElement).select()}
-            style={{ width: '100%', padding: '0.5rem', marginBottom: '0.75rem' }}
-          />
+          <>
+            <input
+              type="text"
+              readOnly
+              value={inviteUrl}
+              onClick={(e) => (e.target as HTMLInputElement).select()}
+              style={{ width: '100%', padding: '0.5rem', marginBottom: '0.75rem' }}
+            />
+            <div style={{ padding: '1rem', backgroundColor: '#fff', display: 'inline-block', marginBottom: '0.75rem' }}>
+              <QRCodeSVG value={inviteUrl} size={160} />
+            </div>
+            <p>
+              <small>Print or display this QR code -- scanning it takes someone straight to the invite link above.</small>
+            </p>
+          </>
         )}
         <button type="button" onClick={handleRegenerate} disabled={regenerating}>
           {regenerating ? 'Regenerating...' : 'Regenerate link'}
         </button>
         <p>
-          <small>Regenerating invalidates the old link immediately.</small>
+          <small>Regenerating invalidates the old link immediately -- the QR code above updates with it.</small>
         </p>
       </section>
 

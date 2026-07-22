@@ -84,6 +84,15 @@ pressure); Course competes loosely with free-tier Google Classroom.
   and broken — `createServerClient()` never carried the caller's session,
   so the POST route always 401'd. Comments now go through the same direct
   Supabase-client pattern already used everywhere else, not that API).
+- ~~Catalog photo upload didn't go straight to the camera on a phone~~ —
+  fixed with the `capture="environment"` attribute on the file input, so
+  someone doing inventory on an iPhone gets the camera immediately instead
+  of an intermediate "Take Photo or Library" sheet.
+- ~~No QR code for the org invite link~~ — fixed: Settings now renders one
+  (`qrcode.react`) next to the invite URL, for printing/displaying so
+  people can scan to join instead of typing a link. Event check-in via QR
+  is a separate, not-yet-decided design question (self-check-in vs.
+  staff-scans) — not built yet.
 
 ## Suggested order
 

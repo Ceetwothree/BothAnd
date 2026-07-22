@@ -265,9 +265,14 @@ export default function CatalogPage() {
                 id="photo"
                 type="file"
                 accept="image/*"
+                capture="environment"
                 onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
                 style={{ marginTop: '0.5rem' }}
               />
+              <p style={{ margin: '0.35rem 0 0' }}>
+                <small>On a phone, this opens the camera directly (rear-facing) for a quick inventory
+                shot. Browsers without a camera fall back to a normal file picker.</small>
+              </p>
             </div>
             <button
               type="submit"
