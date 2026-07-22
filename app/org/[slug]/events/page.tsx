@@ -38,6 +38,25 @@ interface EventRecord {
   rsvps: RsvpResponse[]
 }
 
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MAX_OCCURRENCES = 366
+
+// Walks day-by-day from firstStart through repeatUntil (inclusive),
+// keeping firstStart's time-of-day on every occurrence, and keeps only the
+// days whose weekday is in `weekdays`. No series/template is stored --
+// each occurrence just becomes its own independent event record.
+function generateOccurrenceDates(firstStart: Date, repeatUntil: Date, weekdays: number[]): Date[] {
+  const dates: Date[] = []
+  const cursor = new Date(firstStart)
+  while (cursor <= repeatUntil) {
+    if (weekdays.includes(cursor.getDay())) {
+      dates.push(new Date(cursor))
+    }
+    cursor.setDate(cursor.getDate() + 1)
+  }
+  return dates
+}
+
 function rsvpStatus(ev: EventRecord, userId: string | undefined) {
   const ordered = [...ev.rsvps].sort((a, b) => a.created_at.localeCompare(b.created_at))
   const confirmed = ev.capacity != null ? ordered.slice(0, ev.capacity) : ordered
@@ -71,6 +90,20 @@ export default function EventsPage() {
   const [creating, setCreating] = useState(false)
   const [rsvpingId, setRsvpingId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  const [repeating, setRepeating] = useState(false)
+  const [repeatWeekdays, setRepeatWeekdays] = useState<number[]>([])
+  const [repeatUntil, setRepeatUntil] = useState<Date | null>(null)
+
+  const occurrences =
+    repeating && startsAt && repeatUntil && repeatWeekdays.length > 0
+      ? generateOccurrenceDates(startsAt, repeatUntil, repeatWeekdays)
+      : []
+  const tooManyOccurrences = occurrences.length > MAX_OCCURRENCES
+
+  const toggleWeekday = (day: number) => {
+    setRepeatWeekdays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]))
+  }
 
   const canSetUp = canManageContainers(role)
   const canCreate = canManageEvents(role)
@@ -147,12 +180,29 @@ export default function EventsPage() {
       return
     }
 
-    const startsAtIso = startsAt.toISOString()
-    const endsAtIso = endsAt ? endsAt.toISOString() : null
+    if (repeating) {
+      if (!repeatUntil || repeatWeekdays.length === 0) {
+        setError('Pick at least one day of the week and a repeat-until date')
+        return
+      }
+      if (occurrences.length === 0) {
+        setError('No occurrences fall in that range -- check the repeat-until date')
+        return
+      }
+      if (tooManyOccurrences) {
+        setError(
+          `That would create ${occurrences.length} events -- narrow the date range to ${MAX_OCCURRENCES} or fewer`
+        )
+        return
+      }
+    }
+
+    const durationMs = endsAt ? endsAt.getTime() - startsAt.getTime() : null
+    const dates = repeating ? occurrences : [startsAt]
 
     setCreating(true)
     try {
-      const { error: createError } = await supabase.from('records').insert({
+      const rows = dates.map((d) => ({
         container_id: container.id,
         kind: 'event',
         owner_id: user.id,
@@ -160,9 +210,11 @@ export default function EventsPage() {
         body,
         state: 'open',
         capacity: capacity ? parseInt(capacity, 10) : null,
-        starts_at: startsAtIso,
-        ends_at: endsAtIso,
-      })
+        starts_at: d.toISOString(),
+        ends_at: durationMs != null ? new Date(d.getTime() + durationMs).toISOString() : null,
+      }))
+
+      const { error: createError } = await supabase.from('records').insert(rows)
 
       if (createError) throw createError
 
@@ -171,6 +223,9 @@ export default function EventsPage() {
       setStartsAt(null)
       setEndsAt(null)
       setCapacity('')
+      setRepeating(false)
+      setRepeatWeekdays([])
+      setRepeatUntil(null)
       await fetchEvents(container.id)
     } catch (err: any) {
       setError(err.message || 'Failed to create event')
@@ -309,9 +364,80 @@ export default function EventsPage() {
                 style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
               />
             </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={repeating}
+                  onChange={(e) => setRepeating(e.target.checked)}
+                  style={{ marginRight: '0.5rem' }}
+                />
+                Repeat this event (generate a season of shifts)
+              </label>
+            </div>
+
+            {repeating && (
+              <div
+                style={{
+                  marginBottom: '1rem',
+                  padding: '1rem',
+                  border: '1px solid #eee',
+                  borderRadius: '4px',
+                }}
+              >
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <button type="button" onClick={() => setRepeatWeekdays([0, 1, 2, 3, 4, 5, 6])}>
+                    Every day
+                  </button>{' '}
+                  <button
+                    type="button"
+                    onClick={() => setRepeatWeekdays(startsAt ? [startsAt.getDay()] : [])}
+                    disabled={!startsAt}
+                  >
+                    Weekly (same day)
+                  </button>
+                </div>
+
+                <div style={{ marginBottom: '0.75rem' }}>
+                  {WEEKDAY_LABELS.map((label, day) => (
+                    <label key={day} style={{ marginRight: '0.75rem' }}>
+                      <input
+                        type="checkbox"
+                        checked={repeatWeekdays.includes(day)}
+                        onChange={() => toggleWeekday(day)}
+                        style={{ marginRight: '0.25rem' }}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+
+                <label htmlFor="repeat_until">Repeat until:</label>
+                <br />
+                <DatePicker
+                  id="repeat_until"
+                  selected={repeatUntil}
+                  onChange={(date: Date | null) => setRepeatUntil(date)}
+                  minDate={startsAt ?? undefined}
+                  dateFormat="MMMM d, yyyy"
+                  placeholderText="Pick an end date"
+                  wrapperClassName="bothand-datepicker"
+                />
+
+                <p style={{ marginTop: '0.75rem' }}>
+                  {occurrences.length === 0
+                    ? 'Pick a start time, at least one day of the week, and a repeat-until date.'
+                    : tooManyOccurrences
+                      ? `That's ${occurrences.length} events -- narrow the range to ${MAX_OCCURRENCES} or fewer.`
+                      : `This will create ${occurrences.length} event${occurrences.length === 1 ? '' : 's'}, one per matching day through ${repeatUntil?.toLocaleDateString()}.`}
+                </p>
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={creating}
+              disabled={creating || (repeating && (occurrences.length === 0 || tooManyOccurrences))}
               style={{
                 padding: '0.75rem 1.5rem',
                 backgroundColor: '#0070f3',
@@ -321,7 +447,11 @@ export default function EventsPage() {
                 cursor: creating ? 'not-allowed' : 'pointer',
               }}
             >
-              {creating ? 'Creating...' : 'Create event'}
+              {creating
+                ? 'Creating...'
+                : repeating && occurrences.length > 0
+                  ? `Create ${occurrences.length} event${occurrences.length === 1 ? '' : 's'}`
+                  : 'Create event'}
             </button>
           </form>
         </section>
