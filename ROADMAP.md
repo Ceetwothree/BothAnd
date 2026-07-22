@@ -51,9 +51,9 @@ creating roughly 1,460 individual events a year by hand.
 | Typical feature | BothAnd today | Gap |
 |---|---|---|
 | First-come-first-served claiming | Claim/withdraw a `claim` response | Have it |
-| Photos per listing | Text-only | Yes |
+| Photos per listing | ~~Have it~~ — one photo per listing, uploaded to a new `catalog-photos` storage bucket, member-scoped (not admin-only, unlike org branding) | No |
 | Search/filter by category, keyword, location | None | Yes |
-| Gallery/grid view | Plain list | Yes |
+| Gallery/grid view | ~~Have it~~ — CSS grid of photo cards, replacing the plain list | No |
 | In-app messaging (poster ↔ claimant) | Only via visible email on claim | Yes |
 | Favorites / saved items | None | Yes |
 | Notifications ("tell me when X appears") | None | Yes — also the mechanism cross-org trade would eventually need |

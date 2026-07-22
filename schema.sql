@@ -111,6 +111,9 @@ CREATE TABLE records (
   -- posts/items/events/entries/lessons.
   starts_at TIMESTAMPTZ,
   ends_at TIMESTAMPTZ,
+  -- Only meaningful for kind='item' -- same nullable, kind-specific-column
+  -- pattern as starts_at/ends_at above.
+  photo_url TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -699,6 +702,41 @@ CREATE POLICY logos_admin_update ON storage.objects
       WHERE memberships.org_id = (storage.foldername(name))[1]::uuid
       AND memberships.user_id = auth.uid()::uuid
       AND memberships.role = 'admin'
+      AND memberships.status = 'active'
+    )
+  );
+
+-- ============================================
+-- STORAGE (Catalog item photos)
+-- ============================================
+-- Same "{org_id}/{filename}" convention as logos, but upload/replace is
+-- scoped to any active member rather than admins only -- listing a Catalog
+-- item is a member-level action (canPost), not org-branding.
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('catalog-photos', 'catalog-photos', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY catalog_photos_member_upload ON storage.objects
+  FOR INSERT
+  WITH CHECK (
+    bucket_id = 'catalog-photos'
+    AND EXISTS (
+      SELECT 1 FROM memberships
+      WHERE memberships.org_id = (storage.foldername(name))[1]::uuid
+      AND memberships.user_id = auth.uid()::uuid
+      AND memberships.status = 'active'
+    )
+  );
+
+CREATE POLICY catalog_photos_member_update ON storage.objects
+  FOR UPDATE
+  USING (
+    bucket_id = 'catalog-photos'
+    AND EXISTS (
+      SELECT 1 FROM memberships
+      WHERE memberships.org_id = (storage.foldername(name))[1]::uuid
+      AND memberships.user_id = auth.uid()::uuid
       AND memberships.status = 'active'
     )
   );
