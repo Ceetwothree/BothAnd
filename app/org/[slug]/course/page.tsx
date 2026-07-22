@@ -1,11 +1,20 @@
 // app/org/[slug]/course/page.tsx
 //
-// Kept deliberately minimal, per tonight's roadmap notes: no progression
-// tracking beyond "have I submitted for this lesson yet" -- lowest-demand
-// workflow of the four, not worth over-building sight unseen.
-//
 // "Editing" a submission is delete-then-resubmit rather than an inline
 // edit form -- simpler, and reuses the same insert flow.
+//
+// Progress tracking is just "N of M lessons submitted" -- no per-lesson
+// completion state beyond having submitted, matching the workflow's
+// original minimal scope.
+//
+// Feedback: the course author isn't the submission's own user_id, so
+// responses_update_own (self-scoped) doesn't cover setting it --
+// responses_submission_feedback (staff/admin, same shape as the
+// responses_attendance_* policies) does. Reads need no RLS change: any
+// active member can already read any other member's responses in an
+// org-visibility container (course containers are always 'org'), so the
+// author view below just queries every submission per lesson instead of
+// filtering to the viewer's own, same data, wider client-side query.
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -14,12 +23,21 @@ import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
 import { canManageContainers, canManageCourse, canPost } from '@/lib/permissions'
 
+interface Submission {
+  id: string
+  user_id: string
+  body: string
+  feedback: string | null
+  users: { email: string } | null
+}
+
 interface LessonRecord {
   id: string
   title: string | null
   body: string | null
   created_at: string
-  mySubmission: { id: string; body: string } | null
+  submissions: Submission[]
+  mySubmission: Submission | null
 }
 
 export default function CoursePage() {
@@ -35,6 +53,8 @@ export default function CoursePage() {
   const [creating, setCreating] = useState(false)
   const [submissionDrafts, setSubmissionDrafts] = useState<Record<string, string>>({})
   const [submittingId, setSubmittingId] = useState<string | null>(null)
+  const [feedbackDrafts, setFeedbackDrafts] = useState<Record<string, string>>({})
+  const [savingFeedbackId, setSavingFeedbackId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   const canSetUp = canManageContainers(role)
@@ -53,7 +73,7 @@ export default function CoursePage() {
       .select(
         `
         id, title, body, created_at,
-        responses(id, kind, user_id, body)
+        responses(id, kind, user_id, body, feedback, users!user_id(email))
         `
       )
       .eq('container_id', containerId)
@@ -62,10 +82,9 @@ export default function CoursePage() {
 
     if (!fetchError && data) {
       const rows = (data as any[]).map((r) => {
-        const mine = (r.responses ?? []).find(
-          (resp: any) => resp.kind === 'submission' && resp.user_id === user?.id
-        )
-        return { ...r, mySubmission: mine ? { id: mine.id, body: mine.body } : null }
+        const submissions = (r.responses ?? []).filter((resp: any) => resp.kind === 'submission')
+        const mine = submissions.find((resp: any) => resp.user_id === user?.id)
+        return { ...r, submissions, mySubmission: mine ?? null }
       })
       setLessons(rows)
     }
@@ -162,6 +181,23 @@ export default function CoursePage() {
     }
   }
 
+  const handleSaveFeedback = async (submissionId: string, feedback: string) => {
+    setSavingFeedbackId(submissionId)
+    setError('')
+    try {
+      const { error: updateError } = await supabase
+        .from('responses')
+        .update({ feedback: feedback || null })
+        .eq('id', submissionId)
+      if (updateError) throw updateError
+      if (container) await fetchLessons(container.id)
+    } catch (err: any) {
+      setError(err.message || 'Failed to save feedback')
+    } finally {
+      setSavingFeedbackId(null)
+    }
+  }
+
   if (loadingContainer) return <p>Loading...</p>
 
   if (!container) {
@@ -233,6 +269,13 @@ export default function CoursePage() {
       )}
 
       <section>
+        {!loadingLessons && canSubmit && lessons.length > 0 && (
+          <p>
+            <strong>Your progress:</strong>{' '}
+            {lessons.filter((l) => l.mySubmission).length} of {lessons.length} lessons submitted
+          </p>
+        )}
+
         {loadingLessons ? (
           <p>Loading lessons...</p>
         ) : lessons.length === 0 ? (
@@ -258,6 +301,11 @@ export default function CoursePage() {
                       <p>
                         <strong>Your submission:</strong> {lesson.mySubmission.body}
                       </p>
+                      {lesson.mySubmission.feedback && (
+                        <p>
+                          <strong>Feedback:</strong> {lesson.mySubmission.feedback}
+                        </p>
+                      )}
                       <button
                         onClick={() => handleDeleteSubmission(lesson.id, lesson.mySubmission!.id)}
                         disabled={submittingId === lesson.id}
@@ -284,6 +332,38 @@ export default function CoursePage() {
                       </button>
                     </>
                   )}
+                </div>
+              )}
+
+              {canAuthor && lesson.submissions.length > 0 && (
+                <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #f0f0f0' }}>
+                  <strong>Submissions ({lesson.submissions.length})</strong>
+                  {lesson.submissions.map((sub) => {
+                    const draft = feedbackDrafts[sub.id] ?? sub.feedback ?? ''
+
+                    return (
+                      <div key={sub.id} style={{ marginTop: '0.5rem' }}>
+                        <p style={{ margin: 0 }}>
+                          <strong>{sub.users?.email || 'Unknown'}:</strong> {sub.body}
+                        </p>
+                        <textarea
+                          placeholder="Feedback"
+                          value={draft}
+                          onChange={(e) =>
+                            setFeedbackDrafts((prev) => ({ ...prev, [sub.id]: e.target.value }))
+                          }
+                          rows={2}
+                          style={{ width: '100%', padding: '0.5rem', marginTop: '0.25rem' }}
+                        />
+                        <button
+                          onClick={() => handleSaveFeedback(sub.id, draft)}
+                          disabled={savingFeedbackId === sub.id}
+                        >
+                          {savingFeedbackId === sub.id ? 'Saving...' : 'Save feedback'}
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </article>
