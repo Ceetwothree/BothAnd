@@ -1,8 +1,12 @@
 // app/org/[slug]/catalog/page.tsx
 //
 // Known limitations (see PR description for the full list):
-// - No quantity/stock tracking -- each listing is a single claimable item.
-//   A real "movements" table for stock counts is a separate future migration.
+// - Quantity tracking reuses responses.qty (already used for Events
+//   attendance hours) to record how much of a listing's quantity a given
+//   claim is for. "Claimed"/"fulfilled" is still an owner-driven, whole-
+//   listing state (see the RLS note below) -- quantity only changes how
+//   many separate claims a listing's stock can satisfy before it's shown
+//   as fully claimed, not who marks the overall lifecycle.
 // - Search/filter is client-side over the already-fetched list (matches
 //   the app's existing "fetch everything, render" pattern -- no pagination
 //   exists anywhere yet), not a server-side query.
@@ -27,6 +31,7 @@ import { CATALOG_CATEGORIES } from '@/lib/catalog'
 interface Claim {
   id: string
   user_id: string
+  qty: number | null
   users: { email: string } | null
 }
 
@@ -38,6 +43,7 @@ interface ItemRecord {
   photo_url: string | null
   category: string | null
   location: string | null
+  quantity: number
   created_at: string
   owner_id: string
   users: { email: string } | null
@@ -56,10 +62,15 @@ export default function CatalogPage() {
   const [body, setBody] = useState('')
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
+  const [quantity, setQuantity] = useState('1')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [creating, setCreating] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  // Keyed by item id -- how many of a multi-quantity listing the viewer
+  // wants to request, before they click "Request."
+  const [claimQtyDrafts, setClaimQtyDrafts] = useState<Record<string, string>>({})
 
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -78,9 +89,9 @@ export default function CatalogPage() {
       .from('records')
       .select(
         `
-        id, title, body, state, photo_url, category, location, created_at, owner_id,
+        id, title, body, state, photo_url, category, location, quantity, created_at, owner_id,
         users!owner_id(email),
-        responses(id, kind, user_id, users!user_id(email))
+        responses(id, kind, user_id, qty, users!user_id(email))
         `
       )
       .eq('container_id', containerId)
@@ -126,6 +137,12 @@ export default function CatalogPage() {
       return
     }
 
+    const quantityNum = parseInt(quantity, 10)
+    if (!quantityNum || quantityNum < 1) {
+      setError('Quantity must be at least 1')
+      return
+    }
+
     setCreating(true)
     try {
       let photoUrl: string | null = null
@@ -154,6 +171,7 @@ export default function CatalogPage() {
         photo_url: photoUrl,
         category: category || null,
         location: location || null,
+        quantity: quantityNum,
       })
 
       if (createError) throw createError
@@ -162,6 +180,7 @@ export default function CatalogPage() {
       setBody('')
       setCategory('')
       setLocation('')
+      setQuantity('1')
       setPhotoFile(null)
       await fetchItems(container.id)
     } catch (err: any) {
@@ -171,7 +190,7 @@ export default function CatalogPage() {
     }
   }
 
-  const handleClaim = async (itemId: string) => {
+  const handleClaim = async (itemId: string, qty: number) => {
     if (!user) return
     setBusyId(itemId)
     setError('')
@@ -180,6 +199,7 @@ export default function CatalogPage() {
         record_id: itemId,
         user_id: user.id,
         kind: 'claim',
+        qty,
       })
 
       if (claimError) throw claimError
@@ -310,6 +330,19 @@ export default function CatalogPage() {
                   style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
                 />
               </div>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="quantity">Quantity:</label>
+                <br />
+                <input
+                  id="quantity"
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+                />
+              </div>
             </div>
             <div style={{ marginBottom: '1rem' }}>
               <label htmlFor="photo">Photo (optional):</label>
@@ -387,6 +420,9 @@ export default function CatalogPage() {
             {filteredItems.map((item) => {
               const isOwner = user && item.owner_id === user.id
               const myClaim = user ? item.claims.find((c) => c.user_id === user.id) : undefined
+              const claimedQty = item.claims.reduce((sum, c) => sum + (c.qty ?? 1), 0)
+              const remaining = item.quantity - claimedQty
+              const claimDraft = claimQtyDrafts[item.id] ?? '1'
 
               return (
                 <article
@@ -434,13 +470,21 @@ export default function CatalogPage() {
                     <small>
                       Posted by {item.users?.email || 'Unknown'} on{' '}
                       {new Date(item.created_at).toLocaleDateString()}
+                      {item.quantity > 1 && (
+                        <>
+                          {' '}
+                          &middot; {Math.max(remaining, 0)} of {item.quantity} available
+                        </>
+                      )}
                     </small>
 
                     {!isOwner && canList && item.state === 'open' && (
                       <div style={{ marginTop: '0.75rem' }}>
                         {myClaim ? (
                           <>
-                            <span style={{ marginRight: '0.75rem' }}>You&apos;ve requested this item</span>
+                            <span style={{ marginRight: '0.75rem' }}>
+                              You&apos;ve requested {item.quantity > 1 ? `${myClaim.qty ?? 1} of ` : ''}this item
+                            </span>
                             <button
                               onClick={() => handleWithdrawClaim(item.id, myClaim.id)}
                               disabled={busyId === item.id}
@@ -448,10 +492,36 @@ export default function CatalogPage() {
                               {busyId === item.id ? 'Withdrawing...' : 'Withdraw'}
                             </button>
                           </>
+                        ) : remaining <= 0 ? (
+                          <span>Fully claimed</span>
                         ) : (
-                          <button onClick={() => handleClaim(item.id)} disabled={busyId === item.id}>
-                            {busyId === item.id ? 'Requesting...' : 'I want this'}
-                          </button>
+                          <>
+                            {item.quantity > 1 && (
+                              <input
+                                type="number"
+                                min={1}
+                                max={remaining}
+                                value={claimDraft}
+                                onChange={(e) =>
+                                  setClaimQtyDrafts((prev) => ({ ...prev, [item.id]: e.target.value }))
+                                }
+                                style={{ width: '4rem', padding: '0.25rem', marginRight: '0.5rem' }}
+                              />
+                            )}
+                            <button
+                              onClick={() => {
+                                const qty = item.quantity > 1 ? parseInt(claimDraft, 10) || 1 : 1
+                                handleClaim(item.id, Math.min(Math.max(qty, 1), remaining))
+                              }}
+                              disabled={busyId === item.id}
+                            >
+                              {busyId === item.id
+                                ? 'Requesting...'
+                                : item.quantity > 1
+                                  ? 'Request'
+                                  : 'I want this'}
+                            </button>
+                          </>
                         )}
                       </div>
                     )}
@@ -461,7 +531,12 @@ export default function CatalogPage() {
                         {item.claims.length > 0 && (
                           <p>
                             <strong>Requested by:</strong>{' '}
-                            {item.claims.map((c) => c.users?.email || 'Unknown').join(', ')}
+                            {item.claims
+                              .map(
+                                (c) =>
+                                  `${c.users?.email || 'Unknown'}${item.quantity > 1 ? ` (${c.qty ?? 1})` : ''}`
+                              )
+                              .join(', ')}
                           </p>
                         )}
                         {item.state === 'open' && (

@@ -122,6 +122,10 @@ CREATE TABLE records (
     'Kids & Baby', 'Books & Media', 'Other'
   )),
   location TEXT,
+  -- Also kind='item' only, but unlike the other item columns above, "how
+  -- many" is never optional for a listing -- a single item is just the
+  -- quantity=1 case, matching pre-quantity-tracking behavior exactly.
+  quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1),
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
