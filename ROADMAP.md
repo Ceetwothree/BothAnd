@@ -10,6 +10,24 @@ and fixed live (see `SETUP_GUIDE.md`'s Security Notes) — worth reading
 before making further RLS changes, since it's also a reminder that
 `get_advisors` alone isn't sufficient verification for this class of bug.
 
+**Second pass (research-only, no code):** a deeper competitive dive —
+see `COMPETITIVE_RESEARCH.md`. Headline finding: the "none of this
+business logic is that hard" hypothesis mostly held up against real
+product docs, with identity/compliance checks (background checks) as
+the one genuine exception — and even those are always a third-party API
+integration, never built in-house, by any tool researched. Confirmed a
+few concrete, previously-fuzzy gaps are now well-scoped and cheap:
+Catalog claim-to-message threads (Olio's model), Board comment
+threading (one nullable self-referencing column), and web push
+notifications (Push API + service worker, no third-party SaaS needed,
+closes gaps on both Board and Catalog at once). Also surfaced a real
+policy-layer gap not previously on the list: **shift swapping** for
+Events (propose → counter-accept → admin-approve — a real state
+machine, not a quick add). And found direct precedent for cross-org
+trade in food-bank network software (Link2Feed, FoodCopia) — it's a
+validated, non-speculative category, which raises the priority but
+doesn't change the "design pass before code" plan below.
+
 **Not started, and the natural next steps in priority order:**
 1. **Cross-org trade** — the aspirational feature the whole project is
    ultimately oriented around (see the About page's origin story). Needs
@@ -46,7 +64,10 @@ did before the July 2026 documentation pass.
 
 Research basis: web search of current (2026) volunteer-scheduling, marketplace/
 classifieds, and blog-CMS tools, plus direct reading of BothAnd's own code.
-Not exhaustive — a snapshot to work from, not a permanent ranking.
+Not exhaustive — a snapshot to work from, not a permanent ranking. See
+`COMPETITIVE_RESEARCH.md` for a deeper architecture-level pass (pricing
+gates, what's genuinely hard vs. just CRUD+workflow, open-source
+alternatives' real data models) done after this table was first built.
 
 ## Board — competes with blog/CMS tools (Ghost, WordPress, Substack) + lightweight forums
 
