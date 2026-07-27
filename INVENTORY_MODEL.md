@@ -111,24 +111,120 @@ field system is real EAV-style complexity — a much bigger lift than
 anything else in this document. Leaning toward a small fixed set to
 avoid that, but this wasn't settled.
 
-## Value: separate the public listing from the reporting receipt
+**Flagged, deliberately out of scope for now: AI-assisted taxonomy
+bootstrapping.** An org's messy historical spreadsheet (the same kind of
+serially-inconsistent Google Sheet PATH actually ran on) could in
+principle be fed to a model that proposes a normalized category/
+subcategory tree from it — automating the same normalization work done
+by hand for PATH. Genuinely useful, but explicitly a "fancy idea,
+probably out of scope" per the org's own framing, not the preset/Other/
+custom-editor layering above. Worth remembering as a possible future
+onboarding accelerator, not something to design against yet.
+
+### How big would a preset superset actually need to be?
+
+The open worry was that covering "a majority of NGOs and community
+groups doing intake/distribution" with presets could balloon into a
+large, unmanageable library. Looking across food banks, diaper banks,
+clothing closets, hygiene-kit programs, disaster-relief supply drives,
+and general thrift/donation-center sorting — on top of PATH's own
+9-category list — the same top-level categories keep recurring almost
+everywhere, regardless of org type:
+
+1. Food (perishable / non-perishable, sometimes further split into
+   fresh / pantry / frozen / beverages by storage type)
+2. Clothing (near-universally the deepest category — split further by
+   demographic and season)
+3. Hygiene products
+4. Cleaning / household products
+5. Housewares / kitchenware
+6. Bedding / linens
+7. Baby / diaper-specific items (diapers, wipes, formula — distinct
+   enough from general hygiene that it shows up as its own category at
+   diaper banks specifically)
+8. School supplies
+9. First aid / medical supplies
+10. Kits (bundled, freeform contents — same modeling as above)
+
+General-reuse contexts (Buy Nothing groups, general thrift) add a
+second cluster essentially absent from essential-needs/homeless-services
+intake: furniture, electronics, toys, books. This corroborates the
+"two use profiles" finding above rather than contradicting it — it's not
+that the superset is bigger than expected, it's that it cleanly splits
+into an essential-needs cluster (~9-10 categories) and a general-reuse
+cluster (~4 more), and few real orgs need both at once.
+
+**So: not daunting.** A dozen or so top-level presets, organized into a
+couple of named packs (e.g. "Essential needs / homeless services,"
+"Food bank/pantry," "Clothing closet," "General community reuse"),
+covers the large majority of the cross-section researched. This is a
+one-time research/content task, not an open-ended taxonomy problem —
+consistent with the earlier finding that none of the actual business
+logic here is particularly hard, the effort is in getting the presets'
+content right, not in the mechanism that stores them.
+
+One considered and explicitly ruled-out source: the AIRS/211 Taxonomy of
+Human Services, a large (9,000+ term), accredited national standard.
+It's built to classify *services and programs* an agency offers ("what
+does this agency do"), not to categorize *physical stock-keeping units*
+at the granularity an org needs to answer "how much clothing did we
+distribute this quarter" — the wrong shape for this specific need, not
+a source to draw the preset packs from.
+
+## Donation intake & gift-in-kind reporting
 
 PATH explicitly does not want a dollar value shown on the public item
 detail page — this isn't a shop, it's dignity-centered distribution —
 but does need a value on a **gift-in-kind receipt** used for donation
-reporting and reconciliation (e.g., against DonorPerfect). Whether
-that's a universal rule or PATH-specific wasn't fully resolved either way.
+reporting and reconciliation (e.g., against DonorPerfect).
 
-This isn't just a hidden column. It implies a genuinely separate concept:
-a **donation-intake record** (donor, date received, item(s), estimated
-value) — the digitized version of the paper gift-in-kind form — distinct
-from the public catalog listing, which strips value (and possibly donor
-identity) out entirely. Default to hiding value publicly (dignity-first),
-allow an org to override it if they genuinely want a visible price.
+This isn't just a hidden column. It implies a genuinely separate
+concept: a **donation-intake record** — the digitized version of the
+paper gift-in-kind form — distinct from the public catalog listing.
 
-Open question: how much donor identity (name, contact) does the receipt
-need to carry, and what that implies for privacy/data handling, wasn't
-worked out yet.
+**"Hide value publicly" toggle defaults to OFF.** Value is shown by
+default on the public listing; an org can turn the toggle on to hide it
+(PATH's dignity-first preference becomes an explicit opt-in, not the
+default for every org). Reasoning, directly from the org: *"I don't want
+to box it out"* — PATH's preference is real and worth supporting, but it
+isn't assumed to be every org's preference, and a general community
+group (a garden, a Buy Nothing-style swap) may want value visible by
+default the way a normal listing would. The donation-intake record's
+value field is unaffected either way — that's internal, always present,
+regardless of what the public toggle is set to.
+
+**Standard reporting fields, checked against both IRS Form 8283
+(non-cash charitable contributions) and typical donor-CRM gift-in-kind
+entry patterns (DonorPerfect-style):**
+
+- **Donor** — name/organization, and contact (email and/or phone)
+- **Item description** — free text, plus the taxonomy category/subcategory
+- **Quantity**
+- **Weight** — optional, primarily used for food (matches the org's own
+  recollection: "how food is usually done")
+- **Estimated value** — the field that fills both DonorPerfect's
+  amount/sale-value field and Form 8283's fair market value field
+- **Date received**
+- **Recipient org** — implicit, it's the org's own record; Form 8283
+  additionally wants the recipient org's name/address for the donor's
+  own tax filing, which an org could optionally surface as a print/export
+  field rather than a stored one
+- Optionally: **donor address** (Form 8283 wants this for the donor's own
+  filing; not needed for BothAnd's own bookkeeping) and a **status**
+  field (committed / received / picked up), borrowed from DonorView's
+  gift-in-kind pattern — a nice-to-have, not core
+
+This closely matches the org's own recollection working backwards from
+DonorPerfect's required fields, confirming it: email, phone,
+organization, quantity, weight, description, and value are indeed close
+to a standard set, not a PATH-specific guess. The "few I don't recall"
+turn out to be date received and (for formal 8283 purposes only) the
+donor's address — both easy additions, neither changing the shape of
+the record.
+
+Open question, still not worked out: how much donor identity the
+receipt needs to carry by default versus behind an org-level privacy
+setting, wasn't resolved either way.
 
 ## Photo — already shipped
 
@@ -181,3 +277,18 @@ Design only. Not scheduled against `ROADMAP.md`'s Polish iteration plan
 yet — this supersedes that plan's Catalog-category assumptions once it's
 scoped for real, and is large enough to warrant its own build sequence
 when the time comes, not a single PR.
+
+The three open questions this design needed resolved before touching
+cross-org trade are now resolved: the preset superset is sized (a dozen
+or so top-level categories, not an open-ended problem), the gift-in-kind
+reporting field set is grounded against IRS Form 8283 and DonorPerfect-
+style conventions (not just PATH's own memory of it), and the "hide
+value publicly" toggle's default is corrected to off (shown by default).
+Same-org inter-site trade (sites, taxonomy, value, receipts, QR
+scan-in/out) is modeled above. Cross-org trade — trading surplus between
+two different orgs' inventories, not just between one org's own sites —
+remains a deliberately separate, harder design pass: it raises questions
+this document doesn't touch (does an org get to see another org's
+inventory at all, what counts as a fair/valid cross-org claim, does value/
+taxonomy need to reconcile across two orgs' independently-built
+taxonomies) and is intentionally not started here.
