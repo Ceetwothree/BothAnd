@@ -44,6 +44,21 @@ every tool researched, not a workaround. Surfaced two more cheap wins
 kind of product). All of this is now consolidated into one execution
 sequence below.
 
+**Fourth pass (research-only, no code):** modeled a real rework of
+Catalog's inventory model in depth, grounded in the user's own PATH
+experience — see `INVENTORY_MODEL.md`. Multiple physical sites per org
+(a real entity, not a text field), an org-defined hierarchical
+taxonomy (category → subcategory, layered as sector presets → "Other" →
+optional full customization, replacing the flat hardcoded category list
+shipped in the search/filter PR), a gift-in-kind donation-intake/receipt
+concept separate from the public listing (value hidden publicly, shown
+on the receipt), barcode-assisted intake, and QR scan-in/scan-out for
+unstaffed share boxes (reusing the Events check-in QR pattern — a claim
+with a site-level auto-fulfill toggle, not a new state machine). Big
+enough to be its own initiative, not a line in the polish plan below —
+see that file for the full design and what's still genuinely
+undecided (attribute fields, donor-identity handling on the receipt).
+
 ## Polish iteration plan
 
 Many small iterations, each roughly PR-sized (like everything shipped in
@@ -71,7 +86,10 @@ and most independent first:
 5. **Board comment threading** — one nullable `parent_response_id`
    self-reference, matches Discourse's actual model.
 6. **Catalog Borrow/lend listing type** — one column alongside
-   `category`, not just give-away vs. gone.
+   `category`, not just give-away vs. gone. Note: `category` itself is
+   about to be reworked from a flat hardcoded list into the org-defined
+   hierarchical taxonomy in `INVENTORY_MODEL.md` — sequence this after
+   that lands, or expect to touch it twice.
 7. **Events shift swap** — the one genuine policy-layer gap found in
    the whole research pass. A real state machine (propose →
    counter-accept → admin-approve), needs its own short design pass,
@@ -79,15 +97,22 @@ and most independent first:
 8. **Events skills/availability matching** — a real, larger feature
    (tag members and events, filter or auto-suggest by fit). Also needs
    its own design pass.
-9. **Cross-org trade** — the biggest item, and the one the whole
-   project is ultimately oriented around (see the About page's origin
-   story). Not a polish iteration — needs a real design conversation
-   before any code, since it's inherently cross-tenant and RLS mistakes
-   here would be exactly the shape of bug already fixed once. Start by
-   asking: what does "trade" actually mean concretely (transfer a
-   listing's ownership between orgs? a shared cross-org catalog view?
-   something else?), and what's the minimum RLS change that supports it
-   without loosening anything unrelated.
+9. **Inter-site trade (same org)** — once `INVENTORY_MODEL.md`'s sites
+   exist, trading inventory between two sites *within one org* (e.g.
+   two of Birchwood's own share boxes) is almost free: it's entirely
+   inside that org's existing RLS boundary, just a request/claim scoped
+   across sites instead of within one. Real value, low risk — worth
+   building well before the cross-org version below.
+10. **Cross-org trade** — the biggest item, and the one the whole
+    project is ultimately oriented around (see the About page's origin
+    story), described independently as the inciting idea behind
+    Blueprint LA too. Not a polish iteration — needs a real design
+    conversation before any code, since it's inherently cross-tenant and
+    RLS mistakes here would be exactly the shape of bug already fixed
+    once. Start by asking: what does "trade" actually mean concretely
+    (transfer a listing's ownership between orgs? a shared cross-org
+    catalog view? something else?), and what's the minimum RLS change
+    that supports it without loosening anything unrelated.
 
 Lower-priority items not in this sequence, still open, revisit if they
 become relevant: Journal polish (rich text/photos/tags/search) and
