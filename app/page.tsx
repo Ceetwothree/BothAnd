@@ -225,13 +225,6 @@ function HowItWorks() {
           so donations end up where they&apos;re actually needed -- not just where they first
           landed.
         </p>
-
-        <p className="lp-how-cta-line">Sign up and start planning, tracking, and posting.</p>
-        <div className="lp-cta-row">
-          <Link href="/signup" className="lp-btn lp-btn-primary">
-            Create your organization
-          </Link>
-        </div>
       </div>
     </section>
   )
