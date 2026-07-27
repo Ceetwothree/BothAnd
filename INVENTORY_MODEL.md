@@ -271,6 +271,154 @@ taxonomy layering right (presets → "Other" → optional full
 customization, all backed by one schema) and the state machine
 underneath the rest of this stays human-comprehensible.
 
+## Cross-org trade: staged, security-first
+
+Everything above this point — sites, taxonomy, value, gift-in-kind
+receipts, QR scan-in/out — is scoped entirely to *one* org's own data.
+That's exactly why it was safe to design without touching RLS in any new
+way: every read/write in this document so far is still gated by the same
+"active member of this org" rule the whole schema already enforces.
+
+Cross-org trade is different in kind, not just in scope: it's the first
+feature that asks some inventory *content* (not just an org's public
+identity — name, mission text, whether it's joinable — which `browse`
+and invite-preview already expose) to be readable by someone who isn't a
+member of that org. That's a genuinely new class of RLS policy, and it
+deserves the same rigor that caught the tenant-isolation drift bug —
+simulated as a real non-member request, not just read off the policy
+text, before anything here ships.
+
+**Two distinct asks, not one.** Re-reading the actual requirement: it's
+not just "let another org see more," it's a full visibility *range* —
+staff also want the ability to make a specific item invisible to
+ordinary members or the public (something reserved, something tied to a
+specific client case), same mechanism running in the opposite direction.
+So visibility is a tier, not a boolean:
+
+1. **Staff-only** — invisible to ordinary members entirely (narrower
+   than what exists today, where any active member sees the whole
+   catalog)
+2. **Org members** — today's default and the implicit case for
+   everything designed above
+3. **Cross-org / public** — the new, wider case this section is about
+
+**Granularity reuses a pattern already established for taxonomy:** a
+bulk default at the category level, with a per-item override — the same
+"set it once, override individually when needed" shape as presets vs.
+custom taxonomy editing. A category's visibility tier is its items'
+default; an item can be flagged differently on its own. One column
+(`visibility`) on the same taxonomy-and-item structures, not a second
+system.
+
+**Staged rollout, cheapest and lowest-risk first:**
+
+**Stage 1 — cross-org membership as the MVP.** An individual just joins
+both orgs and interacts as an ordinary member of each. This is
+essentially zero new code: no new visibility tier, no new RLS policy,
+nothing that widens what any single membership already permits — the
+"cross-org" behavior is entirely a property of the human, not the
+system. Ship this first as a `browse`-page nudge — *"did you know: if
+another group makes items available to members, you can join and
+request them"* — because it validates whether people actually want
+cross-org access before any new tenancy surface gets built at all. Feels
+weak precisely because it's not automated (a staffer at Org A doesn't see
+Org B's surplus without personally joining Org B) — that weakness is a
+feature for a first cut, not a bug: it caps the blast radius of getting
+the security model wrong to a single well-understood policy.
+
+**Stage 2 — the visibility tier itself.** Build the `visibility` column
+described above, extend the relevant `records`/`containers` SELECT
+policies so `public`-tier rows are readable outside org membership (and
+`staff-only`-tier rows are *not* readable by ordinary members of the
+*same* org — the narrowing direction matters equally and is easy to
+forget when focused on the widening direction). This is the real new
+security surface; verify it the same way the tenant-isolation bug was
+caught — `SET LOCAL ROLE authenticated` as a genuine non-member, in a
+transaction, before trusting it.
+
+**Stage 3 — coalitions: admin-to-admin, category-scoped delegation.**
+The deeper idea in this message — nudging PATH to let Ropa run all of
+PATH's clothing rather than PATH doing it poorly alongside everything
+else — is bigger than visibility. It's operational delegation: Ropa's
+members should be able to *request and receive* clothing that
+physically lives in PATH's own sites (or PATH hands the stock to Ropa
+outright and stops stocking clothing itself), as a standing
+relationship, not a one-off. Model as an explicit `org_partnerships`
+table — admin-approved on both sides, scoped to specific categories
+and/or sites — granting the partner org's members read+claim rights into
+that scoped slice, without making them full members of the host org.
+This is the hardest RLS in this document: a three-hop policy (user's own
+membership → an active partnership row → that partnership's category/
+site grant) rather than the simple one-hop "is a member" check
+everything else relies on. Exactly the kind of custom business-logic
+policy `get_advisors` won't catch — budget a dedicated design pass and a
+real verification pass for this stage specifically, don't fold it into
+Stage 2's work.
+
+**Stage 4 (optional, UI only, sits on top of Stage 2) — a surplus
+bulletin board.** The concrete trigger case — boxes of men's clothing at
+a women's center, kids' toys at a veteran's center, stock a site will
+provably never use — mapped directly onto the `public`-tier visibility
+from Stage 2: a cross-org aggregated view of everything any org has
+tagged public, framed as *"help us clear this out"* rather than a
+storefront. Explicitly uncertain whether this earns a place in primary
+navigation or should stay one level deep to avoid becoming clutter —
+lean toward buried/secondary until there's real usage signal that it's
+wanted, not designed prominently by default. The map/radius idea ("show
+me stuff within 5–50 miles") is a genuinely separate feature bolted onto
+this one, not a natural extension of it: it needs structured geocoded
+location on `sites` (today `sites` only has freeform address/notes),
+which means either manual lat/lng entry or a geocoding API — a real new
+dependency and cost, not a checkbox. Worth remembering, not worth
+building until Stage 4 itself has proven wanted.
+
+## A related but separate thread: metrics and demand planning
+
+Not cross-org trade, but the same conversation surfaced it and it's
+worth capturing rather than losing. Once there's a real taxonomy and
+real transactions against it (claims, fulfillments, intake), that data
+supports three distinct roles that today all get the same flat
+experience:
+
+- **Members** get what they need (already served — browse, claim).
+- **Staff** manage the transactions and keep inventory accurate (mostly
+  already served — the claim/fulfill state machine, intake).
+- **Leadership/admin** run the operation using metrics — consumption
+  rate by category, what's chronically short vs. chronically
+  overstocked, seasonal patterns. **Not served at all today** — there's
+  no metrics surface of any kind yet.
+
+The concrete feature this points to: **storehouse demand thresholds and
+alarms** — "we need at least X of category Y at site Z," and an alert
+(in-app, maybe email/push later) when on-hand quantity crosses below
+that line. This is straightforwardly buildable once taxonomy + sites +
+quantity exist (all modeled above) — it's a threshold check on data
+that's already there, not a new data source.
+
+Worth naming the connection back to Stage 3 explicitly: the
+Ropa-handles-all-clothing coalition idea is currently a hunch based on
+operational experience ("PATH deals with clothing very poorly, I suspect
+specialization would help"). Metrics are what would turn that hunch into
+a measurable decision — an org (or BothAnd itself, looking across orgs
+that opt into shared benchmarking later) could actually see the
+consumption/fulfillment-rate gap between a specialist and a generalist
+handling the same category. Demand planning doesn't block Stage 3, but
+it's the thing that would let a coalition decision be evidence-based
+rather than anecdotal. Deliberately not scoped further than this here —
+its own design pass when it's actually next in line.
+
+## The core tension, and where it actually lives
+
+Simple enough that Birchwood can set up "Food" and start immediately, but
+genuinely usable by an org with PATH's real, multi-year, two-source,
+category/subcategory complexity. The taxonomy is where this tension
+actually lives — site-scoped browsing, gift-in-kind receipts, and QR
+checkout are all *consumers* of whatever category structure an org has
+built, not independent sources of complexity themselves. Get the
+taxonomy layering right (presets → "Other" → optional full
+customization, all backed by one schema) and the state machine
+underneath the rest of this stays human-comprehensible.
+
 ## Status
 
 Design only. Not scheduled against `ROADMAP.md`'s Polish iteration plan
@@ -285,10 +433,10 @@ reporting field set is grounded against IRS Form 8283 and DonorPerfect-
 style conventions (not just PATH's own memory of it), and the "hide
 value publicly" toggle's default is corrected to off (shown by default).
 Same-org inter-site trade (sites, taxonomy, value, receipts, QR
-scan-in/out) is modeled above. Cross-org trade — trading surplus between
-two different orgs' inventories, not just between one org's own sites —
-remains a deliberately separate, harder design pass: it raises questions
-this document doesn't touch (does an org get to see another org's
-inventory at all, what counts as a fair/valid cross-org claim, does value/
-taxonomy need to reconcile across two orgs' independently-built
-taxonomies) and is intentionally not started here.
+scan-in/out) is modeled above. Cross-org trade is now staged (above):
+Stage 1 (cross-org membership nudge) ships with essentially no new
+security surface; Stages 2–4 (visibility tiers, coalitions, bulletin
+board/map) each add real new RLS surface in increasing order of
+difficulty and are each their own future design-and-verify pass, not a
+single PR. Metrics/demand-planning is captured as a related, independent
+future thread, not scheduled.
