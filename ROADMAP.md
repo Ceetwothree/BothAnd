@@ -59,6 +59,34 @@ enough to be its own initiative, not a line in the polish plan below —
 see that file for the full design and what's still genuinely
 undecided (attribute fields, donor-identity handling on the receipt).
 
+**Fifth pass (research-only, no code):** grounded the Inventory Model's
+two open sizing questions and staged cross-org trade — see
+`INVENTORY_MODEL.md`'s updated sections. The preset taxonomy superset
+turns out small (a dozen or so top-level categories across food banks,
+diaper banks, clothing closets, and disaster relief, not an open-ended
+problem); gift-in-kind reporting fields are grounded against IRS Form
+8283 and DonorPerfect convention; the "hide value publicly" toggle now
+defaults to hiding value on the public listing, always kept on the
+internal donation-intake receipt. Cross-org trade itself is now a
+4-stage plan (cross-org membership MVP → visibility tiers → admin-to-
+admin category-delegation coalitions → an optional surplus bulletin
+board), in increasing order of new RLS surface — see `INVENTORY_MODEL.md`
+for the full staging and why each stage is ordered where it is.
+
+**Sixth pass (research-only, no code):** Course is the least developed
+workflow today — lesson + submission + feedback, connected to nothing
+else. PATH's real, currently fully manual case (a signed paper waiver
+emailed to an admin before a volunteer can see the schedule) generalizes
+into a real, narrow gap: a container can require a course be completed
+first. See `COURSE_GATING.md` for the full design — a container-level
+gate reusing the existing lesson-submission progress definition, plus a
+signature-specific refinement (frozen snapshot of what was agreed to,
+typed name + explicit consent + audit trail, grounded in actual ESIGN/
+UETA requirements) for the waiver case specifically. Also see
+`COMPETITIVE_RESEARCH.md`'s Category 4 for why this is worth building
+despite the earlier "not Moodle-scale" verdict standing — it's a
+narrower question (gating, not content depth) that verdict didn't cover.
+
 ## Polish iteration plan
 
 Many small iterations, each roughly PR-sized (like everything shipped in
@@ -106,13 +134,20 @@ and most independent first:
 10. **Cross-org trade** — the biggest item, and the one the whole
     project is ultimately oriented around (see the About page's origin
     story), described independently as the inciting idea behind
-    Blueprint LA too. Not a polish iteration — needs a real design
-    conversation before any code, since it's inherently cross-tenant and
-    RLS mistakes here would be exactly the shape of bug already fixed
-    once. Start by asking: what does "trade" actually mean concretely
-    (transfer a listing's ownership between orgs? a shared cross-org
-    catalog view? something else?), and what's the minimum RLS change
-    that supports it without loosening anything unrelated.
+    Blueprint LA too. Not a single polish iteration — now staged into 4
+    stages in `INVENTORY_MODEL.md` (cross-org membership MVP → visibility
+    tiers → admin-to-admin coalitions → optional bulletin board), each
+    its own design-and-verify pass, in increasing order of new RLS
+    surface. Start with stage 1, which adds no new RLS at all.
+11. **Course → Events gating** — PATH's real, fully manual case today (a
+    signed waiver emailed to an admin before a volunteer sees the
+    schedule), generalized into a real mechanic: a container can require
+    a course be completed first. See `COURSE_GATING.md` — the gate
+    itself is small (reuses the existing lesson-submission progress
+    definition), the signature-specific refinement (frozen snapshot,
+    typed name + consent + audit trail, self-serve-vs-staff-reviewed
+    toggle) is the part that needs its own care. Sequence as two steps,
+    not one.
 
 Lower-priority items not in this sequence, still open, revisit if they
 become relevant: Journal polish (rich text/photos/tags/search) and

@@ -332,6 +332,46 @@ Moodle's scope. **Not a gap worth closing** — this confirms the
 project's own "not urgent" framing in `ROADMAP.md` was right, not just
 an assumption.
 
+### A narrower, real gap: gating access on completion (waivers, training)
+
+The Moodle-scale verdict above is about breadth of *content* — quizzes,
+rubrics, grading. A different, much narrower question turned up
+separately: PATH requires a signed liability waiver before a volunteer
+can see the volunteering schedule at all, today handled entirely by
+hand (a signed PDF emailed to an admin). That's not a content-depth gap,
+it's a missing *connection* between Course and everything else — full
+design in `COURSE_GATING.md`. Two adjacent markets researched to ground
+it:
+
+- **Standalone volunteer-waiver SaaS** — Smartwaiver, WaiverSign,
+  VolunteerHub's waiver feature, Galaxy Digital, VolunteerMatters. Real,
+  paid products, and the reason they exist as separate purchases is
+  telling: volunteer-scheduling tools generally don't have waiver
+  collection built in, so orgs bolt on a second subscription for it.
+  [VolunteerHub waivers](https://volunteerhub.com/platform/volunteer-liability-waivers) ·
+  [Smartwaiver](https://www.smartwaiver.com/volunteer-liability-waiver)
+- **Corporate compliance-training LMS** — Traliant, EasyLlama,
+  BizLibrary. The "did you complete your anti-fraud training" pattern —
+  assign, track completion, gate access, produce an audit trail — at
+  enterprise HR scale. Not a direct competitor (different buyer, price
+  point, and market entirely) but the clearest existing precedent for
+  the completion-gates-access mechanic itself.
+  [EasyLlama compliance LMS](https://www.easyllama.com/product/lms) ·
+  [Traliant](https://www.traliant.com/traliant-compliance-training-solution/)
+- **The e-signature itself is a solved legal question**, not a research
+  risk: under the ESIGN Act and UETA, a typed name plus a deliberate
+  affirmative act (a checkbox, not just clicking submit) is legally
+  sufficient — a signature pad isn't required. What actually gets
+  e-signatures thrown out in disputes is a missing audit trail (no
+  timestamp, no record of exactly what text was agreed to), not the
+  typed-name method itself.
+  [ESIGN/UETA typed-signature validity](https://ziasign.com/blogs/is-a-typed-name-a-legal-signature-esign-ueta-explained)
+
+**Worth building, narrow scope:** not a Moodle-scale LMS, just a
+container-level "requires this course completed first" gate plus a
+signature-specific refinement of the existing submission record. See
+`COURSE_GATING.md` for the full design.
+
 ## Category 5: Church/community-specific all-in-one tools
 
 **Players researched:** Breeze ChMS, Planning Center.
