@@ -216,6 +216,8 @@ export async function regenerateInviteCode(orgId: string): Promise<string> {
   return newCode
 }
 
+export type BackgroundCheckStatus = 'not_required' | 'pending' | 'cleared'
+
 export interface OrgMember {
   id: string // membership id
   user_id: string
@@ -223,6 +225,7 @@ export interface OrgMember {
   status: string
   created_at: string
   email: string | null
+  background_check_status: BackgroundCheckStatus
 }
 
 // Requires the users_org_admin_read policy (viewer must be an org admin) to
@@ -231,7 +234,7 @@ export interface OrgMember {
 export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
   const { data, error } = await supabase
     .from('memberships')
-    .select('id, user_id, role, status, created_at, users(email)')
+    .select('id, user_id, role, status, created_at, background_check_status, users(email)')
     .eq('org_id', orgId)
     .order('created_at')
 
@@ -243,7 +246,24 @@ export async function listOrgMembers(orgId: string): Promise<OrgMember[]> {
     status: m.status,
     created_at: m.created_at,
     email: m.users?.email ?? null,
+    background_check_status: m.background_check_status as BackgroundCheckStatus,
   }))
+}
+
+// No real background-check API is called here -- this just records status
+// an admin sets by hand (e.g. after running a check through whatever
+// external provider the org already uses). The integration point for a real
+// API is this same column; nothing about the UI needs to change when one
+// gets wired up, only who/what sets it.
+export async function updateBackgroundCheckStatus(
+  membershipId: string,
+  status: BackgroundCheckStatus
+): Promise<void> {
+  const { error } = await supabase
+    .from('memberships')
+    .update({ background_check_status: status })
+    .eq('id', membershipId)
+  if (error) throw error
 }
 
 export async function updateMemberRole(membershipId: string, role: OrgRole): Promise<void> {
@@ -264,4 +284,54 @@ export async function setMemberStatus(
 export async function leaveOrg(orgId: string): Promise<void> {
   const { error } = await supabase.rpc('leave_org', { p_org_id: orgId })
   if (error) throw error
+}
+
+// Deactivates every membership and scrubs the caller's own profile email.
+// Throws if they're the sole active admin of any org -- see
+// delete_own_account() in schema.sql for the full behavior and its
+// currently-known gap (auth.users itself isn't purged yet).
+export async function deleteOwnAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_own_account')
+  if (error) throw error
+}
+
+// Everything an org's own RLS already lets its members read, bundled into
+// one JSON-able object -- the "what if BothAnd stops being maintained"
+// answer. No new RLS or schema: containers/records/responses are fetched
+// the same way any other page on this org already fetches them, just all
+// at once and returned rather than rendered.
+export async function exportOrgData(org: Org): Promise<Record<string, unknown>> {
+  const { data: containers, error: containersError } = await supabase
+    .from('containers')
+    .select('*')
+    .eq('org_id', org.id)
+
+  if (containersError) throw containersError
+
+  const containerIds = (containers ?? []).map((c: any) => c.id)
+
+  const { data: records, error: recordsError } = containerIds.length
+    ? await supabase.from('records').select('*').in('container_id', containerIds)
+    : { data: [], error: null }
+
+  if (recordsError) throw recordsError
+
+  const recordIds = (records ?? []).map((r: any) => r.id)
+
+  const { data: responses, error: responsesError } = recordIds.length
+    ? await supabase.from('responses').select('*').in('record_id', recordIds)
+    : { data: [], error: null }
+
+  if (responsesError) throw responsesError
+
+  const members = await listOrgMembers(org.id)
+
+  return {
+    exported_at: new Date().toISOString(),
+    org,
+    members,
+    containers: containers ?? [],
+    records: records ?? [],
+    responses: responses ?? [],
+  }
 }

@@ -63,12 +63,19 @@ CREATE TABLE orgs (
 
 CREATE TYPE org_role AS ENUM ('admin', 'staff', 'member');
 
+-- 'not_required' is the default so orgs that don't need this see nothing
+-- different; an org that turns it on for a role (e.g. volunteers) moves
+-- members to 'pending' manually today -- no third-party API is called yet,
+-- this is the tracking surface a real integration would plug into later.
+CREATE TYPE background_check_status AS ENUM ('not_required', 'pending', 'cleared');
+
 CREATE TABLE memberships (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) NOT NULL,
   org_id UUID REFERENCES orgs(id) NOT NULL,
   role org_role NOT NULL DEFAULT 'member',
   status TEXT NOT NULL DEFAULT 'active',
+  background_check_status background_check_status NOT NULL DEFAULT 'not_required',
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(user_id, org_id)
 );
@@ -681,6 +688,49 @@ $$;
 
 REVOKE ALL ON FUNCTION leave_org(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION leave_org(UUID) TO authenticated;
+
+-- Self-service account deletion, first pass: deactivates every membership
+-- and scrubs the caller's own profile email (unique + not-null, so it's
+-- replaced with a non-identifying placeholder rather than nulled). Applies
+-- leave_org()'s sole-admin protection across every org at once, rather than
+-- requiring it to be resolved org-by-org first. Deliberately doesn't touch
+-- auth.users -- that requires a service-role call this client-safe RPC
+-- can't make; a real purge is a follow-up, not done here.
+CREATE OR REPLACE FUNCTION delete_own_account()
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_uid UUID := auth.uid()::uuid;
+  v_blocking_org_count INT;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  SELECT count(*) INTO v_blocking_org_count
+  FROM memberships m
+  WHERE m.user_id = v_uid
+  AND m.role = 'admin'
+  AND m.status = 'active'
+  AND (
+    SELECT count(*) FROM memberships m2
+    WHERE m2.org_id = m.org_id AND m2.role = 'admin' AND m2.status = 'active'
+  ) <= 1;
+
+  IF v_blocking_org_count > 0 THEN
+    RAISE EXCEPTION 'You are the only admin of % organization(s) -- promote someone else in each before deleting your account', v_blocking_org_count;
+  END IF;
+
+  UPDATE memberships SET status = 'inactive' WHERE user_id = v_uid;
+  UPDATE users SET email = 'deleted-' || v_uid || '@deleted.bothand.invalid' WHERE id = v_uid;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION delete_own_account() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION delete_own_account() TO authenticated;
 
 -- Lets /join/[code] show "You're invited to join X" before the user
 -- commits, without exposing invite_code itself or needing a listable RLS
