@@ -35,9 +35,10 @@ export default function Home() {
   // "/" is the one stable home -- clicking the BothAnd wordmark from
   // anywhere always lands here, logged in or not. No auto-redirect into an
   // org: that used to strand signed-in visitors with no way back to this
-  // page at all. Signed-in visitors get a "Your organizations" section up
-  // top instead, one click from their org, with the rest of the page (the
-  // pitch, the workflow diagram, the About link) still reachable below it.
+  // page at all. Signed-in visitors get a "Your organizations" section
+  // instead of the marketing pitch below -- the hero/how-it-works/closing
+  // sections are for someone deciding whether to sign up, not someone
+  // already using it, and stayed reachable via the site's own nav either way.
   return (
     <div className="lp-root">
       <SiteHeader
@@ -75,42 +76,49 @@ export default function Home() {
 
       {!checkingUser && user && <YourOrgsSection orgs={orgs} loading={loadingOrgs} />}
 
-      <section className="lp-hero lp-hero-compact">
-        <div className="lp-wrap">
-          <div className="lp-hero-inner">
-            <p className="lp-eyebrow lp-fade-up lp-d1">Free tools for community groups</p>
-            <h1 className="lp-hero-small lp-fade-up lp-d2">
-              A site for your group. <span className="lp-and">And</span> everything it needs.
-            </h1>
-            <div className="lp-cta-row lp-fade-up lp-d3">
-              <Link href="/signup" className="lp-btn lp-btn-primary">
-                Create your organization
-              </Link>
-              <Link href="/browse" className="lp-btn lp-btn-ghost">
-                See who&apos;s already here
-              </Link>
+      {/* The pitch below is for someone deciding whether to sign up --
+          a signed-in visitor already knows what this is, and the nav's
+          "Create org" link is already the one place that action lives for
+          them. Showing it again here (the old hero button pointed at
+          /signup, which doesn't even make sense once logged in) was just
+          repeating the same ask three times on one page. */}
+      {!checkingUser && !user && (
+        <>
+          <section className="lp-hero lp-hero-compact">
+            <div className="lp-wrap">
+              <div className="lp-hero-inner">
+                <p className="lp-eyebrow lp-fade-up lp-d1">Free tools for community groups</p>
+                <h1 className="lp-hero-small lp-fade-up lp-d2">
+                  A site for your group. <span className="lp-and">And</span> everything it needs.
+                </h1>
+                <div className="lp-cta-row lp-fade-up lp-d3">
+                  <Link href="/signup" className="lp-btn lp-btn-primary">
+                    Create your organization
+                  </Link>
+                  <Link href="/browse" className="lp-btn lp-btn-ghost">
+                    See who&apos;s already here
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <HowItWorks />
+          <HowItWorks />
 
-      <section className="lp-closing">
-        <div className="lp-wrap">
-          <h2>
-            Bring your organization. <span className="lp-and">And</span> see how it fits.
-          </h2>
-          <div className="lp-cta-row lp-cta-row-center">
-            <Link href="/signup" className="lp-btn lp-btn-primary">
-              Create your organization
-            </Link>
-            <Link href="/browse" className="lp-btn lp-btn-ghost">
-              Browse public organizations
-            </Link>
-          </div>
-        </div>
-      </section>
+          <section className="lp-closing">
+            <div className="lp-wrap">
+              <h2>
+                See who&apos;s already here. <span className="lp-and">And</span> decide if it fits.
+              </h2>
+              <div className="lp-cta-row lp-cta-row-center">
+                <Link href="/browse" className="lp-btn lp-btn-primary">
+                  Browse public organizations
+                </Link>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       <SiteFooter />
       <SiteStyles />
@@ -127,8 +135,9 @@ function YourOrgsSection({ orgs, loading }: { orgs: UserOrgMembership[]; loading
           <p style={{ color: 'var(--site-ink-muted)', margin: 0 }}>Loading your organizations...</p>
         ) : orgs.length === 0 ? (
           <p style={{ color: 'var(--site-ink-muted)', margin: 0 }}>
-            You&apos;re not part of any organization yet -- browse public ones or create your own
-            below.
+            You&apos;re not part of any organization yet --{' '}
+            <Link href="/browse">browse public ones</Link>, or use &quot;Create org&quot; above to
+            start your own.
           </p>
         ) : (
           <div className="lp-yourorgs-grid">
