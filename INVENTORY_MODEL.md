@@ -182,16 +182,15 @@ This isn't just a hidden column. It implies a genuinely separate
 concept: a **donation-intake record** — the digitized version of the
 paper gift-in-kind form — distinct from the public catalog listing.
 
-**"Hide value publicly" toggle defaults to OFF.** Value is shown by
-default on the public listing; an org can turn the toggle on to hide it
-(PATH's dignity-first preference becomes an explicit opt-in, not the
-default for every org). Reasoning, directly from the org: *"I don't want
-to box it out"* — PATH's preference is real and worth supporting, but it
-isn't assumed to be every org's preference, and a general community
-group (a garden, a Buy Nothing-style swap) may want value visible by
-default the way a normal listing would. The donation-intake record's
-value field is unaffected either way — that's internal, always present,
-regardless of what the public toggle is set to.
+**Value is hidden on the public catalog/search/browse by default; the
+donation-intake / gift-in-kind receipt always carries it, regardless of
+that toggle.** The dignity-first default (no price next to an item in a
+distribution listing) applies out of the box; an org can opt in to
+*show* value publicly if they genuinely want a shop-like listing (a
+general community group, a garden swap). Either way, the internal
+donation-intake record's value field is unaffected — it's always
+present, since it exists for reporting/reconciliation, not for the
+public page.
 
 **Standard reporting fields, checked against both IRS Form 8283
 (non-cash charitable contributions) and typical donor-CRM gift-in-kind
