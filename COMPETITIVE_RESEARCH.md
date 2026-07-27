@@ -37,6 +37,59 @@ confirms it, with one real exception and one important nuance:
   places where BothAnd is behind are specifically the policy layer —
   see the per-category notes below.
 
+## What users actually want (the demand side)
+
+The category-by-category research above is about what tools *do*. This
+is about what their own users say is missing — checked against review
+sites (G2, Capterra), app store reviews, and community/support forums,
+since vendor marketing pages don't say what's wrong with their product.
+The pattern held consistently across every category researched:
+
+**It's overwhelmingly polish and reliability, not missing capability.**
+
+- **SignUpGenius** complaints are almost entirely UX friction: can't
+  easily edit or delete a signed-up person, cluttered free templates,
+  on-page ads, "most outdated and clunky design." Nobody in these
+  reviews is asking for a big new capability — they want the CRUD to
+  stop being annoying. BothAnd already doesn't have any of these
+  problems (no ads, clean edit/delete flows already built).
+- **VolunteerHub**: "the platform has stopped investing in development,"
+  and its Salesforce integration creates duplicate records users have to
+  manually clean up. That's a genuine incumbent-stagnation signal, not a
+  feature gap — a real opening for a tool that's still actively iterating.
+- **BuyNothing app**: broadly described as buggy (login failures, wrong
+  location detection), plus real backlash over a recently-added
+  paywall/subscription prompt. The sharpest critique found — a long
+  community essay asking why nobody's built a "killer app" for this
+  space — makes a deeper point: the actual hard problem isn't the
+  software, it's that **cooperating with strangers is inherently
+  frustrating** — no-shows, no returns, scammers, last-second haggling.
+  That's a trust problem, not a feature problem, and it's largely
+  unsolvable at the software layer for an open, public marketplace.
+  BothAnd sidesteps this almost for free simply by being
+  membership-scoped rather than open to the general public — worth
+  saying out loud as a real structural advantage, not an incidental one.
+- **Industry-wide** (a 2026 nonprofit tech survey, 800+ respondents):
+  what separates "good" from "mediocre" in nonprofits' own words is
+  grant-reporting depth, integration with donor/CRM data, and volunteer
+  recognition/retention features — not exotic scheduling logic.
+
+**Two cheap, high-signal additions this surfaced that weren't on the
+list before:**
+- **Volunteer hours recognition** — a certificate, badge, or simple
+  "thank you" surfaced once someone crosses an hours milestone.
+  BothAnd already tracks the hours data (Events attendance); this is
+  a small UI addition on top of data that already exists, and directly
+  answers a named retention driver.
+- **A grant-reporting export** — a CSV/PDF of attendance + hours for a
+  date range. Same story: the data already exists, there's just no
+  export button yet.
+
+**One thing worth explicitly not chasing:** donor-CRM integration
+(Salesforce, etc.). It's the one place "bigger" is a trap — it pulls
+BothAnd toward being an enterprise CRM-adjacent product instead of the
+free, simple alternative it's trying to be.
+
 ## Category 1: Volunteer / event scheduling
 
 **Players researched:** SignUpGenius, VolunteerHub, Better Impact
@@ -184,6 +237,37 @@ BothAnd's schema and RLS model currently assume org boundaries are the
 tenant boundary. That's exactly why this needs the design pass before
 any code, as already flagged in `ROADMAP.md`.
 
+**Why food specifically, and not general goods?** Three structural
+reasons, worth understanding before designing anything cross-org:
+
+1. **Perishability creates urgency that only real-time cross-org
+   visibility can solve.** A couch doesn't spoil; food does. Routing
+   surplus between orgs only pays for itself when the alternative is
+   throwing product away.
+2. **The Bill Emerson Good Samaritan Food Donation Act is food-specific**
+   — it gives donors and distributing nonprofits federal liability
+   protection *for food donations only*. Nothing equivalent exists for
+   general used goods, so formalizing a donor↔network relationship for
+   "stuff" doesn't have the same legal cover.
+   [Good Samaritan Act overview](https://www.feedingamerica.org/ways-to-give/corporate-and-foundations/product-partner/bill-emerson)
+3. **Feeding America is a pre-existing national umbrella of ~200
+   affiliated food banks that already had to standardize reporting.**
+   Link2Feed-style software is really an extension of an organizational
+   hierarchy that existed for other reasons, not something invented from
+   scratch for a marketplace. General reuse has no equivalent umbrella —
+   and Buy Nothing Project is explicitly *anti-scale by philosophy*
+   (neighbor-to-neighbor relationship-building, not logistics
+   efficiency), so it never had a forcing function pushing it toward
+   cross-group software the way food banks did.
+   [Feeding America network structure](https://www.feedingamerica.org/our-work/food-bank-network)
+
+This matters for scoping cross-org trade later: BothAnd's version won't
+have Feeding America's forcing function (no existing umbrella
+organization mandating it) or food's urgency/liability profile. Any
+design pass should be honest that the "why now" case is weaker than it
+was for food banks — real, per Link2Feed/FoodCopia's existence, but not
+as urgently forced.
+
 ## Category 3: Board — blog/CMS/forum
 
 **Players researched:** Ghost, Discourse, (WordPress referenced via prior
@@ -265,6 +349,120 @@ differentiator, not a novel idea nobody's validated — Breeze validated
 the *bundling* thesis, BothAnd is testing whether it can also be free
 and open.
 
+## Category 6: Donation payment methods
+
+Prompted by a direct question worth its own section: most of BothAnd's
+target orgs run on donations. Is taking payments a hard feature? The
+short answer is: **it depends entirely on whether BothAnd tries to be a
+middleman or not** — and the decision made here is not to be one.
+
+### The standard set
+
+PayPal is the default (nonprofit-discounted ~2.2% + $0.30, guest checkout,
+no PayPal account needed for the donor). Stripe is the default for custom
+checkout flows. A layer of donation-specific platforms — Donorbox,
+Givebutter, Classy, GiveForms — sit on top of Stripe/PayPal adding
+embeddable forms, recurring-gift management, and receipts, usually with an
+extra stacked platform fee (Donorbox ~5.15% all-in). **Zeffy** is worth
+calling out specifically: 100%-free to the nonprofit, funded entirely by
+an optional donor tip at checkout, built on Stripe underneath — the
+closest thing found in this whole research pass to BothAnd's own "free,
+funded differently" thesis, just applied to payments instead of software.
+[Zeffy vs. Stripe](https://www.zeffy.com/compare/zeffy-vs-stripe) ·
+[Guide to nonprofit fundraising platforms](https://stripe.com/resources/more/nonprofit-fundraising-platforms)
+
+### Why BothAnd isn't going to process payments itself
+
+Taking payments *as a platform* — collecting from donors and forwarding
+to many different orgs — is one of the few genuine complexity spikes
+found anywhere in this research, and not because checkout UI is hard:
+
+- **Money movement across many orgs risks looking like money
+  transmission**, a real, state-by-state licensing problem. The standard
+  fix is **Stripe Connect**: Stripe holds the license and does identity
+  verification (KYC) on each connected org so the platform itself never
+  becomes a money transmitter — but each org still has to complete
+  Stripe's own onboarding, which is real friction, not a free lunch.
+  [Stripe Connect overview](https://stripe.com/connect)
+- **Tax receipts are the org's legal responsibility, not the
+  processor's** — the IRS requires a written acknowledgment for any gift
+  over $250, and every processor above auto-generates this today. Taking
+  that on directly means inheriting an obligation BothAnd doesn't
+  currently have any reason to inherit.
+  [IRS written acknowledgment rules](https://www.irs.gov/charities-non-profits/charitable-contributions-written-acknowledgments)
+
+**The alternative — linking out to whatever the org already has — is
+nearly free, and it's already the universal designed-for pattern, not a
+workaround.** Every processor above generates a plain link or an
+embeddable snippet specifically so it can be dropped into a third-party
+site the org doesn't otherwise control. BothAnd doing the same is a
+same-day feature: a `donate_url` column on `orgs`, identical in shape to
+the existing `website_url`/`facebook_url` fields, rendered as a "Give"
+button. Zero new payment surface, zero compliance inherited, and the org
+keeps the exact processor (and donor history, and tax-receipt flow) it
+already has. [Embeddable donate buttons are the norm](https://www.jimdo.com/blog/donate-button-to-your-website/)
+
+### Not every "typical" method is equally safe to recommend
+
+- **Venmo has an official Charity Profile** for verified 501(c)(3)s,
+  linked through PayPal — zero fees for the donor, a low fee for the org
+  (1.9% + $0.10), and it auto-sends the tax receipt. As legitimate as
+  PayPal itself. [Venmo charity profiles](https://help.venmo.com/cs/articles/receiving-donations-faq-vhel180)
+- **Zelle is explicitly personal-use-only in its own terms** — "you
+  agree that you will not use the Service to send or receive payments in
+  connection with your business or commercial enterprise" — and it only
+  works for org use if the org's *specific bank* separately offers
+  "Zelle for Business," which not all do. Recommending it flatly, with
+  no caveat, would be steering orgs toward something that can violate
+  their own bank agreement. [Zelle personal-use terms](https://legalclarity.org/can-businesses-use-zelle-setup-limits-and-tax-rules/)
+
+### The informal-group case (not just registered 501(c)(3)s)
+
+BothAnd's actual target includes plenty of groups that aren't a
+registered nonprofit at all — a community garden, a book club, a mutual
+aid pod. This changes the payments question in a way none of the
+commercial tools above have to think about, since they're all built
+assuming a verified charity on the other end.
+
+- **Tax reporting risk is smaller than it sounds.** The 1099-K threshold
+  reverted for 2026 to $20,000 and 200 transactions — a small informal
+  group collecting dues or plot fees is very unlikely to cross that.
+  [2026 1099-K threshold](https://www.ehm-tech.com/tax-calculator-us/blog/1099-k-threshold-2026-venmo-paypal/)
+- **The real risk is categorization and commingling, not taxes.** A
+  garden-plot fee is arguably payment *for something*, not a "friends and
+  family" gift — platforms distinguish the two, and using one person's
+  personal account for group funds makes it hard later to prove which
+  money was whose, especially if that person steps back from the role.
+  This is an extremely common, tolerated practice, not a crisis — but a
+  naive version of this feature would say nothing about it at all, and
+  BothAnd can, for free.
+
+### The design
+
+Two nullable `TEXT` columns on `orgs`, same pattern as every other
+kind-specific field already in the schema, in a new "Ways to give"
+settings section:
+
+- **`donate_url`** — one clickable link (PayPal.me, Venmo Charity
+  Profile, Donorbox, Zeffy, GoFundMe Charity, etc.), rendered as a "Give"
+  button. Helper text: *"Link to your existing donation page — we'll
+  show it as a Give button. BothAnd never touches this money — donors go
+  straight to whatever you already use."*
+- **`donate_info`** — freeform multi-line text for anything that isn't a
+  clickable link (Zelle instructions, a mailing address, cash at
+  events), with helper text that surfaces the Venmo-Charity-Profile vs.
+  Zelle-ToS distinction and the informal-group commingling advice above,
+  rather than presenting all "typical methods" as equally simple.
+
+If BothAnd itself ever wants to accept donations (separately, and not a
+near-term plan): the LLC-vs-501(c)(3) distinction actually matters here
+in a way it doesn't for the orgs on the platform — an LLC doesn't make a
+contribution tax-deductible for the donor. The standard fast/cheap path
+before committing to a full 501(c)(3) filing is **fiscal sponsorship** —
+an existing 501(c)(3) accepts funds under their exempt status for a small
+cut. Either way, same principle as everywhere else in this section: a
+dedicated account, never commingled with personal funds.
+
 ## Cross-cutting technical notes
 
 - **Notifications**: the standard 2026 implementation for "notify me
@@ -292,20 +490,34 @@ to what paid tools do for the same job, confirmed against real product
 docs rather than assumption. The gaps worth prioritizing next, in
 rough order of leverage:
 
-1. **Claim → message thread** for Catalog (Olio's model) — cheap, closes
+1. **"Ways to give" on org settings** (`donate_url` + `donate_info`) —
+   the cheapest item on this whole list, no new payment surface, and
+   directly serves the core reason most of these orgs exist.
+2. **Claim → message thread** for Catalog (Olio's model) — cheap, closes
    a real gap, better than the current visible-email approach.
-2. **Push notifications** (Web Push API) — closes gaps on both Board and
+3. **Volunteer hours recognition** and **grant-reporting export** for
+   Events — both cheap, both build on attendance/hours data that
+   already exists, both directly named as retention/reporting drivers.
+4. **Push notifications** (Web Push API) — closes gaps on both Board and
    Catalog with no new infra, using a now-mature, fully-supported
    browser standard.
-3. **Comment threading** on Board — one nullable self-referencing
+5. **Comment threading** on Board — one nullable self-referencing
    column, matches Discourse's actual model.
-4. **Shift swap** for Events — the one genuine policy-layer gap found in
+6. **A Borrow/lend listing type** for Catalog (Olio's model) — one
+   column alongside `category`, not just give-away.
+7. **Shift swap** for Events — the one genuine policy-layer gap found in
    the scheduling category; real state machine, worth scoping properly
    rather than bolting on.
-5. **Skills/availability matching** for Events — a real, larger feature;
+8. **Skills/availability matching** for Events — a real, larger feature;
    worth a design pass, not a quick add.
-6. **Cross-org trade** — confirmed as a real, established category
-   (Link2Feed/FoodCopia) worth building, not speculative — but still
-   needs the RLS design conversation flagged in `ROADMAP.md` before any
-   code, now doubly so given those platforms are built cross-tenant from
-   day one and BothAnd's schema currently isn't.
+9. **Cross-org trade** — confirmed as a real, established category
+   (Link2Feed/FoodCopia) worth building, not speculative, though weaker
+   than food's case (no umbrella-org forcing function, no perishability
+   urgency, no food-specific liability law) — still needs the RLS design
+   conversation flagged in `ROADMAP.md` before any code, now doubly so
+   given those platforms are built cross-tenant from day one and
+   BothAnd's schema currently isn't.
+
+Full detail and PR-sized breakdown of items 1–8 is in `ROADMAP.md`'s
+"Polish iteration plan" — this list is the research's own priority call;
+that one is the actual execution sequence.
