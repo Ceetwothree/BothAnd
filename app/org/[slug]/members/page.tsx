@@ -6,7 +6,14 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { canManageMembers, OrgRole } from '@/lib/permissions'
-import { listOrgMembers, updateMemberRole, setMemberStatus, OrgMember } from '@/lib/orgs'
+import {
+  listOrgMembers,
+  updateMemberRole,
+  setMemberStatus,
+  updateBackgroundCheckStatus,
+  OrgMember,
+  BackgroundCheckStatus,
+} from '@/lib/orgs'
 
 export default function OrgMembersPage() {
   const { org, role } = useOrg()
@@ -74,6 +81,21 @@ export default function OrgMembersPage() {
     }
   }
 
+  const handleBackgroundCheckChange = async (member: OrgMember, status: BackgroundCheckStatus) => {
+    setError('')
+    setSavingId(member.id)
+    try {
+      await updateBackgroundCheckStatus(member.id, status)
+      setMembers((prev) =>
+        prev.map((m) => (m.id === member.id ? { ...m, background_check_status: status } : m))
+      )
+    } catch (err: any) {
+      setError(err.message || 'Failed to update background check status')
+    } finally {
+      setSavingId(null)
+    }
+  }
+
   const handleStatusToggle = async (member: OrgMember) => {
     const newStatus = member.status === 'active' ? 'inactive' : 'active'
 
@@ -116,6 +138,7 @@ export default function OrgMembersPage() {
               <th style={{ padding: '0.5rem' }}>Email</th>
               <th style={{ padding: '0.5rem' }}>Role</th>
               <th style={{ padding: '0.5rem' }}>Status</th>
+              <th style={{ padding: '0.5rem' }}>Background check</th>
               <th style={{ padding: '0.5rem' }}>Joined</th>
               <th style={{ padding: '0.5rem' }} />
             </tr>
@@ -138,6 +161,19 @@ export default function OrgMembersPage() {
                   </select>
                 </td>
                 <td style={{ padding: '0.5rem' }}>{m.status}</td>
+                <td style={{ padding: '0.5rem' }}>
+                  <select
+                    value={m.background_check_status}
+                    disabled={savingId === m.id}
+                    onChange={(e) =>
+                      handleBackgroundCheckChange(m, e.target.value as BackgroundCheckStatus)
+                    }
+                  >
+                    <option value="not_required">not required</option>
+                    <option value="pending">pending</option>
+                    <option value="cleared">cleared</option>
+                  </select>
+                </td>
                 <td style={{ padding: '0.5rem' }}>{new Date(m.created_at).toLocaleDateString()}</td>
                 <td style={{ padding: '0.5rem' }}>
                   <button onClick={() => handleStatusToggle(m)} disabled={savingId === m.id}>

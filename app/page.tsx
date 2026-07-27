@@ -53,6 +53,9 @@ export default function Home() {
               <Link href="/orgs/new" className="lp-nav-link">
                 Create org
               </Link>
+              <Link href="/account" className="lp-nav-link">
+                Account
+              </Link>
               <button onClick={handleLogOut} className="lp-btn lp-btn-ghost">
                 Log out
               </button>

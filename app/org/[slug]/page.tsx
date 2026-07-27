@@ -8,6 +8,7 @@ import Banner from '../../components/Banner'
 import { useOrg } from './OrgContext'
 import { canManageOrgSettings, canManageMembers, canPost } from '@/lib/permissions'
 import { joinPublicOrg } from '@/lib/orgs'
+import OnboardingChecklist from '../../components/OnboardingChecklist'
 
 export default function OrgHomePage() {
   const { org, role } = useOrg()
@@ -225,6 +226,9 @@ export default function OrgHomePage() {
             {canManageMembers(role) && <Link href={`/org/${org.slug}/members`}>Members</Link>}
             {canManageOrgSettings(role) && <Link href={`/org/${org.slug}/settings`}>Settings</Link>}
           </nav>
+        )}
+        {canManageOrgSettings(role) && (
+          <OnboardingChecklist orgId={org.id} orgSlug={org.slug} hasMission={!!org.mission_statement} />
         )}
       </header>
 

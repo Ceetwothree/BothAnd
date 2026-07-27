@@ -9,7 +9,7 @@ import { ACCENT_COLORS, AccentColorId, BANNER_TEMPLATES, BannerTemplateId } from
 import { useOrg } from '../OrgContext'
 import { canManageOrgSettings } from '@/lib/permissions'
 import { useRouter } from 'next/navigation'
-import { getInviteCode, regenerateInviteCode, leaveOrg } from '@/lib/orgs'
+import { getInviteCode, regenerateInviteCode, leaveOrg, exportOrgData } from '@/lib/orgs'
 import { QRCodeSVG } from 'qrcode.react'
 
 export default function OrgSettingsPage() {
@@ -18,6 +18,27 @@ export default function OrgSettingsPage() {
   const router = useRouter()
   const [leaving, setLeaving] = useState(false)
   const [leaveError, setLeaveError] = useState('')
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState('')
+
+  const handleExport = async () => {
+    setExportError('')
+    setExporting(true)
+    try {
+      const data = await exportOrgData(org)
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${org.slug}-export-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (err: any) {
+      setExportError(err.message || 'Failed to export data')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const handleLeave = async () => {
     if (!window.confirm(`Leave ${org.name}? You'll need a new invite to rejoin.`)) return
@@ -374,6 +395,19 @@ export default function OrgSettingsPage() {
         <p>
           <small>Regenerating invalidates the old link immediately -- the QR code above updates with it.</small>
         </p>
+      </section>
+
+      <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #ddd' }}>
+        <h2>Your data</h2>
+        <p>
+          Download everything {org.name} has stored -- members, board posts, events, catalog
+          items, journal entries, course lessons and submissions -- as a JSON file. Worth having a
+          copy of, independent of BothAnd itself.
+        </p>
+        {exportError && <div style={{ color: 'red', marginBottom: '1rem' }}>{exportError}</div>}
+        <button type="button" onClick={handleExport} disabled={exporting}>
+          {exporting ? 'Preparing export...' : 'Export org data'}
+        </button>
       </section>
 
       <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #ddd' }}>

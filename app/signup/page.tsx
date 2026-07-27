@@ -10,6 +10,7 @@ function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -22,6 +23,11 @@ function SignupForm() {
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
+      return
+    }
+
+    if (!agreedToTerms) {
+      setError('You need to agree to the Terms and Privacy Policy to continue')
       return
     }
 
@@ -92,6 +98,21 @@ function SignupForm() {
             required
             style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
           />
+        </div>
+        <div style={{ marginBottom: '1rem', fontSize: '0.9rem' }}>
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              required
+              style={{ marginTop: '0.2rem' }}
+            />
+            <span>
+              I agree to the <Link href="/terms">Terms of Service</Link> and{' '}
+              <Link href="/privacy">Privacy Policy</Link>.
+            </span>
+          </label>
         </div>
         <button
           type="submit"

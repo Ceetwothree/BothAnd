@@ -28,6 +28,12 @@ export function SiteFooter() {
           <Link href="/about" className="lp-nav-link">
             About
           </Link>
+          <Link href="/terms" className="lp-nav-link">
+            Terms
+          </Link>
+          <Link href="/privacy" className="lp-nav-link">
+            Privacy
+          </Link>
         </nav>
         <span className="lp-footer-tag">
           Coordination infrastructure for organizations that can&apos;t afford software.
