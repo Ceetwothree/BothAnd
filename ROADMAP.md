@@ -89,65 +89,86 @@ narrower question (gating, not content depth) that verdict didn't cover.
 
 ## Polish iteration plan
 
-Many small iterations, each roughly PR-sized (like everything shipped in
-the second pass), rather than one big rework. Suggested order, cheapest
-and most independent first:
+Reorganized from a flat priority list into dependency-ordered tiers —
+several items quietly depended on other items that weren't themselves
+scheduled anywhere. Tiers are ordered by what actually blocks what, not
+just by size; within a tier, cheapest/most independent first.
 
-1. **"Ways to give" on org Settings** — `donate_url` (clickable link,
+### Tier 0 — ship first, zero dependencies
+
+1. **Cross-org trade, Stage 1** (the cross-org-membership nudge from
+   `INVENTORY_MODEL.md`'s staged plan) — genuinely the cheapest thing in
+   the entire plan: zero schema change, zero new RLS, a line of copy on
+   the `browse` page (*"if another group makes items available to
+   members, you can join and request them"*). Worth doing first
+   specifically because it tests real demand for cross-org access before
+   any of the harder, riskier stages get built.
+2. **"Ways to give" on org Settings** — `donate_url` (clickable link,
    rendered as a Give button) + `donate_info` (freeform text: Zelle,
    mailing address, cash at events) on `orgs`. Helper text should
    surface the Venmo-Charity-Profile-vs-Zelle-ToS distinction and the
    informal-group commingling advice, not just "paste a link here."
    See `COMPETITIVE_RESEARCH.md`'s Category 6 for the full design and
    exact copy drafted for this.
-2. **Catalog claim → message thread** — replaces the current
+3. **Catalog claim → message thread** — replaces the current
    visible-email-on-claim approach with an actual thread scoped to that
    claim, matching Olio's model.
-3. **Volunteer recognition + grant-report export** for Events — both
+4. **Volunteer recognition + grant-report export** for Events — both
    build on attendance/hours data that already exists; a small UI
    surface on top, not new data modeling.
-4. **Web push notifications** (Push API + service worker + VAPID keys)
+5. **Board comment threading** — one nullable `parent_response_id`
+   self-reference, matches Discourse's actual model.
+6. **Course gating, base mechanic** — `containers.requires_course_container_id`
+   + a locked-container UI state, reusing the existing lesson-submission
+   progress definition. Independent of the waiver-signature specifics in
+   Tier 1 below — real value on its own (any "complete this training
+   first" case, not just liability waivers). See `COURSE_GATING.md`.
+
+### Tier 1 — still independent, each needs its own short design pass
+
+7. **Web push notifications** (Push API + service worker + VAPID keys)
    — the one item here that's real infrastructure, not just a schema
    change. Closes gaps on both Board (new post/reply) and Catalog ("tell
    me when X appears") at once, so it's worth building generically
    rather than once per workflow.
-5. **Board comment threading** — one nullable `parent_response_id`
-   self-reference, matches Discourse's actual model.
-6. **Catalog Borrow/lend listing type** — one column alongside
-   `category`, not just give-away vs. gone. Note: `category` itself is
-   about to be reworked from a flat hardcoded list into the org-defined
-   hierarchical taxonomy in `INVENTORY_MODEL.md` — sequence this after
-   that lands, or expect to touch it twice.
-7. **Events shift swap** — the one genuine policy-layer gap found in
+8. **Course gating, waiver refinement** — frozen snapshot of what was
+   agreed to, typed name + explicit consent + audit trail (grounded in
+   ESIGN Act/UETA requirements), self-serve-vs-staff-reviewed toggle.
+   Builds on Tier 0 item 6. See `COURSE_GATING.md`.
+9. **Events shift swap** — the one genuine policy-layer gap found in
    the whole research pass. A real state machine (propose →
    counter-accept → admin-approve), needs its own short design pass,
    not a bolt-on.
-8. **Events skills/availability matching** — a real, larger feature
-   (tag members and events, filter or auto-suggest by fit). Also needs
-   its own design pass.
-9. **Inter-site trade (same org)** — once `INVENTORY_MODEL.md`'s sites
-   exist, trading inventory between two sites *within one org* (e.g.
-   two of Birchwood's own share boxes) is almost free: it's entirely
-   inside that org's existing RLS boundary, just a request/claim scoped
-   across sites instead of within one. Real value, low risk — worth
-   building well before the cross-org version below.
-10. **Cross-org trade** — the biggest item, and the one the whole
-    project is ultimately oriented around (see the About page's origin
-    story), described independently as the inciting idea behind
-    Blueprint LA too. Not a single polish iteration — now staged into 4
-    stages in `INVENTORY_MODEL.md` (cross-org membership MVP → visibility
-    tiers → admin-to-admin coalitions → optional bulletin board), each
-    its own design-and-verify pass, in increasing order of new RLS
-    surface. Start with stage 1, which adds no new RLS at all.
-11. **Course → Events gating** — PATH's real, fully manual case today (a
-    signed waiver emailed to an admin before a volunteer sees the
-    schedule), generalized into a real mechanic: a container can require
-    a course be completed first. See `COURSE_GATING.md` — the gate
-    itself is small (reuses the existing lesson-submission progress
-    definition), the signature-specific refinement (frozen snapshot,
-    typed name + consent + audit trail, self-serve-vs-staff-reviewed
-    toggle) is the part that needs its own care. Sequence as two steps,
-    not one.
+10. **Events skills/availability matching** — a real, larger feature
+    (tag members and events, filter or auto-suggest by fit). Also needs
+    its own design pass.
+
+### Tier 2 — the big initiative, build as one sequenced project
+
+11. **Inventory Model** (`INVENTORY_MODEL.md`) — this is the prerequisite
+    that was implicit but never itself a scheduled step: sites →
+    taxonomy (sector presets → "Other" → optional custom editor) →
+    migrate the existing flat hardcoded `category` column onto it →
+    gift-in-kind receipt / value-visibility toggle → barcode-assisted
+    intake → QR scan-in/scan-out for share boxes, in that internal
+    order. Once this exists, two previously-listed items become cheap
+    follow-ons rather than needing their own design work:
+    - **Catalog Borrow/lend listing type** — one column alongside the
+      new taxonomy, not just give-away vs. gone.
+    - **Inter-site trade (same org)** — trading inventory between two
+      sites *within* one org (e.g. two of Birchwood's own share boxes)
+      is almost free once sites exist: entirely inside that org's
+      existing RLS boundary, just a request/claim scoped across sites
+      instead of within one.
+
+### Tier 3 — deliberately last, hardest new RLS surface
+
+12. **Cross-org trade, Stages 2–4** — visibility tiers (public/member/
+    staff-only) → admin-to-admin category-delegation coalitions →
+    optional surplus bulletin board. Sequenced after the Inventory Model
+    (reasoning about what's shareable needs the taxonomy to exist) and
+    after Stage 1 has actually shown whether people want this. Each
+    stage is its own design-and-verify pass — see `INVENTORY_MODEL.md`.
 
 Lower-priority items not in this sequence, still open, revisit if they
 become relevant: Journal polish (rich text/photos/tags/search) and
@@ -157,6 +178,57 @@ Board categories/tags/search/admin pinning; database-level role gating
 member write regardless of role — today's role gates are UI-level
 checks only); Freecycle-style hotword moderation (only relevant if
 BothAnd opens up to larger/public orgs).
+
+## Gaps found in a review pass (not yet scheduled)
+
+A deliberate "what's missing that we haven't thought of" pass, prompted
+directly by the question. Not yet prioritized into the tiers above —
+that's a judgment call worth making separately, not something to bury
+inside a reordering.
+
+**Worth real weight** — these aren't cosmetic:
+
+- **No RLS regression testing.** The one real security incident this
+  project has had (the tenant-isolation drift) was caught by hand, once,
+  via manual `SET LOCAL ROLE` simulation — a real, repeatable method, but
+  not automated. Nothing currently stops a future schema change from
+  silently reintroducing that exact class of bug. Arguably deserves
+  higher priority than several Tier 1 items, precisely because it's the
+  project's own hard-won lesson.
+- **No data-export / continuity story.** A single-maintainer, free
+  project has no "export your org's data" path today. Any org that comes
+  to depend on it has no way to get their own data back if it stops
+  being maintained — a real trust question, not a hypothetical one,
+  given tomorrow's meeting.
+- **No account/data deletion path.** Leave-org is self-service; full
+  account deletion isn't. Pairs directly with the donation-intake
+  design's already-open question (how much donor identity the
+  gift-in-kind receipt carries) — PII handling and deletion belong in
+  the same design pass, not separate ones.
+- **No Terms of Service / Privacy Policy for BothAnd itself.** Notable
+  given Course Gating is literally about collecting legally-binding
+  e-signatures — the platform collecting them probably needs its own
+  baseline legal pages.
+- **No first-run/onboarding flow for a brand-new org.** The competitive
+  research's own headline finding was "polish over features" — the
+  single biggest polish gap is a new admin's first ten minutes, which
+  today is an empty Settings page.
+- **Background-check integration is named but never scheduled.**
+  `COMPETITIVE_RESEARCH.md` already flagged this as the one genuine
+  exception to "none of this is hard" (always a third-party API
+  integration, never built in-house, by any tool researched) — but it
+  doesn't appear anywhere in the actual build order above.
+
+**Worth naming, lower priority:**
+
+- Spam/abuse prevention on public join/invite flows (no captcha or rate
+  limiting today)
+- Admin activity/audit log (role changes, invite-code regeneration, etc.)
+- Accessibility pass (screen reader, keyboard nav, contrast — especially
+  relevant given the populations some orgs serve)
+- Basic product analytics for the maintainer (which workflows are
+  actually used, useful before investing further in a workflow like
+  Course)
 
 ## Thesis
 
