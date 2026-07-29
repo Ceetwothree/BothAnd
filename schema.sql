@@ -141,6 +141,11 @@ CREATE TABLE records (
   -- many" is never optional for a listing -- a single item is just the
   -- quantity=1 case, matching pre-quantity-tracking behavior exactly.
   quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1),
+  -- Also kind='item' only. Captured from a camera barcode scan or typed by
+  -- hand -- an intake accelerator, not a requirement, so freeform and
+  -- always optional. No product-lookup API behind it; it's just recorded
+  -- for reference/re-scanning, same spirit as photo_url.
+  barcode TEXT,
   -- Only meaningful for kind='lesson' -- whatever URL the author pasted
   -- (YouTube, Vimeo, or otherwise). Stored as-is; lib/videoEmbed.ts is
   -- what decides whether it's rendered as an embed or a plain link, not

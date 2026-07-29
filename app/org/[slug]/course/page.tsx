@@ -329,7 +329,10 @@ export default function CoursePage() {
         {loadingLessons ? (
           <p>Loading lessons...</p>
         ) : lessons.length === 0 ? (
-          <p>No lessons yet.</p>
+          <p style={{ color: '#666' }}>
+            No lessons yet. Course is for training and onboarding material -- add a lesson to
+            get started.
+          </p>
         ) : (
           lessons.map((lesson) => (
             <article
