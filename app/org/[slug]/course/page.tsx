@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
 import { canManageContainers, canManageCourse, canPost } from '@/lib/permissions'
+import { parseVideoEmbed } from '@/lib/videoEmbed'
 
 interface Submission {
   id: string
@@ -35,9 +36,40 @@ interface LessonRecord {
   id: string
   title: string | null
   body: string | null
+  video_url: string | null
   created_at: string
   submissions: Submission[]
   mySubmission: Submission | null
+}
+
+// Renders a recognized YouTube/Vimeo URL as a responsive 16:9 embed;
+// anything else that was pasted in still shows up as a plain link, not
+// silently dropped and not rendered as an iframe of an unrecognized
+// origin -- see lib/videoEmbed.ts for why.
+function LessonVideo({ url }: { url: string }) {
+  const parsed = parseVideoEmbed(url)
+
+  if (!parsed) {
+    return (
+      <p>
+        <a href={url} target="_blank" rel="noopener noreferrer">
+          Watch video
+        </a>
+      </p>
+    )
+  }
+
+  return (
+    <div style={{ position: 'relative', paddingTop: '56.25%', marginBottom: '1rem' }}>
+      <iframe
+        src={parsed.embedUrl}
+        title="Lesson video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+      />
+    </div>
+  )
 }
 
 export default function CoursePage() {
@@ -50,6 +82,7 @@ export default function CoursePage() {
   const [settingUp, setSettingUp] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
   const [creating, setCreating] = useState(false)
   const [submissionDrafts, setSubmissionDrafts] = useState<Record<string, string>>({})
   const [submittingId, setSubmittingId] = useState<string | null>(null)
@@ -72,7 +105,7 @@ export default function CoursePage() {
       .from('records')
       .select(
         `
-        id, title, body, created_at,
+        id, title, body, video_url, created_at,
         responses(id, kind, user_id, body, feedback, users!user_id(email))
         `
       )
@@ -128,6 +161,7 @@ export default function CoursePage() {
         owner_id: user.id,
         title,
         body,
+        video_url: videoUrl || null,
         state: 'open',
       })
 
@@ -135,6 +169,7 @@ export default function CoursePage() {
 
       setTitle('')
       setBody('')
+      setVideoUrl('')
       await fetchLessons(container.id)
     } catch (err: any) {
       setError(err.message || 'Failed to create lesson')
@@ -250,6 +285,21 @@ export default function CoursePage() {
                 style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
               />
             </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label htmlFor="video_url">Video URL (optional):</label>
+              <input
+                id="video_url"
+                type="url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
+              />
+              <p style={{ margin: '0.35rem 0 0' }}>
+                <small>YouTube and Vimeo links play inline. Other links still show up as a
+                plain link on the lesson.</small>
+              </p>
+            </div>
             <button
               type="submit"
               disabled={creating}
@@ -279,7 +329,10 @@ export default function CoursePage() {
         {loadingLessons ? (
           <p>Loading lessons...</p>
         ) : lessons.length === 0 ? (
-          <p>No lessons yet.</p>
+          <p style={{ color: '#666' }}>
+            No lessons yet. Course is for training and onboarding material -- add a lesson to
+            get started.
+          </p>
         ) : (
           lessons.map((lesson) => (
             <article
@@ -292,6 +345,7 @@ export default function CoursePage() {
               }}
             >
               <h3>{lesson.title}</h3>
+              {lesson.video_url && <LessonVideo url={lesson.video_url} />}
               <p style={{ whiteSpace: 'pre-wrap' }}>{lesson.body}</p>
 
               {canSubmit && (

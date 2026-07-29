@@ -318,7 +318,10 @@ export default function OrgHomePage() {
           {loadingPosts ? (
             <p>Loading posts...</p>
           ) : posts.length === 0 ? (
-            <p>No posts yet.</p>
+            <p style={{ color: '#666' }}>
+              No posts yet. Board is for announcements and discussion -- post an update to get
+              things started.
+            </p>
           ) : (
             <div>
               {posts.map((post: any) => (

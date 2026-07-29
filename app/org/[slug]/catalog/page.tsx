@@ -21,7 +21,7 @@
 //   matching how records_write itself doesn't yet gate by role either.
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
@@ -64,6 +64,10 @@ export default function CatalogPage() {
   const [location, setLocation] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [barcode, setBarcode] = useState('')
+  const [scanning, setScanning] = useState(false)
+  const [scanError, setScanError] = useState('')
+  const scanVideoRef = useRef<HTMLVideoElement>(null)
   const [creating, setCreating] = useState(false)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -127,6 +131,38 @@ export default function CatalogPage() {
     }
   }
 
+  // Capture-only: decodes a barcode from the camera into the `barcode`
+  // field, nothing more. No product-lookup API behind this -- that would
+  // be a real external dependency (rate limits, an API key to manage,
+  // something that can go down) added without being asked for. Title,
+  // category, etc. still get filled in by hand either way.
+  //
+  // @zxing/browser is a genuinely large dependency (~115kB) for a feature
+  // most visits to this page won't use -- dynamically imported here so it
+  // only loads for someone who actually taps "Scan," not on every Catalog
+  // page load.
+  const startScan = async () => {
+    setScanError('')
+    setScanning(true)
+    const zxing = await import('@zxing/browser')
+    try {
+      const reader = new zxing.BrowserMultiFormatReader()
+      const result = await reader.decodeOnceFromVideoDevice(undefined, scanVideoRef.current ?? undefined)
+      setBarcode(result.getText())
+    } catch (err: any) {
+      setScanError('Could not read a barcode -- try again, or type it in below.')
+    } finally {
+      setScanning(false)
+      zxing.BrowserCodeReader.releaseAllStreams()
+    }
+  }
+
+  const cancelScan = async () => {
+    setScanning(false)
+    const { BrowserCodeReader } = await import('@zxing/browser')
+    BrowserCodeReader.releaseAllStreams()
+  }
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!container || !user) return
@@ -172,6 +208,7 @@ export default function CatalogPage() {
         category: category || null,
         location: location || null,
         quantity: quantityNum,
+        barcode: barcode || null,
       })
 
       if (createError) throw createError
@@ -182,6 +219,7 @@ export default function CatalogPage() {
       setLocation('')
       setQuantity('1')
       setPhotoFile(null)
+      setBarcode('')
       await fetchItems(container.id)
     } catch (err: any) {
       setError(err.message || 'Failed to create listing')
@@ -360,6 +398,44 @@ export default function CatalogPage() {
                 shot. Browsers without a camera fall back to a normal file picker.</small>
               </p>
             </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label htmlFor="barcode">Barcode (optional):</label>
+              <br />
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <input
+                  id="barcode"
+                  type="text"
+                  value={barcode}
+                  onChange={(e) => setBarcode(e.target.value)}
+                  placeholder="Scan, or type it in by hand"
+                  style={{ flex: 1, padding: '0.5rem' }}
+                />
+                <button type="button" onClick={startScan} disabled={scanning}>
+                  {scanning ? 'Scanning...' : 'Scan'}
+                </button>
+              </div>
+              {scanError && <p style={{ color: 'red', margin: '0.35rem 0 0' }}>{scanError}</p>}
+              {scanning && (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <video
+                    ref={scanVideoRef}
+                    style={{ width: '100%', maxWidth: '360px', borderRadius: '4px' }}
+                    muted
+                    playsInline
+                  />
+                  <p style={{ margin: '0.35rem 0 0' }}>
+                    <button type="button" onClick={cancelScan}>
+                      Cancel
+                    </button>
+                  </p>
+                </div>
+              )}
+              <p style={{ margin: '0.35rem 0 0' }}>
+                <small>Useful when a box of donated goods happens to have commercial barcodes --
+                not required, and there&apos;s no product lookup behind it, just a code saved for
+                reference.</small>
+              </p>
+            </div>
             <button
               type="submit"
               disabled={creating}
@@ -406,7 +482,10 @@ export default function CatalogPage() {
         {loadingItems ? (
           <p>Loading items...</p>
         ) : items.length === 0 ? (
-          <p>No items yet.</p>
+          <p style={{ color: '#666' }}>
+            No items yet. Catalog is where donations and surplus get tracked and given away --
+            add an item to get started.
+          </p>
         ) : filteredItems.length === 0 ? (
           <p>No items match your search.</p>
         ) : (
