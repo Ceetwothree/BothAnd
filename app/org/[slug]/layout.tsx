@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useOrgBySlug, Org } from '@/lib/orgs'
+import { getTheme } from '@/lib/branding'
 import { OrgContext } from './OrgContext'
 import OrgSwitcher from '../../components/OrgSwitcher'
 import WorkflowNav from './WorkflowNav'
@@ -40,6 +41,7 @@ export default function OrgLayout({
   }
 
   const mergedOrg: Org = { ...org, ...orgOverride }
+  const theme = getTheme(mergedOrg.theme)
 
   return (
     <OrgContext.Provider
@@ -49,10 +51,14 @@ export default function OrgLayout({
         refreshOrg: (patch) => setOrgOverride((prev) => ({ ...prev, ...patch })),
       }}
     >
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-        <OrgSwitcher currentOrg={mergedOrg} />
-        <WorkflowNav slug={mergedOrg.slug} />
-        {children}
+      <div style={{ background: theme.paper, minHeight: '100vh' }}>
+        <div
+          style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem', color: theme.ink }}
+        >
+          <OrgSwitcher currentOrg={mergedOrg} />
+          <WorkflowNav slug={mergedOrg.slug} />
+          {children}
+        </div>
       </div>
     </OrgContext.Provider>
   )

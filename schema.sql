@@ -30,11 +30,14 @@ CREATE TABLE orgs (
   logo_url TEXT,
   banner_template TEXT NOT NULL DEFAULT 'centered'
     CHECK (banner_template IN ('logo-left', 'centered', 'full-banner')),
-  -- Drawn from the same considered palette as BothAnd's own site theme
-  -- (app/globals.css) -- pine/ochre are literally the site's teal/gold --
-  -- rather than a generic default-Tailwind rainbow.
-  accent_color TEXT NOT NULL DEFAULT 'ink'
-    CHECK (accent_color IN ('pine', 'indigo', 'plum', 'ochre', 'clay', 'ink')),
+  -- A handful of complete, curated themes (background + text + accent
+  -- together), not a raw accent-color swatch picker over an otherwise
+  -- always-white page -- see lib/branding.ts's THEMES. 'bothand' is
+  -- literally the homepage's own theme (app/globals.css's --site-*
+  -- tokens); the default, so a new org reads as part of the same family
+  -- unless it deliberately picks something else.
+  theme TEXT NOT NULL DEFAULT 'bothand'
+    CHECK (theme IN ('bothand', 'warm', 'cool', 'rose')),
   -- Multi-org identity: public orgs are browsable/self-joinable,
   -- private orgs are invite-link only (distinct from containers.visibility)
   is_public BOOLEAN NOT NULL DEFAULT false,
@@ -741,13 +744,13 @@ GRANT EXECUTE ON FUNCTION delete_own_account() TO authenticated;
 -- commits, without exposing invite_code itself or needing a listable RLS
 -- policy on orgs (which would let anyone enumerate every private org).
 CREATE OR REPLACE FUNCTION get_org_preview_by_invite_code(p_code TEXT)
-RETURNS TABLE(id UUID, name TEXT, slug TEXT, logo_url TEXT, banner_template TEXT, accent_color TEXT, mission_statement TEXT)
+RETURNS TABLE(id UUID, name TEXT, slug TEXT, logo_url TEXT, banner_template TEXT, theme TEXT, mission_statement TEXT)
 LANGUAGE sql
 SECURITY DEFINER
 SET search_path = public
 STABLE
 AS $$
-  SELECT id, name, slug, logo_url, banner_template, accent_color, mission_statement
+  SELECT id, name, slug, logo_url, banner_template, theme, mission_statement
   FROM orgs
   WHERE invite_code = p_code;
 $$;

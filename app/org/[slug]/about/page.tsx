@@ -4,7 +4,7 @@
 import Link from 'next/link'
 import { useOrg } from '../OrgContext'
 import { canManageOrgSettings } from '@/lib/permissions'
-import { accentHex } from '@/lib/branding'
+import { getTheme } from '@/lib/branding'
 
 const SOCIAL_LINKS: {
   key: 'website_url' | 'facebook_url' | 'instagram_url' | 'x_url' | 'mailing_list_url'
@@ -19,7 +19,7 @@ const SOCIAL_LINKS: {
 
 export default function OrgAboutPage() {
   const { org, role } = useOrg()
-  const accent = accentHex(org.accent_color)
+  const accent = getTheme(org.theme).accent
   const canManage = canManageOrgSettings(role)
 
   const links = SOCIAL_LINKS.filter((l) => org[l.key])

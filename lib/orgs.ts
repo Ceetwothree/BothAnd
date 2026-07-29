@@ -26,7 +26,7 @@ export interface UserOrgMembership {
 }
 
 const ORG_FIELDS =
-  'id, name, slug, logo_url, banner_template, accent_color, is_public, mission_statement, about_text, facebook_url, instagram_url, x_url, website_url, mailing_list_url, contact_email'
+  'id, name, slug, logo_url, banner_template, theme, is_public, mission_statement, about_text, facebook_url, instagram_url, x_url, website_url, mailing_list_url, contact_email'
 
 // The viewer's orgs, for the top-level hub and the org switcher.
 export function useUserOrgs() {
@@ -190,7 +190,7 @@ export interface OrgInvitePreview {
   slug: string
   logo_url: string | null
   banner_template: string
-  accent_color: string
+  theme: string
   mission_statement: string | null
 }
 

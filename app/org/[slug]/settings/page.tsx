@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import Banner from '../../../components/Banner'
-import { ACCENT_COLORS, AccentColorId, BANNER_TEMPLATES, BannerTemplateId } from '@/lib/branding'
+import { THEMES, ThemeId, BANNER_TEMPLATES, BannerTemplateId } from '@/lib/branding'
 import { useOrg } from '../OrgContext'
 import { canManageOrgSettings } from '@/lib/permissions'
 import { useRouter } from 'next/navigation'
@@ -55,7 +55,7 @@ export default function OrgSettingsPage() {
 
   const [logoUrl, setLogoUrl] = useState(org.logo_url)
   const [bannerTemplate, setBannerTemplate] = useState(org.banner_template as BannerTemplateId)
-  const [accentColor, setAccentColor] = useState(org.accent_color as AccentColorId)
+  const [theme, setTheme] = useState(org.theme as ThemeId)
   const [isPublic, setIsPublic] = useState(org.is_public)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [missionStatement, setMissionStatement] = useState(org.mission_statement ?? '')
@@ -130,7 +130,7 @@ export default function OrgSettingsPage() {
       const profileUpdate = {
         logo_url: newLogoUrl,
         banner_template: bannerTemplate,
-        accent_color: accentColor,
+        theme: theme,
         is_public: isPublic,
         mission_statement: orNull(missionStatement),
         about_text: orNull(aboutText),
@@ -184,7 +184,7 @@ export default function OrgSettingsPage() {
 
       <section style={{ marginBottom: '2rem' }}>
         <h2>Preview</h2>
-        <Banner org={{ ...org, logo_url: logoUrl, banner_template: bannerTemplate, accent_color: accentColor }} />
+        <Banner org={{ ...org, logo_url: logoUrl, banner_template: bannerTemplate, theme: theme }} />
       </section>
 
       {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
@@ -224,26 +224,40 @@ export default function OrgSettingsPage() {
 
         <div style={{ marginBottom: '1.5rem' }}>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Accent color
+            Theme
           </label>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {ACCENT_COLORS.map((color) => (
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            {THEMES.map((t) => (
               <button
-                key={color.id}
+                key={t.id}
                 type="button"
-                title={color.label}
-                onClick={() => setAccentColor(color.id)}
+                onClick={() => setTheme(t.id)}
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  backgroundColor: color.hex,
-                  border: accentColor === color.id ? '3px solid #000' : '1px solid #ccc',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  gap: '0.4rem',
+                  width: '140px',
+                  padding: '0.65rem',
+                  borderRadius: '6px',
+                  border: theme === t.id ? `2px solid ${t.accent}` : '1px solid #ccc',
+                  background: t.paper,
                   cursor: 'pointer',
+                  textAlign: 'left',
                 }}
-              />
+              >
+                <span
+                  style={{ width: '100%', height: '8px', borderRadius: '3px', background: t.accent }}
+                />
+                <strong style={{ color: t.ink, fontSize: '0.9rem' }}>{t.label}</strong>
+                <small style={{ color: t.ink, opacity: 0.7 }}>{t.description}</small>
+              </button>
             ))}
           </div>
+          <small style={{ display: 'block', color: '#666', marginTop: '0.5rem' }}>
+            &quot;BothAnd&quot; matches this site&apos;s own look, for a group that wants to read
+            as part of the same family. The others give a little of your own identity.
+          </small>
         </div>
 
         <div style={{ marginBottom: '1.5rem' }}>
