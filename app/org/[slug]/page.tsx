@@ -2,6 +2,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import Banner from '../../components/Banner'
@@ -9,6 +10,23 @@ import { useOrg } from './OrgContext'
 import { canManageOrgSettings, canManageMembers, canPost } from '@/lib/permissions'
 import { joinPublicOrg } from '@/lib/orgs'
 import OnboardingChecklist from '../../components/OnboardingChecklist'
+import RichTextView from '../../components/RichTextView'
+
+// The editor (Tiptap + ProseMirror) is a genuinely large bundle -- everyone
+// who just reads Board, not only the smaller set of people composing or
+// editing a post, would otherwise pay for it on every page load.
+// RichTextView (the sanitizer + renderer every reader needs) stays a
+// normal import; only the write-path editor is split out and loaded on
+// demand. It also needs a real DOM to attach to, so `ssr: false` is a
+// correctness requirement here, not just a size optimization.
+const RichTextEditor = dynamic(() => import('../../components/RichTextEditor'), {
+  ssr: false,
+  loading: () => <p style={{ color: '#666' }}>Loading editor...</p>,
+})
+
+// Tiptap's "empty" state is `<p></p>`, not an empty string -- a plain
+// falsy check on the HTML would let an all-whitespace post through.
+const isHtmlEmpty = (html: string) => html.replace(/<[^>]*>/g, '').trim() === ''
 
 export default function OrgHomePage() {
   const { org, role } = useOrg()
@@ -18,6 +36,11 @@ export default function OrgHomePage() {
   const [loadingPosts, setLoadingPosts] = useState(true)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  // Tiptap isn't a controlled input -- it only reads `content` once, at
+  // mount. Bumping this key after a successful post forces a fresh,
+  // genuinely-empty editor instance rather than trying to imperatively
+  // clear the old one.
+  const [postFormKey, setPostFormKey] = useState(0)
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState('')
   const [joining, setJoining] = useState(false)
@@ -91,7 +114,7 @@ export default function OrgHomePage() {
     e.preventDefault()
     setError('')
 
-    if (!title || !body) {
+    if (!title || isHtmlEmpty(body)) {
       setError('Title and body are required')
       return
     }
@@ -114,6 +137,7 @@ export default function OrgHomePage() {
 
       setTitle('')
       setBody('')
+      setPostFormKey((k) => k + 1)
       await fetchPosts(containerId)
     } catch (err: any) {
       setError(err.message || 'Failed to create post')
@@ -267,14 +291,9 @@ export default function OrgHomePage() {
               </div>
               <div style={{ marginBottom: '1rem' }}>
                 <label htmlFor="body">Message:</label>
-                <textarea
-                  id="body"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  required
-                  rows={4}
-                  style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
-                />
+                <div style={{ marginTop: '0.5rem' }}>
+                  <RichTextEditor key={postFormKey} value={body} onChange={setBody} />
+                </div>
               </div>
               <button
                 type="submit"
@@ -323,12 +342,9 @@ export default function OrgHomePage() {
                         onChange={(e) => setEditTitle(e.target.value)}
                         style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem' }}
                       />
-                      <textarea
-                        value={editBody}
-                        onChange={(e) => setEditBody(e.target.value)}
-                        rows={4}
-                        style={{ width: '100%', padding: '0.5rem', marginBottom: '0.5rem' }}
-                      />
+                      <div style={{ marginBottom: '0.5rem' }}>
+                        <RichTextEditor value={editBody} onChange={setEditBody} />
+                      </div>
                       <button onClick={() => handleSaveEdit(post.id)} disabled={savingEdit}>
                         {savingEdit ? 'Saving...' : 'Save'}
                       </button>{' '}
@@ -339,7 +355,7 @@ export default function OrgHomePage() {
                   ) : (
                     <>
                       <h3>{post.title}</h3>
-                      <p>{post.body}</p>
+                      <RichTextView html={post.body ?? ''} />
                     </>
                   )}
                   <small>
