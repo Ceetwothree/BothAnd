@@ -106,6 +106,37 @@ CREATE TABLE containers (
 );
 
 -- ============================================
+-- CATALOG CATEGORIES (org-defined taxonomy for Catalog)
+-- ============================================
+--
+-- Replaces the flat, hardcoded 9-value category list this project
+-- shipped with. That list was reasonable given what was known at the
+-- time, but baking in even a well-researched list as *the* list just
+-- trades one one-size-fits-all for a better one-size-fits-all -- Birchwood
+-- only ever needs "Food," Ropa only ever needs "Clothing," a general
+-- reuse group needs neither. See INVENTORY_MODEL.md for the full design
+-- this implements.
+--
+-- Self-referencing, org-scoped: category -> subcategory is two levels
+-- deep (parent_id null = top-level category, set = a subcategory of
+-- that category), matching PATH's own real category/subcategory/item
+-- structure. A NULL category_id on a record is the "Other" catch-all --
+-- deliberately not a real row, so an org that doesn't want to think
+-- about taxonomy at all is never blocked from just starting.
+--
+-- sector_key marks which opt-in sector preset (see lib/catalog.ts's
+-- SECTOR_PRESETS) seeded a row, so turning a sector off again removes
+-- exactly the rows it added. NULL for anything an org added by hand.
+CREATE TABLE catalog_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID REFERENCES orgs(id) NOT NULL,
+  parent_id UUID REFERENCES catalog_categories(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  sector_key TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- ============================================
 -- RECORDS (posts, items, events, entries, lessons)
 -- ============================================
 
@@ -129,13 +160,13 @@ CREATE TABLE records (
   -- Only meaningful for kind='item' -- same nullable, kind-specific-column
   -- pattern as starts_at/ends_at above.
   photo_url TEXT,
-  -- category is a fixed set (meaningful filtering needs consistent
-  -- values, unlike free text); location is free text since orgs' physical
-  -- layouts vary too much for a fixed list. Also kind='item' only.
-  category TEXT CHECK (category IS NULL OR category IN (
-    'Furniture', 'Clothing', 'Electronics', 'Household', 'Food', 'Tools',
-    'Kids & Baby', 'Books & Media', 'Other'
-  )),
+  -- Replaces the old flat `category TEXT CHECK (...)` column -- see
+  -- catalog_categories above. ON DELETE SET NULL so disabling a sector
+  -- preset (deleting its category rows) un-categorizes any items that
+  -- were using it rather than blocking the deletion. Also kind='item'
+  -- only; location is free text since orgs' physical layouts vary too
+  -- much for a fixed list.
+  category_id UUID REFERENCES catalog_categories(id) ON DELETE SET NULL,
   location TEXT,
   -- Also kind='item' only, but unlike the other item columns above, "how
   -- many" is never optional for a listing -- a single item is just the
@@ -206,6 +237,7 @@ ALTER TABLE memberships ENABLE ROW LEVEL SECURITY;
 ALTER TABLE containers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE responses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE catalog_categories ENABLE ROW LEVEL SECURITY;
 
 -- USERS: Can only read/write their own record
 CREATE POLICY users_self ON users
@@ -349,6 +381,25 @@ CREATE POLICY containers_admin_write ON containers
       AND memberships.status = 'active'
     )
   );
+
+-- CATALOG_CATEGORIES: any active member can read (they need to see the
+-- taxonomy to browse/filter/list an item); only admins can manage it,
+-- same is_org_admin() gate as containers_admin_write and orgs_admin_update.
+CREATE POLICY catalog_categories_read ON catalog_categories
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM memberships
+      WHERE memberships.org_id = catalog_categories.org_id
+      AND memberships.user_id = auth.uid()::uuid
+      AND memberships.status = 'active'
+    )
+  );
+
+CREATE POLICY catalog_categories_admin_write ON catalog_categories
+  FOR ALL
+  USING (is_org_admin(org_id))
+  WITH CHECK (is_org_admin(org_id));
 
 -- RECORDS: Inherit container visibility. Split into one policy per case
 -- (rather than one big USING with ORs) so each is independently readable

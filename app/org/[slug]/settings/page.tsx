@@ -11,6 +11,7 @@ import { canManageOrgSettings } from '@/lib/permissions'
 import { useRouter } from 'next/navigation'
 import { getInviteCode, regenerateInviteCode, leaveOrg, exportOrgData } from '@/lib/orgs'
 import { QRCodeSVG } from 'qrcode.react'
+import CatalogCategoriesSettings from '../../../components/CatalogCategoriesSettings'
 
 export default function OrgSettingsPage() {
   const { org, role, refreshOrg } = useOrg()
@@ -401,6 +402,11 @@ export default function OrgSettingsPage() {
           {saving ? 'Saving...' : 'Save settings'}
         </button>
       </form>
+
+      <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #ddd' }}>
+        <h2>Catalog categories</h2>
+        <CatalogCategoriesSettings orgId={org.id} />
+      </section>
 
       <section style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid #ddd' }}>
         <h2>Invite link</h2>
