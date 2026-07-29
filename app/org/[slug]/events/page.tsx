@@ -545,7 +545,10 @@ export default function EventsPage() {
         {loadingEvents ? (
           <p>Loading events...</p>
         ) : events.length === 0 ? (
-          <p>No events yet.</p>
+          <p style={{ color: '#666' }}>
+            No events yet. Events is for scheduling shifts, meetups, and volunteer sign-ups --
+            create one to get started.
+          </p>
         ) : (
           events.map((ev) => {
             const { confirmed, confirmedCount, waitlistedCount, full, myResponseId, myStatus } =

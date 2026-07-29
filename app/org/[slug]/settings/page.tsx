@@ -12,6 +12,39 @@ import { useRouter } from 'next/navigation'
 import { getInviteCode, regenerateInviteCode, leaveOrg, exportOrgData } from '@/lib/orgs'
 import { QRCodeSVG } from 'qrcode.react'
 
+// A small shape diagram for each banner layout -- the old picker was just
+// a label and a sentence, so choosing between "logo left" and "centered"
+// meant picturing it from words alone. These mirror Banner.tsx's actual
+// three layouts (a small logo square, a name bar, a border where the
+// banner's bottom rule sits) at a glance.
+function BannerLayoutShape({ id }: { id: BannerTemplateId }) {
+  if (id === 'logo-left') {
+    return (
+      <svg width="60" height="36" viewBox="0 0 60 36" aria-hidden="true">
+        <rect x="4" y="8" width="14" height="14" rx="2" fill="#cbd5e1" />
+        <rect x="22" y="12" width="30" height="6" rx="2" fill="#94a3b8" />
+        <line x1="0" y1="30" x2="60" y2="30" stroke="#94a3b8" strokeWidth="2" />
+      </svg>
+    )
+  }
+  if (id === 'full-banner') {
+    return (
+      <svg width="60" height="36" viewBox="0 0 60 36" aria-hidden="true">
+        <rect x="2" y="2" width="56" height="32" rx="3" fill="#cbd5e1" />
+        <rect x="8" y="22" width="26" height="6" rx="2" fill="#f1f5f9" />
+      </svg>
+    )
+  }
+  // 'centered' (default)
+  return (
+    <svg width="60" height="36" viewBox="0 0 60 36" aria-hidden="true">
+      <rect x="23" y="4" width="14" height="14" rx="2" fill="#cbd5e1" />
+      <rect x="15" y="20" width="30" height="6" rx="2" fill="#94a3b8" />
+      <line x1="0" y1="30" x2="60" y2="30" stroke="#94a3b8" strokeWidth="2" />
+    </svg>
+  )
+}
+
 export default function OrgSettingsPage() {
   const { org, role, refreshOrg } = useOrg()
   const canManage = canManageOrgSettings(role)
@@ -208,16 +241,27 @@ export default function OrgSettingsPage() {
             Banner layout
           </label>
           {BANNER_TEMPLATES.map((tpl) => (
-            <label key={tpl.id} style={{ display: 'block', marginBottom: '0.5rem' }}>
+            <label
+              key={tpl.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                marginBottom: '0.5rem',
+                padding: '0.4rem 0',
+              }}
+            >
               <input
                 type="radio"
                 name="banner_template"
                 value={tpl.id}
                 checked={bannerTemplate === tpl.id}
                 onChange={() => setBannerTemplate(tpl.id)}
-                style={{ marginRight: '0.5rem' }}
               />
-              {tpl.label} — <small>{tpl.description}</small>
+              <BannerLayoutShape id={tpl.id} />
+              <span>
+                {tpl.label} — <small>{tpl.description}</small>
+              </span>
             </label>
           ))}
         </div>
