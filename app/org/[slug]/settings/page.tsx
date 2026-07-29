@@ -64,6 +64,7 @@ export default function OrgSettingsPage() {
   const [instagramUrl, setInstagramUrl] = useState(org.instagram_url ?? '')
   const [xUrl, setXUrl] = useState(org.x_url ?? '')
   const [websiteUrl, setWebsiteUrl] = useState(org.website_url ?? '')
+  const [mailingListUrl, setMailingListUrl] = useState(org.mailing_list_url ?? '')
   const [contactEmail, setContactEmail] = useState(org.contact_email ?? '')
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -137,6 +138,7 @@ export default function OrgSettingsPage() {
         instagram_url: orNull(instagramUrl),
         x_url: orNull(xUrl),
         website_url: orNull(websiteUrl),
+        mailing_list_url: orNull(mailingListUrl),
         contact_email: orNull(contactEmail),
       }
 
@@ -315,6 +317,23 @@ export default function OrgSettingsPage() {
             placeholder="hello@example.org"
             style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
           />
+
+          <label htmlFor="mailing_list" style={{ display: 'block', marginBottom: '0.35rem' }}>
+            Mailing list signup
+          </label>
+          <input
+            id="mailing_list"
+            type="url"
+            value={mailingListUrl}
+            onChange={(e) => setMailingListUrl(e.target.value)}
+            placeholder="https://..."
+            style={{ width: '100%', padding: '0.5rem', marginBottom: '0.35rem' }}
+          />
+          <small style={{ display: 'block', color: '#666', marginBottom: '1rem' }}>
+            A signup link from whatever list tool you already use (Mailchimp, Substack,
+            Buttondown, etc.) -- BothAnd doesn&apos;t send email itself, this just points people
+            to your existing list.
+          </small>
 
           <label htmlFor="facebook" style={{ display: 'block', marginBottom: '0.35rem' }}>
             Facebook
