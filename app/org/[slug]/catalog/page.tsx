@@ -26,7 +26,7 @@ import { supabase } from '@/lib/supabase'
 import { useOrg } from '../OrgContext'
 import { useContainer, ensureContainer } from '@/lib/containers'
 import { canManageContainers, canPost } from '@/lib/permissions'
-import { CATALOG_CATEGORIES } from '@/lib/catalog'
+import { listCatalogCategories, CatalogCategory } from '@/lib/catalog'
 
 interface Claim {
   id: string
@@ -41,7 +41,7 @@ interface ItemRecord {
   body: string | null
   state: string
   photo_url: string | null
-  category: string | null
+  category_id: string | null
   location: string | null
   quantity: number
   created_at: string
@@ -50,12 +50,57 @@ interface ItemRecord {
   claims: Claim[]
 }
 
+// A subcategory shows as "Parent > Child" everywhere it's displayed or
+// offered as an option -- a flat top-level category is just its own name,
+// the zero-subcategory case of the same lookup.
+function categoryLabel(categories: CatalogCategory[], id: string | null): string | null {
+  if (!id) return null
+  const cat = categories.find((c) => c.id === id)
+  if (!cat) return null
+  if (!cat.parent_id) return cat.name
+  const parent = categories.find((c) => c.id === cat.parent_id)
+  return parent ? `${parent.name} > ${cat.name}` : cat.name
+}
+
+// Shared by both the add-item form's category select and the filter
+// select -- a top-level category with subcategories groups them under an
+// <optgroup>; one with none (Kits, School supplies, ...) is directly
+// selectable, the flat, zero-subcategory case of the same structure.
+function CategoryOptions({ categories }: { categories: CatalogCategory[] }) {
+  const topLevel = categories.filter((c) => !c.parent_id)
+
+  return (
+    <>
+      {topLevel.map((top) => {
+        const children = categories.filter((c) => c.parent_id === top.id)
+        if (children.length === 0) {
+          return (
+            <option key={top.id} value={top.id}>
+              {top.name}
+            </option>
+          )
+        }
+        return (
+          <optgroup key={top.id} label={top.name}>
+            {children.map((child) => (
+              <option key={child.id} value={child.id}>
+                {child.name}
+              </option>
+            ))}
+          </optgroup>
+        )
+      })}
+    </>
+  )
+}
+
 export default function CatalogPage() {
   const { org, role } = useOrg()
   const { container, loading: loadingContainer, setContainer } = useContainer(org.id, 'catalog')
   const [user, setUser] = useState<any>(null)
   const [items, setItems] = useState<ItemRecord[]>([])
   const [loadingItems, setLoadingItems] = useState(true)
+  const [categories, setCategories] = useState<CatalogCategory[]>([])
 
   const [settingUp, setSettingUp] = useState(false)
   const [title, setTitle] = useState('')
@@ -86,6 +131,12 @@ export default function CatalogPage() {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
   }, [])
 
+  useEffect(() => {
+    listCatalogCategories(org.id)
+      .then(setCategories)
+      .catch(() => {})
+  }, [org.id])
+
   const fetchItems = async (containerId: string) => {
     setLoadingItems(true)
 
@@ -93,7 +144,7 @@ export default function CatalogPage() {
       .from('records')
       .select(
         `
-        id, title, body, state, photo_url, category, location, quantity, created_at, owner_id,
+        id, title, body, state, photo_url, category_id, location, quantity, created_at, owner_id,
         users!owner_id(email),
         responses(id, kind, user_id, qty, users!user_id(email))
         `
@@ -205,7 +256,7 @@ export default function CatalogPage() {
         body,
         state: 'open',
         photo_url: photoUrl,
-        category: category || null,
+        category_id: category || null,
         location: location || null,
         quantity: quantityNum,
         barcode: barcode || null,
@@ -279,7 +330,7 @@ export default function CatalogPage() {
 
   const query = searchQuery.trim().toLowerCase()
   const filteredItems = items.filter((item) => {
-    if (categoryFilter && item.category !== categoryFilter) return false
+    if (categoryFilter && item.category_id !== categoryFilter) return false
     if (!query) return true
     return [item.title, item.body, item.location].some((field) =>
       field?.toLowerCase().includes(query)
@@ -349,12 +400,16 @@ export default function CatalogPage() {
                   style={{ width: '100%', padding: '0.5rem', marginTop: '0.5rem' }}
                 >
                   <option value="">No category</option>
-                  {CATALOG_CATEGORIES.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
+                  <CategoryOptions categories={categories} />
                 </select>
+                {categories.length === 0 && (
+                  <p style={{ margin: '0.35rem 0 0' }}>
+                    <small>
+                      No categories set up yet -- an admin can turn on category presets that fit
+                      this org in Settings.
+                    </small>
+                  </p>
+                )}
               </div>
               <div style={{ flex: 1 }}>
                 <label htmlFor="location">Location (optional):</label>
@@ -470,11 +525,7 @@ export default function CatalogPage() {
               style={{ flex: 1, padding: '0.5rem' }}
             >
               <option value="">All categories</option>
-              {CATALOG_CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
+              <CategoryOptions categories={categories} />
             </select>
           </div>
         )}
@@ -538,13 +589,18 @@ export default function CatalogPage() {
                     <h3 style={{ margin: '0 0 0.25rem' }}>
                       {item.title} <small>({item.state})</small>
                     </h3>
-                    {(item.category || item.location) && (
-                      <p style={{ margin: '0 0 0.5rem' }}>
-                        {item.category && <small>{item.category}</small>}
-                        {item.category && item.location && <small> &middot; </small>}
-                        {item.location && <small>{item.location}</small>}
-                      </p>
-                    )}
+                    {(() => {
+                      const catLabel = categoryLabel(categories, item.category_id)
+                      return (
+                        (catLabel || item.location) && (
+                          <p style={{ margin: '0 0 0.5rem' }}>
+                            {catLabel && <small>{catLabel}</small>}
+                            {catLabel && item.location && <small> &middot; </small>}
+                            {item.location && <small>{item.location}</small>}
+                          </p>
+                        )
+                      )
+                    })()}
                     <p style={{ flex: 1 }}>{item.body}</p>
                     <small>
                       Posted by {item.users?.email || 'Unknown'} on{' '}

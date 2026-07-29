@@ -19,10 +19,10 @@
 -- This is NOT wired into CI yet -- run by hand after any change that
 -- touches RLS policies, tenancy-relevant tables, or SECURITY DEFINER
 -- functions. Not exhaustive: covers the tenant-isolation shape of bug
--- already found once, plus the newest tenancy-relevant column
--- (background_check_status). Extend it as new RLS surface is added,
--- rather than trusting a future change is fine because it looks similar
--- to something already covered.
+-- already found once, plus tenancy-relevant additions since
+-- (background_check_status, catalog_categories). Extend it as new RLS
+-- surface is added, rather than trusting a future change is fine because
+-- it looks similar to something already covered.
 
 BEGIN;
 
@@ -36,6 +36,7 @@ DECLARE
   container_b_id UUID;
   record_b_id UUID;
   membership_b_member_id UUID;
+  category_b_id UUID;
   v_count INT;
 BEGIN
   -------------------------------------------------------------------
@@ -81,6 +82,10 @@ BEGIN
   INSERT INTO records (container_id, kind, owner_id, title, body)
   VALUES (container_b_id, 'post', admin_b_id, 'Org B secret post', 'should not be readable from org A')
   RETURNING id INTO record_b_id;
+
+  INSERT INTO catalog_categories (org_id, parent_id, name, sector_key)
+  VALUES (org_b_id, NULL, 'RLS Test Food Category', 'food')
+  RETURNING id INTO category_b_id;
 
   -------------------------------------------------------------------
   -- Test 1 (the historical bug, exact shape): a member of org A must
@@ -172,6 +177,51 @@ BEGIN
     RAISE EXCEPTION 'FAILED (test 7): org A member could read org B admin''s user row';
   END IF;
   RAISE NOTICE 'PASSED (test 7): org B admin''s profile invisible to an unrelated org A member';
+
+  -------------------------------------------------------------------
+  -- Test 8: org A member must not be able to read org B's catalog
+  -- taxonomy (catalog_categories_read requires active membership in
+  -- that same org).
+  -------------------------------------------------------------------
+  SELECT count(*) INTO v_count FROM catalog_categories WHERE id = category_b_id;
+  IF v_count != 0 THEN
+    RAISE EXCEPTION 'FAILED (test 8): org A member could read org B''s catalog_categories row';
+  END IF;
+  RAISE NOTICE 'PASSED (test 8): org B''s category invisible to an org A member';
+
+  -------------------------------------------------------------------
+  -- Test 9: a plain member (not admin) must not be able to write a
+  -- category into their own org -- catalog_categories_admin_write
+  -- requires is_org_admin(), same gate as containers_admin_write.
+  -------------------------------------------------------------------
+  BEGIN
+    INSERT INTO catalog_categories (org_id, parent_id, name, sector_key)
+    VALUES (org_a_id, NULL, 'Should be blocked', 'test');
+    RAISE EXCEPTION 'FAILED (test 9): plain member inserted a catalog_categories row';
+  EXCEPTION
+    WHEN OTHERS THEN
+      IF SQLERRM LIKE 'FAILED%' THEN
+        RAISE;
+      END IF;
+      RAISE NOTICE 'PASSED (test 9): plain member blocked from writing catalog_categories';
+  END;
+
+  -------------------------------------------------------------------
+  -- Test 10 (positive path): org B's own admin CAN read and add to its
+  -- own org's categories -- confirms test 8/9 failed for the right
+  -- reason (tenancy + role gates), not because the table is broken.
+  -------------------------------------------------------------------
+  PERFORM set_config('request.jwt.claim.sub', admin_b_id::text, true);
+
+  SELECT count(*) INTO v_count FROM catalog_categories WHERE id = category_b_id;
+  IF v_count != 1 THEN
+    RAISE EXCEPTION 'FAILED (test 10): org B''s own admin could not read its own org''s category';
+  END IF;
+
+  INSERT INTO catalog_categories (org_id, parent_id, name, sector_key)
+  VALUES (org_b_id, category_b_id, 'RLS Test Subcategory', 'food');
+
+  RAISE NOTICE 'PASSED (test 10): org B''s admin can read/write its own org''s categories';
 
   RESET ROLE;
   RAISE NOTICE 'ALL RLS REGRESSION TESTS PASSED';
