@@ -1,8 +1,8 @@
 // app/components/Banner.tsx
-import { accentHex, OrgBranding } from '@/lib/branding'
+import { getTheme, OrgBranding } from '@/lib/branding'
 
 export default function Banner({ org }: { org: OrgBranding }) {
-  const accent = accentHex(org.accent_color)
+  const accent = getTheme(org.theme).accent
 
   if (org.banner_template === 'full-banner' && org.logo_url) {
     return (
