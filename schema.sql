@@ -141,6 +141,11 @@ CREATE TABLE records (
   -- many" is never optional for a listing -- a single item is just the
   -- quantity=1 case, matching pre-quantity-tracking behavior exactly.
   quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1),
+  -- Only meaningful for kind='lesson' -- whatever URL the author pasted
+  -- (YouTube, Vimeo, or otherwise). Stored as-is; lib/videoEmbed.ts is
+  -- what decides whether it's rendered as an embed or a plain link, not
+  -- this column.
+  video_url TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
