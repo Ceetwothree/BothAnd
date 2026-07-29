@@ -181,7 +181,10 @@ export default function JournalPage() {
         {loadingEntries ? (
           <p>Loading entries...</p>
         ) : entries.length === 0 ? (
-          <p>No entries yet.</p>
+          <p style={{ color: '#666' }}>
+            No entries yet. Journal is for your own private-ish notes -- only you and org admins
+            can see what you write here.
+          </p>
         ) : (
           entries.map((entry) => (
             <article

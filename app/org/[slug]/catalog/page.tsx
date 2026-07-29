@@ -406,7 +406,10 @@ export default function CatalogPage() {
         {loadingItems ? (
           <p>Loading items...</p>
         ) : items.length === 0 ? (
-          <p>No items yet.</p>
+          <p style={{ color: '#666' }}>
+            No items yet. Catalog is where donations and surplus get tracked and given away --
+            add an item to get started.
+          </p>
         ) : filteredItems.length === 0 ? (
           <p>No items match your search.</p>
         ) : (
