@@ -146,6 +146,11 @@ CREATE TABLE records (
   -- always optional. No product-lookup API behind it; it's just recorded
   -- for reference/re-scanning, same spirit as photo_url.
   barcode TEXT,
+  -- Only meaningful for kind='lesson' -- whatever URL the author pasted
+  -- (YouTube, Vimeo, or otherwise). Stored as-is; lib/videoEmbed.ts is
+  -- what decides whether it's rendered as an embed or a plain link, not
+  -- this column.
+  video_url TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
