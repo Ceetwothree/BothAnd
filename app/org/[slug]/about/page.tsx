@@ -6,8 +6,12 @@ import { useOrg } from '../OrgContext'
 import { canManageOrgSettings } from '@/lib/permissions'
 import { accentHex } from '@/lib/branding'
 
-const SOCIAL_LINKS: { key: 'website_url' | 'facebook_url' | 'instagram_url' | 'x_url'; label: string }[] = [
+const SOCIAL_LINKS: {
+  key: 'website_url' | 'facebook_url' | 'instagram_url' | 'x_url' | 'mailing_list_url'
+  label: string
+}[] = [
   { key: 'website_url', label: 'Website' },
+  { key: 'mailing_list_url', label: 'Mailing list' },
   { key: 'facebook_url', label: 'Facebook' },
   { key: 'instagram_url', label: 'Instagram' },
   { key: 'x_url', label: 'X / Twitter' },

@@ -53,6 +53,11 @@ CREATE TABLE orgs (
     CHECK (x_url IS NULL OR x_url LIKE 'https://%'),
   website_url TEXT
     CHECK (website_url IS NULL OR website_url LIKE 'https://%'),
+  -- A signup link (Mailchimp, Substack, Buttondown, etc.), not a mailing
+  -- list BothAnd itself sends -- an org links to whatever list-management
+  -- tool it already uses, same as the other social/contact links below.
+  mailing_list_url TEXT
+    CHECK (mailing_list_url IS NULL OR mailing_list_url LIKE 'https://%'),
   contact_email TEXT
     CHECK (contact_email IS NULL OR contact_email LIKE '%@%')
 );

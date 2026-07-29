@@ -16,6 +16,7 @@ export interface Org extends OrgBranding {
   instagram_url: string | null
   x_url: string | null
   website_url: string | null
+  mailing_list_url: string | null
   contact_email: string | null
 }
 
@@ -25,7 +26,7 @@ export interface UserOrgMembership {
 }
 
 const ORG_FIELDS =
-  'id, name, slug, logo_url, banner_template, accent_color, is_public, mission_statement, about_text, facebook_url, instagram_url, x_url, website_url, contact_email'
+  'id, name, slug, logo_url, banner_template, accent_color, is_public, mission_statement, about_text, facebook_url, instagram_url, x_url, website_url, mailing_list_url, contact_email'
 
 // The viewer's orgs, for the top-level hub and the org switcher.
 export function useUserOrgs() {
