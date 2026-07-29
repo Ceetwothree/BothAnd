@@ -141,6 +141,11 @@ CREATE TABLE records (
   -- many" is never optional for a listing -- a single item is just the
   -- quantity=1 case, matching pre-quantity-tracking behavior exactly.
   quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1),
+  -- Also kind='item' only. Captured from a camera barcode scan or typed by
+  -- hand -- an intake accelerator, not a requirement, so freeform and
+  -- always optional. No product-lookup API behind it; it's just recorded
+  -- for reference/re-scanning, same spirit as photo_url.
+  barcode TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
