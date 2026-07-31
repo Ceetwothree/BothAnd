@@ -10,27 +10,218 @@ and fixed live (see `SETUP_GUIDE.md`'s Security Notes) — worth reading
 before making further RLS changes, since it's also a reminder that
 `get_advisors` alone isn't sufficient verification for this class of bug.
 
-**Not started, and the natural next steps in priority order:**
-1. **Cross-org trade** — the aspirational feature the whole project is
-   ultimately oriented around (see the About page's origin story). Needs
-   a real design conversation before writing any code, not a silent
-   build — it's inherently cross-tenant, and RLS mistakes here would be
-   exactly the shape of bug just fixed. Start by asking: what does "trade"
-   actually mean (transfer a listing's ownership between orgs? a shared
-   cross-org catalog view? something else?), and what's the minimum RLS
-   change that supports it without loosening anything unrelated.
-2. Catalog's remaining gaps (in-app messaging, favorites, notifications)
-   — lower priority, but notifications specifically double as the
-   mechanism cross-org trade would need, so worth considering together.
-3. Journal & Course polish (rich text/photos/tags/search for Journal,
-   rich lesson content for Course) — lowest urgency, no competitive
-   pressure driving it.
-4. Board: categories/tags, search, notifications, admin pinning,
-   comment threading — never scoped into a suggested-order slot, still
-   open.
-5. Database-level role gating — `records_write`/`containers_admin_write`
-   RLS still allow any active member to write regardless of role; today's
-   role gates (e.g. "staff can create events") are UI-level checks only.
+**Second pass (research-only, no code):** a deeper competitive dive —
+see `COMPETITIVE_RESEARCH.md`. Headline finding: the "none of this
+business logic is that hard" hypothesis mostly held up against real
+product docs, with identity/compliance checks (background checks) as
+the one genuine exception — and even those are always a third-party API
+integration, never built in-house, by any tool researched. Confirmed a
+few concrete, previously-fuzzy gaps are now well-scoped and cheap:
+Catalog claim-to-message threads (Olio's model), Board comment
+threading (one nullable self-referencing column), and web push
+notifications (Push API + service worker, no third-party SaaS needed,
+closes gaps on both Board and Catalog at once). Also surfaced a real
+policy-layer gap not previously on the list: **shift swapping** for
+Events (propose → counter-accept → admin-approve — a real state
+machine, not a quick add). And found direct precedent for cross-org
+trade in food-bank network software (Link2Feed, FoodCopia) — it's a
+validated, non-speculative category, though a structurally weaker "why
+now" case than food's (no umbrella-org forcing function, no
+perishability urgency, no food-specific liability law) — raises the
+priority but doesn't change the "design pass before code" plan below.
+
+**Third pass (research-only, no code):** dug into what users of these
+tools actually complain is missing (review sites, app store reviews,
+industry surveys) — overwhelmingly polish/reliability, not missing
+capability, which is itself the opportunity (see `COMPETITIVE_RESEARCH.md`'s
+"What users actually want" section). Also modeled donation payments in
+depth: decided BothAnd will not be a payment middleman — orgs link out
+to whatever processor they already use (PayPal, Venmo Charity Profile,
+Donorbox, Zeffy, etc.), which is the universal designed-for pattern for
+every tool researched, not a workaround. Surfaced two more cheap wins
+(volunteer recognition, grant-report export) and one real trap to avoid
+(donor-CRM integration — out of scope, pulls toward being a different
+kind of product). All of this is now consolidated into one execution
+sequence below.
+
+**Fourth pass (research-only, no code):** modeled a real rework of
+Catalog's inventory model in depth, grounded in the user's own PATH
+experience — see `INVENTORY_MODEL.md`. Multiple physical sites per org
+(a real entity, not a text field), an org-defined hierarchical
+taxonomy (category → subcategory, layered as sector presets → "Other" →
+optional full customization, replacing the flat hardcoded category list
+shipped in the search/filter PR), a gift-in-kind donation-intake/receipt
+concept separate from the public listing (value hidden publicly, shown
+on the receipt), barcode-assisted intake, and QR scan-in/scan-out for
+unstaffed share boxes (reusing the Events check-in QR pattern — a claim
+with a site-level auto-fulfill toggle, not a new state machine). Big
+enough to be its own initiative, not a line in the polish plan below —
+see that file for the full design and what's still genuinely
+undecided (attribute fields, donor-identity handling on the receipt).
+
+**Fifth pass (research-only, no code):** grounded the Inventory Model's
+two open sizing questions and staged cross-org trade — see
+`INVENTORY_MODEL.md`'s updated sections. The preset taxonomy superset
+turns out small (a dozen or so top-level categories across food banks,
+diaper banks, clothing closets, and disaster relief, not an open-ended
+problem); gift-in-kind reporting fields are grounded against IRS Form
+8283 and DonorPerfect convention; the "hide value publicly" toggle now
+defaults to hiding value on the public listing, always kept on the
+internal donation-intake receipt. Cross-org trade itself is now a
+4-stage plan (cross-org membership MVP → visibility tiers → admin-to-
+admin category-delegation coalitions → an optional surplus bulletin
+board), in increasing order of new RLS surface — see `INVENTORY_MODEL.md`
+for the full staging and why each stage is ordered where it is.
+
+**Sixth pass (research-only, no code):** Course is the least developed
+workflow today — lesson + submission + feedback, connected to nothing
+else. PATH's real, currently fully manual case (a signed paper waiver
+emailed to an admin before a volunteer can see the schedule) generalizes
+into a real, narrow gap: a container can require a course be completed
+first. See `COURSE_GATING.md` for the full design — a container-level
+gate reusing the existing lesson-submission progress definition, plus a
+signature-specific refinement (frozen snapshot of what was agreed to,
+typed name + explicit consent + audit trail, grounded in actual ESIGN/
+UETA requirements) for the waiver case specifically. Also see
+`COMPETITIVE_RESEARCH.md`'s Category 4 for why this is worth building
+despite the earlier "not Moodle-scale" verdict standing — it's a
+narrower question (gating, not content depth) that verdict didn't cover.
+
+## Polish iteration plan
+
+Reorganized from a flat priority list into dependency-ordered tiers —
+several items quietly depended on other items that weren't themselves
+scheduled anywhere. Tiers are ordered by what actually blocks what, not
+just by size; within a tier, cheapest/most independent first.
+
+### Tier 0 — ship first, zero dependencies
+
+**Platform-level stubs, currently being built** (from the gap-analysis
+pass — real features, deliberately shipped as stubs first: language and
+polish are expected to iterate, the mechanism is what matters this
+round):
+
+1. **Terms of Service / Privacy Policy.** Two pages, footer-linked,
+   required-checkbox at signup. First pass doesn't persist an
+   acceptance record (timestamp/version) — noted as the follow-up, not
+   done now.
+2. **Org data export.** Admin-only button on Settings; packages that
+   org's own containers/records/responses as downloadable JSON. Directly
+   answers "what if BothAnd stops being maintained" with something real
+   today, not just a promise.
+3. **Self-service account deletion.** Same shape as `leave_org()` —
+   deactivate + anonymize via a `SECURITY DEFINER` RPC. First pass
+   doesn't purge `auth.users` itself (that needs a service-role call,
+   not a client-safe RPC) — noted as the follow-up.
+4. **First-run onboarding checklist.** A dismissible checklist on a new
+   org's home page for admins — mission set? invited anyone? first
+   event or catalog item? — computed from existing data, no new state
+   beyond "dismissed."
+5. **Background-check status tracking.** A manual status field per
+   membership (not required / pending / cleared) with admin-only
+   read/write — real, useful today even though nothing calls a real
+   background-check API yet. The integration point for later.
+6. **RLS regression test script.** Codifies the manual `SET LOCAL ROLE`
+   verification method used to catch the tenant-isolation bug into a
+   repeatable script, covering that incident plus the RLS added since.
+   Run by hand for now, not wired into CI yet.
+
+**Everything else already independent and zero-dependency:**
+
+7. **Cross-org trade, Stage 1** (the cross-org-membership nudge from
+   `INVENTORY_MODEL.md`'s staged plan) — genuinely the cheapest thing in
+   the entire plan: zero schema change, zero new RLS, a line of copy on
+   the `browse` page (*"if another group makes items available to
+   members, you can join and request them"*). Worth doing first
+   specifically because it tests real demand for cross-org access before
+   any of the harder, riskier stages get built.
+8. **"Ways to give" on org Settings** — `donate_url` (clickable link,
+   rendered as a Give button) + `donate_info` (freeform text: Zelle,
+   mailing address, cash at events) on `orgs`. Helper text should
+   surface the Venmo-Charity-Profile-vs-Zelle-ToS distinction and the
+   informal-group commingling advice, not just "paste a link here."
+   See `COMPETITIVE_RESEARCH.md`'s Category 6 for the full design and
+   exact copy drafted for this.
+9. **Catalog claim → message thread** — replaces the current
+   visible-email-on-claim approach with an actual thread scoped to that
+   claim, matching Olio's model.
+10. **Volunteer recognition + grant-report export** for Events — both
+    build on attendance/hours data that already exists; a small UI
+    surface on top, not new data modeling.
+11. **Board comment threading** — one nullable `parent_response_id`
+    self-reference, matches Discourse's actual model.
+12. **Course gating, base mechanic** — `containers.requires_course_container_id`
+    + a locked-container UI state, reusing the existing lesson-submission
+    progress definition. Independent of the waiver-signature specifics in
+    Tier 1 below — real value on its own (any "complete this training
+    first" case, not just liability waivers). See `COURSE_GATING.md`.
+
+### Tier 1 — still independent, each needs its own short design pass
+
+1. **Web push notifications** (Push API + service worker + VAPID keys)
+   — the one item here that's real infrastructure, not just a schema
+   change. Closes gaps on both Board (new post/reply) and Catalog ("tell
+   me when X appears") at once, so it's worth building generically
+   rather than once per workflow.
+2. **Course gating, waiver refinement** — frozen snapshot of what was
+   agreed to, typed name + explicit consent + audit trail (grounded in
+   ESIGN Act/UETA requirements), self-serve-vs-staff-reviewed toggle.
+   Builds on Tier 0's base gate. See `COURSE_GATING.md`.
+3. **Events shift swap** — the one genuine policy-layer gap found in
+   the whole research pass. A real state machine (propose →
+   counter-accept → admin-approve), needs its own short design pass,
+   not a bolt-on.
+4. **Events skills/availability matching** — a real, larger feature
+   (tag members and events, filter or auto-suggest by fit). Also needs
+   its own design pass.
+
+### Tier 2 — the big initiative, build as one sequenced project
+
+1. **Inventory Model** (`INVENTORY_MODEL.md`) — this is the prerequisite
+   that was implicit but never itself a scheduled step: sites →
+   taxonomy (sector presets → "Other" → optional custom editor) →
+   migrate the existing flat hardcoded `category` column onto it →
+   gift-in-kind receipt / value-visibility toggle → barcode-assisted
+   intake → QR scan-in/scan-out for share boxes, in that internal
+   order. Once this exists, two previously-listed items become cheap
+   follow-ons rather than needing their own design work:
+   - **Catalog Borrow/lend listing type** — one column alongside the
+     new taxonomy, not just give-away vs. gone.
+   - **Inter-site trade (same org)** — trading inventory between two
+     sites *within* one org (e.g. two of Birchwood's own share boxes)
+     is almost free once sites exist: entirely inside that org's
+     existing RLS boundary, just a request/claim scoped across sites
+     instead of within one.
+
+### Tier 3 — deliberately last, hardest new RLS surface
+
+1. **Cross-org trade, Stages 2–4** — visibility tiers (public/member/
+   staff-only) → admin-to-admin category-delegation coalitions →
+   optional surplus bulletin board. Sequenced after the Inventory Model
+   (reasoning about what's shareable needs the taxonomy to exist) and
+   after Stage 1 has actually shown whether people want this. Each
+   stage is its own design-and-verify pass — see `INVENTORY_MODEL.md`.
+
+## Next phase (deferred, not this pass)
+
+Explicitly put off until the tiers above are further along:
+
+- Spam/abuse prevention on public join/invite flows (no captcha or rate
+  limiting today)
+- Admin activity/audit log (role changes, invite-code regeneration, etc.)
+- Accessibility pass (screen reader, keyboard nav, contrast — especially
+  relevant given the populations some orgs serve)
+- Basic product analytics for the maintainer (which workflows are
+  actually used, useful before investing further in a workflow like
+  Course)
+
+Also still open, revisit if relevant: Journal polish (rich
+text/photos/tags/search) and Course rich lesson content (no competitive
+pressure driving either); Board categories/tags/search/admin pinning;
+database-level role gating (`records_write`/`containers_admin_write` RLS
+currently let any active member write regardless of role — today's role
+gates are UI-level checks only); Freecycle-style hotword moderation
+(only relevant if BothAnd opens up to larger/public orgs).
 
 ## Thesis
 
@@ -46,7 +237,10 @@ did before the July 2026 documentation pass.
 
 Research basis: web search of current (2026) volunteer-scheduling, marketplace/
 classifieds, and blog-CMS tools, plus direct reading of BothAnd's own code.
-Not exhaustive — a snapshot to work from, not a permanent ranking.
+Not exhaustive — a snapshot to work from, not a permanent ranking. See
+`COMPETITIVE_RESEARCH.md` for a deeper architecture-level pass (pricing
+gates, what's genuinely hard vs. just CRUD+workflow, open-source
+alternatives' real data models) done after this table was first built.
 
 ## Board — competes with blog/CMS tools (Ghost, WordPress, Substack) + lightweight forums
 
@@ -145,13 +339,11 @@ pressure); Course competes loosely with free-tier Google Classroom.
    comments wired up, self-service leave-org, edit/delete own post.
 2. ~~Events rework~~ — done: real date/time field, waitlist,
    recurring/templated shift generation, attendance/hours logged
-   (including walk-in self-check-in via QR). Only automated
-   reminders/calendar view remain, and are low-priority.
+   (including walk-in self-check-in via QR).
 3. ~~Catalog rework~~ — done: photos, gallery view, search/filter,
-   quantity/stock tracking. In-app messaging, favorites, and
-   notifications remain (lower priority, not part of the original
-   rework's scope) -- notifications specifically is also the mechanism
-   cross-org trade would need.
-4. **Cross-org trade** (the aspirational feature) — now that Catalog
-   itself is solid, since it's built on the same data model.
-5. Journal/Course polish, as time allows — lower urgency.
+   quantity/stock tracking.
+
+What comes after this (messaging, notifications, recognition, donation
+links, shift swap, skills matching, cross-org trade, Journal/Course
+polish) is now tracked as the "Polish iteration plan" near the top of
+this file, not here — that supersedes this list.
