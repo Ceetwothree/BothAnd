@@ -1,0 +1,13 @@
+{
+  "name": "la-homelessness-research-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static site generator for the LA Homelessness research project. Content lives in content/*.md, builds to dist/.",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch"
+  },
+  "devDependencies": {
+    "marked": "^12.0.0"
+  }
+}
