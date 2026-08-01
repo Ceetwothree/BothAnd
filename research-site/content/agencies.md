@@ -22,6 +22,32 @@ Because governance power is split evenly, neither government fully owns LAHSA �
 
 LAHSA also serves as the **Collaborative Applicant** for the HUD-recognized LA Continuum of Care — meaning it's not just "a" homeless-services agency but the entity that legally applies for and administers nearly $1 billion in cumulative federal funding on behalf of the entire county's system. That dual role is why HUD's 2026 suspension threatens the whole county's system, not just LAHSA's own programs.
 
+<div class="pm">
+<p class="pm-title">Who governs, who funds, who owns nothing fully</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">HUD designates the LA Continuum of Care as the federal funding vehicle; LAHSA is its sole Collaborative Applicant<small>One agency's legal standing determines whether the entire county's ~$1B federal pipeline can be applied for at all.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">LAHSA Commission: 5 seats appointed by the County Board of Supervisors, 5 by the Mayor with Council confirmation<small>Governance power is split exactly evenly by design.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> because neither government fully owns LAHSA, the County can vote to defund it but the joint agreement still nominally gives it equal governing power, and the City can't unilaterally restructure or abolish it either — the structural ambiguity cited repeatedly as why the 2025-2026 breakup turned messy instead of clean.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">County pulls funding and staff into its own new department (HSH, launched Jan. 2026)<small>Directly operates county-funded interim housing, outreach, and prevention — but LAHSA keeps the federal Collaborative Applicant role regardless.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">City keeps funding LAHSA directly (~73% of its FY2026-27 budget) while HUD suspends LAHSA's federal funding over the same institution</p><p class="pm-break-note"><strong>Breaks here:</strong> no reporter or advocate has articulated what happens to CoC compliance if County operating capacity sits at HSH while the federal "lead agency" designation stays with LAHSA — see "Where mandates overlap" below.</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 ## Government agencies
 
 | Entity | Type | Role | Scale (most recent figure) | Funding |

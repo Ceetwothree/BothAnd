@@ -44,6 +44,34 @@ The core design flaw, per City Controller audits: a housing bond alone doesn't f
 
 Mayor Bass's signature encampment-resolution strategy: outreach teams and LAHSA negotiate with an entire encampment at once, offering everyone motel/hotel rooms on the spot. By October 2025, it had served 5,179 people across 114 operations — 1,243 in permanent housing, 1,636 still in interim placements, and 2,300 who'd exited the program with **no public breakdown of what happened to them**. By mid-2026, of roughly 6,000 served cumulatively, about **40% had exited and returned to unsheltered homelessness**. Cost has topped **$322 million** — roughly $259,000 per person actually reaching permanent housing, or $62,000 per person served regardless of outcome.
 
+<div class="pm">
+<p class="pm-title">Inside Safe, as a case study in how agency, tool, and person interact</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Mayor's Field Intervention Team engages a targeted encampment and offers everyone a motel/hotel room on the spot</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Person accepts and moves into a motel room, tracked as "served"</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">HMIS/Clarity is supposed to log the eventual exit and destination<small>See <a href="tools.html">Tools &amp; Systems</a>.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> LAHSA's system lets providers bypass exit logging entirely for this program — the city can keep paying for a motel room for weeks after someone has already left, with no enforced requirement to record it. This is the specific, named mechanism behind the "2,300 people with no public breakdown of what happened to them" figure above.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Person either reaches permanent housing (~1 in 5 of those served) or returns to unsheltered homelessness (~40% of exits)</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 <div class="callout callout-fails">
 <h4>Independent RAND research contradicts the "whack-a-mole" denials</h4>
 RAND's longitudinal LA LEADS study (tracking Hollywood, Venice, Skid Row since 2021) found tent dwelling fell roughly 50% since 2021, but rough sleeping and vehicle dwelling rose to offset it — rough sleeping specifically hit a <strong>four-year high</strong>. Nearly half of surveyed rough sleepers reported losing a dwelling in the past year; 46% of those said it was confiscated or towed by officials. RAND's own summary: sweeps and camping-ban enforcement reduce visible tent homelessness short-term but push people into harder-to-track, often more dangerous forms of unsheltered homelessness rather than into housing. <a href="https://www.rand.org/news/press/2026/05/homelessness-holds-steady-across-three-la-neighborhoods.html">RAND, May 2026</a>

@@ -17,6 +17,7 @@ marked.setOptions({ gfm: true });
 const NAV = [
   { group: "Start Here", items: [
     { file: "index", label: "Home" },
+    { file: "sopk", label: "The Analytical Frame" },
     { file: "overview", label: "Scope & Scale" },
   ]},
   { group: "The System", items: [

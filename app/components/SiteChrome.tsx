@@ -287,6 +287,40 @@ const SITE_CSS = `
       .rp-content .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
       .rp-content .card { border: 1px solid var(--site-paper-line); border-radius: 10px; padding: 1rem 1.1rem; background: var(--site-paper-raised); }
       .rp-content .card a { text-decoration: none; font-weight: 600; }
+
+      /* Process-map diagrams: a hand-authored, dependency-free vertical
+         stepper (no JS/Mermaid) showing who/what touches a process and
+         where it's documented to break. Node "type" (agency/tool/process/
+         person) is conveyed by a colored tag, not position, so the same
+         vocabulary reads consistently across every diagram on the page. */
+      .rp-content .pm { margin: 1.75rem 0; padding: 1.25rem 1.4rem 1.5rem; border: 1px solid var(--site-paper-line); border-radius: 10px; background: var(--site-paper-raised); }
+      .rp-content .pm-title { margin: 0 0 1.25rem; font-weight: 600; color: var(--site-ink); font-size: 1rem; }
+      .rp-content .pm-flow { display: flex; flex-direction: column; }
+      .rp-content .pm-step { display: flex; gap: 0.9rem; align-items: stretch; }
+      .rp-content .pm-marker { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 14px; }
+      .rp-content .pm-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 0.3rem; border: 2px solid var(--site-paper-raised); box-shadow: 0 0 0 2px currentColor; }
+      .rp-content .pm-dot-agency { color: var(--site-teal); }
+      .rp-content .pm-dot-tool { color: var(--site-gold); }
+      .rp-content .pm-dot-process { color: var(--site-ink-muted); }
+      .rp-content .pm-dot-person { color: #8a63b0; }
+      .rp-content .pm-line { flex: 1; width: 2px; min-height: 1.35rem; background: var(--site-paper-line); margin: 0.15rem 0; }
+      .rp-content .pm-step:last-child .pm-line { display: none; }
+      .rp-content .pm-body { flex: 1; padding-bottom: 1.35rem; min-width: 0; }
+      .rp-content .pm-step:last-child .pm-body { padding-bottom: 0; }
+      .rp-content .pm-tag { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.12em 0.55em; border-radius: 999px; margin-bottom: 0.4rem; }
+      .rp-content .pm-tag-agency { background: rgba(31, 111, 92, 0.15); color: var(--site-teal); }
+      .rp-content .pm-tag-tool { background: var(--site-gold-soft); color: var(--site-gold); }
+      .rp-content .pm-tag-process { background: var(--site-paper-line); color: var(--site-ink-muted); }
+      .rp-content .pm-tag-person { background: rgba(138, 99, 176, 0.15); color: #8a63b0; }
+      .rp-content .pm-label { margin: 0; font-size: 0.95rem; color: var(--site-ink); line-height: 1.5; }
+      .rp-content .pm-label small { display: block; margin-top: 0.3rem; font-size: 0.85rem; color: var(--site-ink-soft); font-weight: 400; }
+      .rp-content .pm-step-break .pm-line { background: repeating-linear-gradient(to bottom, #a13d2f, #a13d2f 4px, transparent 4px, transparent 8px); }
+      .rp-content .pm-break-note { margin: 0.6rem 0 0; padding: 0.65rem 0.85rem; border-radius: 6px; background: rgba(161, 61, 47, 0.1); border: 1px solid #a13d2f; font-size: 0.88rem; color: var(--site-ink-soft); }
+      .rp-content .pm-break-note strong { color: #a13d2f; }
+
+      .rp-content .pm-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 1rem 0 0.5rem; font-size: 0.85rem; color: var(--site-ink-soft); }
+      .rp-content .pm-legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+      .rp-content .pm-legend-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 2px currentColor; }
 `
 
 export function SiteStyles() {

@@ -21,6 +21,8 @@ export const RESEARCH_PAPER_HTML = `
 <li>Where does the process <strong>break</strong>, structurally — not &quot;who&#39;s to blame,&quot; but where the pipe actually leaks?</li>
 <li>What <strong>solutions have been tried</strong> — which worked, which didn&#39;t, and why?</li>
 </ul>
+<h3>The lens this project uses</h3>
+<p>Before the findings: this project isn&#39;t trying to catch anyone doing something wrong, and it isn&#39;t a spending-scandal writeup. It uses W. Edwards Deming&#39;s <strong>System of Profound Knowledge</strong> — a discipline for seeing a system (not just the people in it) clearly enough to know where it would actually give, if pushed. See <a href="#rp-sopk">The Analytical Frame</a> before the rest, since every other page is written to be read through it.</p>
 <h3>How this site is organized</h3>
 <p>This is a research-led project, not a fixed report — the structure will evolve as findings warrant. Right now it&#39;s organized in five parts:</p>
 <div class="card-grid">
@@ -38,6 +40,78 @@ export const RESEARCH_PAPER_HTML = `
 <h5>Open right now</h5>
 This project is in its early research phase. See the <a href="#rp-findings">Findings Log</a> for the current state of investigation and the questions actively being chased down.
 </div>
+</div>
+
+<div class="rp-page" id="rp-sopk">
+<h2>A System of Profound Knowledge</h2>
+<p class="rp-subtitle">This project isn't trying to catch anyone doing something wrong. It's trying to see the system clearly enough to know where it would actually give, if pushed.</p>
+<div class="rp-meta-row"><span class="rp-status rp-status-in-progress">In Progress</span><span>Last updated 2026-08-01</span></div>
+<h3>Why this page exists</h3>
+<p>Every other page on this site documents a failure somewhere — an audit that couldn&#39;t verify spending, a tool with a documented bias record, a bottleneck that reversed two years of progress in one. Read in isolation, that list reads as an indictment: LA&#39;s homelessness system is corrupt, or incompetent, or both.</p>
+<p>That&#39;s not the read this project is going for, and it&#39;s worth saying explicitly why, because it changes what the rest of this site is <em>for</em>.</p>
+<p>W. Edwards Deming — the statistician whose work underpins modern process improvement — argued that most failures inside an organization aren&#39;t caused by the people working in it. They&#39;re caused by the <em>system</em> those people work inside: its structure, its incentives, its information flows, its variation. His shorthand for this was blunt: <strong>&quot;a bad system will beat a good person every time.&quot;</strong> He proposed a discipline for actually seeing a system clearly enough to improve it, which he called the <strong>System of Profound Knowledge</strong> — four interdependent lenses:</p>
+<ol>
+<li><strong>Appreciation for a system</strong> — seeing the whole set of interdependent parts working (or failing to work) toward a shared aim, instead of judging each part in isolation.</li>
+<li><strong>Knowledge of variation</strong> — telling the difference between normal noise in a process and a genuine, causal signal, so you don&#39;t chase phantom explanations for random fluctuation or ignore real ones.</li>
+<li><strong>Theory of knowledge</strong> — understanding what a measurement actually measures, what it predicts, and where it breaks down — because a number that looks precise can still be measuring the wrong thing.</li>
+<li><strong>Psychology</strong> — understanding what actually motivates the people inside the system, both the workforce and the people the system is meant to serve, and what happens to that motivation under fear, blame, or perverse incentive.</li>
+</ol>
+<div class="callout callout-question">
+<h5>What this page is not</h5>
+This is not a claim that LAHSA, the City, the County, or any provider on this site is well-run, or that the fraud/waste findings documented elsewhere are somehow excused by "it's the system's fault." Some of what's documented here — the LAHSA conflict-of-interest contract, for instance — is straightforwardly individual misconduct, and this page doesn't launder that into a systems problem. The point is narrower: <strong>most of the poor outcomes on this site would still happen even if every individual currently working in this system were replaced with an equally well-intentioned, competent person</strong> — because the structure itself produces them. That's the part worth understanding, because it's the part a new hire, a new mayor, or a new audit can't fix by simply trying harder.
+</div>
+
+<h3>1. Appreciation for a system</h3>
+<p>A system is a set of interdependent components working toward a common aim. The first failure mode Deming describes is optimizing one component in a way that damages the system as a whole — because the components aren&#39;t actually independent, even when they&#39;re managed as if they were.</p>
+<p>LA&#39;s homelessness response is a textbook case of this, and it&#39;s visible at every scale documented on this site:</p>
+<ul>
+<li><strong>The interim-housing bottleneck</strong> (see <a href="#rp-breaks">Where &amp; Why It Breaks</a>) exists because the sub-systems that add capacity to <em>shelters</em> (Inside Safe, A Bridge Home, tiny-home villages) were funded and scaled independently of the sub-system that moves people <em>out</em> of shelters into permanent housing (Rapid Re-Housing, PSH). Each sub-system, measured on its own terms, looks like it&#39;s working — beds opened, encampments cleared. The system as a whole still gets worse, because the two halves were never designed as one pipeline with one shared capacity constraint.</li>
+<li><strong>LAHSA as a joint powers authority</strong> (see <a href="#rp-agencies">Agencies &amp; NGOs</a>) is a structural admission that City and County are two components that don&#39;t share one aim — the JPA was built specifically because neither government would subordinate its own control to the other&#39;s. That same non-alignment is what made the 2025 split messy instead of clean: there was no single accountable owner of the whole system to begin with.</li>
+<li><strong>Fifteen City Council districts each running an independent &quot;Homelessness Deputy&quot; operation</strong> means encampment response, sanitation, and service-linkage vary block to block by design — fifteen locally-optimized sub-systems, no shared aim enforced across them.</li>
+<li><strong>Prevention is the single most cost-effective intervention documented on this site</strong> (a 14.5% return-to-homelessness rate, versus far worse downstream — see <a href="#rp-effectiveness">What Works, What Doesn&#39;t</a>) and it is also the smallest, most poorly scaled program in the entire system. A system genuinely optimizing for its stated aim (reducing homelessness) would over-invest in its highest-leverage, lowest-cost intervention. This one doesn&#39;t, because prevention funding, interim-shelter funding, and PSH funding are appropriated through entirely separate political and bureaucratic channels that don&#39;t compete against each other for the same dollar — so there&#39;s no mechanism that would ever reallocate toward the highest-leverage point.</li>
+</ul>
+<p>The pattern across all four: nobody has to be incompetent or dishonest for these outcomes to occur. They occur because the components are managed as separate systems when they are, in fact, one system with a single population moving through it.</p>
+<h3>2. Knowledge of variation</h3>
+<p>Deming distinguished <strong>common cause variation</strong> (the normal, expected noise in any process, which no single event explains) from <strong>special cause variation</strong> (a real, identifiable event that shifted the process). Treating common-cause noise as if it were a special cause — reacting to every wiggle in a chart as news — is one of the most reliable ways to make a stable system perform worse, because you end up &quot;correcting&quot; for noise that will regress on its own, and mistaking a random dip for a policy win.</p>
+<p>This site&#39;s own Scope &amp; Scale data is a live example of exactly this problem:</p>
+<ul>
+<li>The PIT count moved from 75,312 (2024) to a finalized 72,195 (2025) to 73,040 (2026) — see <a href="#rp-overview">Scope &amp; Scale</a>. LAHSA itself characterized the 2026 increase as &quot;not statistically significant.&quot; That&#39;s a variation claim, not a trend claim — and it cuts both ways: the celebrated &quot;two years of decline&quot; that preceded it should be read with the same skepticism about whether it was signal or noise, especially given the methodology concerns below.</li>
+<li>Independent RAND field research found the official count may miss a large and <em>growing</em> share of the unsheltered population in hot-spot neighborhoods (undercounting an estimated 32-39% in some areas by 2025) as encampment-clearing pushed the remaining unsheltered population into harder-to-find locations. If the undercount itself has a trend embedded in it, then part of what looks like &quot;the homeless population is shrinking&quot; may actually be &quot;the count is getting worse at seeing it&quot; — two different processes producing the same headline number, and no way to tell them apart from the topline figure alone.</li>
+<li>The 2025 count&#39;s reported 27-34% drop in street-family counts was attributed by LAHSA&#39;s own chief of staff not to genuine improvement but to fewer family shelter beds pushing families into doubled-up situations the count doesn&#39;t see at all — a case where a number moved for a reason that has nothing to do with the outcome the number is supposed to represent.</li>
+</ul>
+<div class="callout callout-mixed">
+<h5>The practical implication</h5>
+Every year-over-year percentage change on this site should be read with the same discipline Deming applied to a control chart: is there a specific, identifiable, sourced cause for this move (a subsidy pause, a methodology change), or is it inside the range of normal noise for a count of this kind, taken this way? Where this project could find a specific documented cause, it says so explicitly (the 2026 reversal has one: the RRH funding pause). Where it couldn't, that's stated as an open question rather than resolved with a story.
+</div>
+
+<h3>3. Theory of knowledge</h3>
+<p>A measurement is only useful to the extent you understand what it actually measures, what it was validated against, and where that validation breaks down. Deming&#39;s theory of knowledge is about taking that seriously instead of treating a number as self-evidently meaningful just because it&#39;s precise.</p>
+<p>This site has already documented at least three concrete cases where LA&#39;s system is running on a measurement whose theoretical foundation doesn&#39;t hold up under its actual use:</p>
+<ul>
+<li><strong>The VI-SPDAT</strong> (see <a href="#rp-tools">Tools &amp; Systems</a>) was built on data from a single northeastern U.S. city, from a largely male sample, and validated against likelihood of <em>death</em> — then deployed for years as a <em>housing-priority</em> instrument, a different construct than the one it was actually validated on. Its own creator publicly disavowed it as an intake tool. That&#39;s not a data-entry bug; it&#39;s a category error in what the number was ever entitled to predict — and it directly produced a documented racial disparity in who got prioritized, because the thing it was actually measuring (willingness to disclose trauma/substance use to an intake worker) correlates with institutional trust, which correlates with race.</li>
+<li><strong>The PIT count</strong> is a single-night methodology being asked to answer a fundamentally different question — &quot;how big is homelessness in LA, and is it going up or down&quot; — than the one it&#39;s actually built to answer, which is closer to &quot;how many people were visible to a volunteer team on one specific night.&quot; National literature suggests true scale could be 2.5-10x what a PIT count captures. Every policy conversation that treats the PIT number as <em>the</em> homelessness figure for LA is smuggling in a theory-of-knowledge error.</li>
+<li><strong>&quot;Cost per successful exit to permanent housing&quot;</strong> — arguably the single most useful accountability metric this system could produce — does not exist anywhere in the public record found in this research pass (see <a href="#rp-findings">Findings Log</a>). Its absence is itself a theory-of-knowledge finding: an enormous amount of measurement effort goes into tracking inputs (dollars appropriated, beds opened, contacts made) and comparatively little into the one output measure that would let anyone compare interventions on equal footing.</li>
+</ul>
+<div class="callout callout-fails">
+<h5>Where this compounds with the workforce, not just the tooling</h5>
+Because scores and metrics directly determine resource allocation, there is documented concern (echoed in comparable-tool literature) about both provider-side "coaching" of answers and client-side underreporting due to stigma — both distort the measurement further, on top of the tool's own validity problems. A theory-of-knowledge failure at the instrument level and a psychology failure at the human level compound each other; they aren't separate problems.
+</div>
+
+<h3>4. Psychology</h3>
+<p>Deming&#39;s fourth lens is about what actually motivates people — and what a system does to that motivation through fear, blame, extrinsic incentives, and ranking. A system that responds to failure by assigning individual blame tends to get <em>less</em> honest information over time, not more, because the rational response to being blamed for a systemic problem is to stop surfacing it.</p>
+<p>Two workforces sit inside this system, and both show documented psychology effects:</p>
+<ul>
+<li><strong>The frontline services workforce.</strong> Case managers earning $40,000-$60,000/year in a county where it takes roughly $64,000/year to afford a one-bedroom without being rent-burdened; ~30% turnover at Chrysalis; some clients cycling through six or seven different case managers (see <a href="#rp-breaks">Where &amp; Why It Breaks</a>). Case management is fundamentally a relationship-based intervention — its effectiveness depends on continuity and trust, which is precisely the thing high turnover destroys. This isn&#39;t a training problem or a hiring-bar problem; it&#39;s a direct, mechanical result of paying the people who provide the intervention less than it costs to live in the place they&#39;re providing it.</li>
+<li><strong>The audit/accountability apparatus itself.</strong> LAHSA facing simultaneous county defunding, a HUD suspension, and a federal fraud task force is exactly the environment Deming would predict produces defensive, blame-avoidant behavior rather than open reporting — and there&#39;s a specific documented instance of this: LAHSA revising 2025 count data shortly before release in a way that increased the reported decline, a disputed-but-troubling data-integrity claim (see <a href="#rp-breaks">Where &amp; Why It Breaks</a>). Whether or not that specific instance was deliberate, a system under this much simultaneous scrutiny has a strong psychological incentive to make its numbers look better, which is corrosive to exactly the kind of honest measurement Deming&#39;s third lens depends on.</li>
+<li><strong>The people the system is meant to serve.</strong> The VI-SPDAT bias finding above is also a psychology finding: documented reluctance among Black respondents, rooted in historic institutional mistrust, to disclose formal healthcare use, mental-health history, or illicit behavior to an intake worker. That&#39;s a rational psychological response to a real history of institutional harm — and a system that scores people on their willingness to disclose, without accounting for why disclosure itself carries risk for some populations differently than others, will systematically misjudge exactly the people who have the most reason to be guarded.</li>
+</ul>
+<div class="callout callout-question">
+<h5>The throughline</h5>
+In all three cases, the "fix" that occurs to a spending-scandal reading of this system — audit harder, punish more, add more compliance reporting — is close to the opposite of what Deming's psychology lens would suggest. More fear-based accountability on top of an already-strained, already-scrutinized system is more likely to produce more defensive reporting and faster burnout, not more honest information or better retention. That doesn't mean accountability is wrong. It means accountability mechanisms that ignore psychology tend to get the reporting behavior they incentivize, not the reporting behavior they intend.
+</div>
+
+<h3>Reading the rest of this site through this frame</h3>
+<p>Every page from here on documents specific, sourced findings — the same standard as before (see <a href="#rp-sources">Sources &amp; Methodology</a>). What changes is the question being asked of each finding: not just <em>what went wrong</em>, but <em>which of these four lenses explains why the system produced this outcome, and would a different person in the same seat have produced a materially different result?</em> Where the answer is &quot;yes, this really is about a specific individual or specific decision,&quot; this site says so — the LAHSA conflict-of-interest contract is that kind of finding, and it&#39;s presented as one. Where the answer is &quot;no, this is what the structure produces regardless of who&#39;s in the seat,&quot; that&#39;s the more useful and more actionable finding, because it points at what would actually have to change.</p>
 </div>
 
 <p class="rp-eyebrow rp-section-eyebrow">Scope & Scale</p>
@@ -88,6 +162,30 @@ Different outlets reported different 2025 totals at different points: initial re
 <p>LA&#39;s unhoused population roughly <strong>doubled</strong> from the mid-2010s to its 2020/2023 peak (66,433 in 2020; 75,518 in 2023), was roughly flat-to-declining in 2024–2025, and ticked back up in 2026. No count was conducted in 2021 (cancelled due to COVID-19 transmission risk) — a real gap in the trend line. The honest characterization: <strong>elevated and volatile around a high plateau</strong>, not a clean upward or downward line — and the accuracy concerns below suggest even this trend may understate the true trajectory in specific neighborhoods.</p>
 <h3>How the count actually works</h3>
 <p>HUD requires a biennial unsheltered count as a condition of Continuum of Care funding; LAHSA has done it <strong>annually</strong> since 2016 to track trends more granularly. It has three components: (1) a physical unsheltered tally — volunteers in teams of ~4 covering assigned census tracts across roughly 4,000 square miles over one to three nights in late January, counting people, tents, vehicles, and makeshift shelters (no interviews during the tally itself); (2) a separate demographic survey and youth count, extrapolated onto the raw tally; (3) HMIS administrative data for the sheltered population, counted by name/record.</p>
+<div class="pm">
+<p class="pm-title">How one headline number gets produced — and where measurement theory breaks down</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Volunteer teams of ~4 physically tally people, tents, and vehicles across ~4,000 square miles over 1-3 nights in late January<small>No interviews during the tally itself — a visual count only.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Process</span><p class="pm-label">The raw tally is extrapolated using a separate demographic/youth survey and combined with HMIS records for the sheltered population</p><p class="pm-break-note"><strong>Breaks here — this is a theory-of-knowledge problem, not a data-entry one:</strong> a single-night visual tally structurally cannot see people who are doubled-up, and RAND field research found the official tally captured only about 68% of the unsheltered population in three hot-spot neighborhoods when cross-checked against a more intensive count — as low as 61% in Skid Row. The instrument is being asked to answer "how big is homelessness in LA" when it can only actually answer "how many people were visible to a volunteer team on one specific night." See <a href="#rp-sopk">The Analytical Frame</a>.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">LAHSA aggregates, finalizes (sometimes revising totals shortly before release), and reports the countywide/city figure<small>See <a href="#rp-breaks">Where &amp; Why It Breaks</a> for the disputed 2025 late-revision finding.</small></p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-ink-muted)"></span>Process step</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 <h3>The count&#39;s accuracy is itself a live, documented dispute</h3>
 <div class="callout callout-fails">
 <h5>RAND: the official count may be missing a large and growing share of unsheltered people</h5>
@@ -132,6 +230,45 @@ LAHSA's geographic dashboards (by City Council District, County Supervisorial Di
 This maps the intended end-to-end pipeline. Agency detail is kept light here — see <a href="#rp-agencies">Agencies &amp; NGOs</a> for full profiles — and outcome/effectiveness data for each phase lives on <a href="#rp-effectiveness">What Works, What Doesn't</a>.
 </div>
 
+<h3>The topographical view: the intended pipeline, end to end</h3>
+<div class="pm">
+<p class="pm-title">One person's intended path from unsheltered to permanently housed</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Phase 1</span><p class="pm-label">Prevention &amp; diversion<small>Financial assistance + case management for people at imminent risk, or a "problem-solving" conversation to avoid formal entry entirely.</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Phase 2</span><p class="pm-label">Street outreach<small>DMH HOME, DHS MDT, Inside Safe FIT, CIRCLE, and LA-HOP-triaged teams make contact and attempt to engage. See the zoomed-in view below.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Phase 3</span><p class="pm-label">Coordinated Entry System (CES): assessment &amp; matching<small>A person is scored and matched centrally to an open unit rather than applying to each provider separately. See the zoomed-in view below.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> Mayor Bass has publicly called CES "dysfunctional," noting units can sit vacant "for far too long" while matching runs — see <a href="#rp-breaks">Where &amp; Why It Breaks</a>.</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Phase 4</span><p class="pm-label">Interim / crisis housing<small>Shelters, bridge housing, tiny-home villages, motel/hotel vouchers — meant as a temporary bridge, not an end state.</small></p><p class="pm-break-note"><strong>Breaks here — the central bottleneck of the whole system:</strong> interim-to-permanent transitions fell 36% in one year (2025); fewer than 1 in 5 people in city-funded interim housing reach permanent housing at all. See the zoomed-in view below and <a href="#rp-breaks">Where &amp; Why It Breaks</a>.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Phase 5</span><p class="pm-label">Permanent placement: RRH or PSH<small>CES's acuity score is meant to sort higher-acuity households toward PSH (indefinite subsidy + services) and lower-acuity toward RRH (short/medium subsidy, faster exit).</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Phase 6</span><p class="pm-label">Aftercare &amp; retention<small>~94% one-year PSH retention overall, with a documented racial disparity in returns to homelessness — see <a href="#rp-effectiveness">What Works, What Doesn't</a>.</small></p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-ink-muted)"></span>Process step</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+<p>This is the &quot;topographical&quot; view — the shape of the whole system. The sections below zoom into three of these phases at the process level: not just that CES is &quot;dysfunctional,&quot; but what specifically happens, mechanically, when a match is offered and declined; not just that outreach converts few contacts to housing, but where in a specific contact-to-enrollment chain that conversion is lost; not just that interim-to-permanent transitions fell 36%, but what actually happens (or fails to happen) at the handoff itself.</p>
 <h3>1. Prevention &amp; diversion</h3>
 <p><strong>Prevention</strong> targets people at <em>imminent</em> risk — e.g., someone given a 30-day notice to vacate — with short-term (generally up to six months) financial assistance and housing-stabilization case management. Eligibility is means-tested and prioritized using a <strong>Prevention Targeting Tool</strong>: households scoring above a risk-score cutoff get full assistance; households below it get a lighter-touch service instead — meaning many at-risk households are screened out of intensive help by design.</p>
 <p><strong>Diversion</strong> is conceptually distinct: it targets people already homeless or about to enter the shelter/Coordinated Entry system <em>right now</em>, using a conversation-based &quot;problem-solving&quot; approach — helping someone identify any viable option in their own network (family, friends) to avoid ever entering the formal system, sometimes backed by small, one-time flexible financial assistance (a bus ticket, a small rent-gap payment) as a last resort.</p>
@@ -145,6 +282,46 @@ This maps the intended end-to-end pipeline. Agency detail is kept light here —
 <li><strong>LA-HOP</strong> (<a href="http://www.LA-HOP.org">www.LA-HOP.org</a>) — the public referral portal for requesting outreach to a specific unhoused individual, which triages to the appropriate team.</li>
 </ul>
 <p>No reliable current figure for total outreach-team headcount or annual contacts made across all these teams combined was found in this research pass — a plausible gap for future work. See <a href="#rp-effectiveness">What Works, What Doesn&#39;t</a> for outreach&#39;s actual conversion rate to housing.</p>
+<h4>Zoomed in: what a contact-to-enrollment chain actually looks like</h4>
+<p>HUD&#39;s HMIS data model draws a hard technical line between a <strong>&quot;contact&quot;</strong> — any documented interaction &quot;designed to engage the client,&quot; logged via the Current Living Situation data element — and <strong>&quot;engagement&quot;</strong>, a single milestone date marking &quot;the date on which an interactive client relationship results in a deliberate client assessment or the beginning of a case plan.&quot; The system is explicitly built around the assumption that engagement is a later, harder-won state reached only after repeated contacts, not a first-conversation outcome. (<a href="https://www.hudexchange.info/programs/hmis/hmis-data-standards/standards/common-program-specific-data-elements/413-date-of-engagement/">HUD Exchange</a>)</p>
+<div class="pm">
+<p class="pm-title">From first contact to a service offer that actually holds</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Unhoused person is contacted by an outreach team<small>Often low-barrier at first: hygiene kits, water, information — building trust, not extracting a housing decision.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Repeated contacts over an undocumented timeframe build toward "engagement"<small>No LA-specific published data exists on average contacts-to-acceptance — LA has the lagging outcome metric (17% enrolled within a year) but not the leading process metric that would show where in repeated contact people are lost.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> up to five parallel teams (DMH HOME, DHS MDT, Inside Safe FIT, CIRCLE, council-district contractors) can contact the same person with no shared real-time deconfliction — the court-ordered Alvarez &amp; Marsal audit found "an unhoused person may be contacted by multiple providers, none of whom coordinate with the other." Council District 13 has separately admitted this was its own status quo: "some of them were doing the same thing in the same area, while other parts of the district were being entirely ignored." <a href="https://www.cacd.uscourts.gov/sites/default/files/Dkt%20905%20FINAL%20AM%20REPORT.pdf">Alvarez &amp; Marsal report</a> &middot; <a href="https://cd13.lacity.gov/issues/homelessness">LA City Council District 13</a></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">Worker checks bed/shelter availability and makes an offer<small>The City/County tasked LAHSA with a real-time bed-availability system in 2016.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> seven years later a Controller audit found no such system — LAHSA tracked beds by phone calls and daily emails, called "woefully inadequate." A 2025 fix (the Interim Housing Inventory Module) introduced new mismatches instead of fixing the old one: in August 2025 LAHSA's own system showed 2 of 88 beds occupied at a PATH-run East Hollywood shelter that PATH's internal records showed 84 of 88 filled. <a href="https://laist.com/news/housing-homelessness/finding-a-shelter-bed-in-la-isnt-easy-la-city-controller-releases-audit">LAist, on the Controller audit</a> &middot; <a href="https://www.aol.com/news/homeless-shelters-open-beds-advocates-100000952.html">LA Times, via AOL, on the 2025 data mismatch</a></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">A standardized DHS/DMH/LAHSA referral form is meant to carry the person's information into the receiving program<small>LA County's Interim Housing Outreach Program (IHOP) uses a "single anchor care manager" who stays with a client through the transition — a dedicated fix that exists specifically because the default pathway doesn't guarantee continuity.</small></p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+<div class="callout callout-fails">
+<h5>What "successful" outreach placement can still fail to mean, a year out</h5>
+After the 2021 Echo Park Lake encampment clearing, LAHSA's Executive Director reported at least 180 people placed into interim housing at the time of the operation — but a year later, fewer than 1 in 10 of those residents had moved into permanent supportive housing, subsidized rentals, or any other long-term housing. The overwhelming majority of "successful" placements never converted into a stable outcome. <a href="https://laist.com/news/housing-homelessness/echo-park-housing-report">LAist, "Only 1 In 10 Of Echo Park's Unhoused Residents Have Found Long Term Housing"</a>
+</div>
+
+<div class="callout callout-question">
+<h5>What looks like resistance is often something more specific</h5>
+Outreach workers are described in reporting as effectively "salespeople without a product": what reads downstream as a person declining help is frequently "the unwillingness to begin a lengthy, tedious process that may never come to fruition," not a rejection of housing itself. <a href="http://thelion.sites.lmu.edu/city/los-angeles-homelessness-outreach-workers/">THE LION (LMU)</a>. On the workforce side: KQED profiled LAHSA outreach worker Denise Velazquez, tasked with getting 10 people indoors during the Echo Park operation, whose blood pressure and mental health deteriorated badly enough in the weeks after that she eventually concluded the only way to recover was to quit — a decision she called heartbreaking because it meant abandoning clients mid-relationship. Reported caseloads have run as high as 36 clients per worker, roughly double-to-triple the 12-15 recommended for Housing First-model case management. <a href="https://www.kqed.org/news/11902904/underpaid-and-burned-out-many-outreach-workers-for-unhoused-californians-are-leaving-their-jobs">KQED</a> &middot; <a href="https://laist.com/news/housing-homelessness/homelessness-outreach-workers-in-la-are-exhausted-and-stressed-out">LAist</a>
+</div>
+
 <h3>3. Coordinated Entry System (CES)</h3>
 <p>CES is LA County&#39;s single coordinated intake/prioritization framework, in place since roughly 2013 — meant to replace an earlier first-come-first-served, provider-by-provider approach with one shared system: a person is assessed once, logged into HMIS, and matched to housing centrally under a shared Prioritization and Matching Policy rather than each provider running its own intake.</p>
 <p>Historically, CES used the <strong>VI-SPDAT</strong> assessment tool — see <a href="#rp-tools">Tools &amp; Systems</a> for the documented bias critique and LA&#39;s transition to a successor tool.</p>
@@ -153,6 +330,47 @@ This maps the intended end-to-end pipeline. Agency detail is kept light here —
 "The current coordinated entry system is dysfunctional, impractical and inequitable," she said, noting housing units can sit vacant "for far too long" while the matching process runs. Separately, California Policy Lab research found the CES/PSH matching process produces racially disparate outcomes, with Black unhoused residents specifically underprioritized relative to need. <a href="https://knock-la.com/inside-la-endless-queues-for-housing/">Knock LA</a>
 </div>
 
+<h4>Zoomed in: what a match is, mechanically, and how a household falls out of the pool without ever &quot;declining&quot;</h4>
+<p>CES was built from its 2013 pilot as two connected algorithms, not one: a ranking algorithm that scores vulnerability, and a matching algorithm that pairs ranked people to specific housing openings, running inside LAHSA&#39;s HMIS platform (Clarity, vendor Bitfocus) via a &quot;Community Queue&quot; and eligibility engine, coordinated by a dedicated internal <strong>CES Matching Team</strong>. (<a href="https://www.americanscientist.org/article/high-tech-homelessness">American Scientist</a>; <a href="https://www.bitfocus.com/coordinated-entry-products">Bitfocus</a>)</p>
+<div class="callout callout-finding">
+<h5>The ranking logic is not simply "highest acuity score wins"</h5>
+Per CES governance documentation, <strong>length of time homeless is the primary prioritization factor</strong> — treated as a proxy for overall vulnerability — with shelter status as a secondary factor and the VI-SPDAT/LA HAT acuity score used mainly as a tie-breaker, which the same documentation says is "rarely, if ever" actually needed. A carve-out reserves the top 10% of the by-name list for unsheltered people regardless of shelter status, specifically so they aren't perpetually out-ranked by sheltered households. <a href="https://ceo.oc.gov/sites/ceo/files/2022-08/CES%20Committee_CES%20Policies%20Upda.pdf">Orange County CEO's Office, describing the shared regional CES methodology</a>. LAHSA's own current governing document — "CES PSH Prioritization and Matching Guidance," revised 4/24/2026 — exists and is publicly linked but was not readable in this research pass; its full text should be checked directly before treating this ranking description as final. <a href="https://www.lahsa.org/documents?id=7658-ces-psh-prioritization-and-matching-guidance-revised-04-24-2026-.pdf">LAHSA</a>
+</div>
+
+<div class="pm">
+<p class="pm-title">How a household can go from "matched" to "unmatchable" without ever declining anything</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Household is assessed and enters the CES Community Queue, ranked mainly by time homeless</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">A designated Point of Contact (POC) on the household's file must be refreshed every 90 days<small>Any provider staff member who can maintain regular contact qualifies — but the record itself must stay current.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> per LAHSA policy, "CES Matchers will only be able to match CES Participants who have a current point of contact" — if the 90-day refresh lapses (a case manager turns over, a phone number changes), the household silently drops out of active matching without ever formally declining a unit. This connects directly to the workforce-turnover finding above: a Point of Contact that depends on one case manager staying in place is only as stable as that case manager's own job tenure. <a href="https://www.sbceh.org/uploads/4/5/0/7/45075441/2-2019_lahsa_ces_points_of_contact_what_you_need_to_know_draft.pdf">LAHSA, "CES Points of Contact"</a></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">A match is generated; the case manager is contractually required to reach the household within 7 days<small>LA County's own workflow documentation specifies this provider-side deadline.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">If lease-up doesn't happen, the unit accrues "Vacancy Days" — a tracked metric with no published SLA<small>LA County's own system defines Vacancy Days and says it's meant to trigger follow-up.</small></p><p class="pm-break-note"><strong>Breaks here — the clearest documented gap in this entire pipeline:</strong> no public document specifies a numeric threshold that forces escalation, whether a declined unit is immediately re-offered, or a cap on how many times a unit can go unfilled before someone intervenes. What vacancy investigations <em>do</em> show is that units mostly sit empty from paperwork/eligibility mismatches, not explicit declines — LAist found 274 newly built Prop HHH apartments sat empty 60+ days past "ready to occupy," partly from federal eligibility rules mismatched to a building's target population. A 2023 Council motion by Nithya Raman found ~20% of shelter beds vacant on any given night and PSH units "taking months to fill." <a href="https://homeless.lacounty.gov/icms-glossary/">LA County HSH glossary</a> &middot; <a href="https://laist.com/news/housing-homelessness/homeless-la-empty-apartments-prop-hhh-bass-vacant-units-los-angeles">LAist, on empty Prop HHH units</a></p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+<div class="callout callout-fails">
+<h5>The clearest current illustration: LAHSA's own master-leased apartments</h5>
+LAHSA master-leases 14 buildings totaling 758 units, renting whole buildings with tax dollars and subleasing to unhoused people. By May 2026, <strong>259 of those 758 units (about 34%) sat vacant</strong> — while taxpayers remained on the hook for the full lease regardless of occupancy, at roughly $3,400/unit/month (~$880,000/month, ~$10.6 million/year, on vacant units alone). LAHSA blamed "subsidy restrictions, funding reductions, and bureaucratic hurdles," but didn't explain why buildings were leased without a plan to keep them filled — and had committed to more than $70 million in future payments on noncancelable leases, removing the normal financial incentive to solve the matching bottleneck quickly, since the agency pays the same rent whether units are filled or not. The presentation on this vacancy was pulled from LAHSA's own public finance-committee agenda after LAist asked about it. Part of LAHSA's own fix was to loosen front-end verification itself — approving "presumptive eligibility" waivers letting people self-certify without proving eligibility up front — which is itself a mechanistic clue about where the agency believed the real bottleneck lived. This episode directly contributed to HUD's June 2026 funding suspension, which explicitly cited "a failure to track empty hotel rooms." <a href="https://laist.com/news/housing-homelessness/tax-funded-la-apartments-sit-empty-mayor-bass-homelessness-strategy">LAist</a>
+</div>
+
+<p>Case conferencing — where difficult matches are meant to get resolved — happens through each Service Planning Area&#39;s designated &quot;SPA Lead&quot; agency (e.g., HOPICS for South LA), on a roughly biweekly-to-monthly cadence rather than a real-time one. No public document lists who specifically attends these meetings or documents what gets decided there versus left unresolved — an open gap, not a confirmed failure. (<a href="https://www.lahsa.org/ces/home/accessingces/">LAHSA</a>; <a href="http://ceslosangeles.weebly.com/spa-2-san-fernando-valley.html">CES Los Angeles, SPA 2 schedule</a>)</p>
 <h3>4. Interim / crisis housing</h3>
 <p>This category — emergency shelters, bridge housing, tiny home villages, motel/hotel vouchers — is explicitly meant to function as a <em>temporary bridge</em> to permanent housing, not an end state.</p>
 <p><strong>A Bridge Home</strong> (launched under Mayor Garcetti) opened its first site in September 2018 (45 beds, a &quot;sleeping module&quot; congregate model) and expanded into tiny-home-village formats — Chandler Boulevard (40 units/75 beds), Tarzana (76 units/150 beds), Whitsett West (77 units/150 beds), and others. As of 2022 the City had delivered roughly 12 tiny-home villages totaling ~1,552 interim beds — a dated figure; the current total is almost certainly higher.</p>
@@ -162,6 +380,45 @@ A LAist investigation found relatively few people placed in LA's bridge/interim 
 </div>
 
 <p>See <a href="#rp-breaks">Where &amp; Why It Breaks</a> for the full mechanics of this bottleneck.</p>
+<h4>Zoomed in: the handoff itself, and where a specific person&#39;s case actually stalls</h4>
+<p>LA&#39;s CES treats case management and housing navigation as two service tracks that don&#39;t automatically stay with the same person — LAHSA&#39;s own CES description offers housing navigation specifically &quot;for homeless participants who do not yet have a primary case manager,&quot; meaning whether someone keeps their case manager through the transition or gets handed to a separate navigator depends on which track they were sorted into, not a uniform continuity policy. No LAHSA or City/County document found formally mandates who follows a client through the transition. (<a href="https://www.lahsa.org/ces/home/inaction/">LAHSA CES</a>)</p>
+<div class="pm">
+<p class="pm-title">The paperwork gauntlet between "matched" and "moved in"</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Step</span><p class="pm-label">Eligibility documentation<small>Proof of homelessness, income/asset verification, photo ID, Social Security cards for every household member.</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Step</span><p class="pm-label">Criminal background check<small>Assistance can be denied outright for a household member evicted from federally assisted housing for drug-related activity in the prior three years.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Step</span><p class="pm-label">Request for Tenancy Approval (RFTA) + unit inspection<small>HACLA says this "should take about a month" once a landlord and unit are matched.</small></p><p class="pm-break-note"><strong>Breaks here — a documented, named case:</strong> Yolanda Robins, unhoused on Skid Row for three decades, was approved for an apartment via federal voucher in January 2022. Her RFTA sat incomplete and HACLA staff stopped responding to email; it wasn't filed until June 4, and only got resolved after the LA Times contacted HACLA directly — more than six months after her approval. HACLA's own assistant housing manager acknowledged understaffing as the direct cause elsewhere in the same period: <em>"It's not normal... we will drop the ball."</em> <a href="https://www.hacla.org/en/news/hacla-response-la-times-article-july-25-2022-la-gives-them-housing-vouchers-they-cant-use">HACLA's response, quoting the LA Times reporting</a> &middot; <a href="https://laist.com/news/housing-homelessness/hacla-unhoused-la-homelessness">LAist</a></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Step</span><p class="pm-label">Move-in funds<small>A CalAIM program covers deposit/furnishing costs up to $5,000-$6,000 — but requires submission within 3 business days of move-in with a draft lease already in place, meaning it only works if every prior step already cleared on a tight timeline.</small></p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-ink-muted)"></span>Process step</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+<div class="callout callout-fails">
+<h5>A second named case: bounced between case managers, not paperwork</h5>
+Halcyon Selfmade, a wheelchair user with Stickler syndrome living at the Schrader Boulevard "A Bridge Home" site in Hollywood, was told he and his partner would be connected to a wheelchair-accessible unit within 90 days. Ninety days passed. Then another 90. In the interim, LAist reported he was "bounced from one case manager who couldn't find an apartment to another that wouldn't set appointments with him" — the continuity failure this section is about, on the record, with a name attached. <a href="https://laist.com/news/homeless-shelter-housing-halcyon-selfmade-hollywood">LAist, "LA's Homeless Services System Can Be Achingly Slow"</a>
+</div>
+
+<div class="callout callout-question">
+<h5>What "unknown exit destination" actually means, mechanically</h5>
+HUD's HMIS Data Standards (Universal Data Element 3.12) instruct staff to record "No exit interview completed" or "Data not collected" whenever a client exits <em>without</em> staff having contact with them about where they're going. National HMIS training guidance specifically flags night-by-night shelters as prone to high rates of missing destination data, because a client is auto-exited after a set period of not showing up — the system doesn't wait and investigate; it times out and defaults to "unknown," because by definition no one got to ask. In other words: "unknown exit destination" is overwhelmingly a record of <em>lost contact before a documented exit conversation</em>, not a confirmed outcome. <a href="https://www.hudexchange.info/programs/hmis/hmis-data-standards/standards/universal-data-elements/312-destination/">HUD Exchange, HMIS Data Standards</a>
+</div>
+
+<p>On the granular reasons beds sit empty while people are turned away in the same building: a Controller audit found restrictive geographic catchment areas can keep an empty bed off-limits to someone eligible for it but currently located a few miles outside its zone, and documented shelters that don&#39;t accept walk-ins, cap how many belongings or family members someone can bring, or prohibit pets outright — each a concrete way a specific open bed and a specific person in need can coexist without matching. A June 2024 Inside Safe operation to clear a Hollywood encampment was itself delayed a week and a half not by a lack of beds or motel rooms, but by late payments from LAHSA to the provider running the motel placements — the money mechanics from <a href="#rp-money">The Money</a> directly stalling a physical placement. (<a href="https://www.nbclosangeles.com/news/local/audit-finds-inefficient-system-responsible-for-leaving-available-shelter-beds-empty/3289819/">NBC Los Angeles</a>; <a href="https://laist.com/news/housing-homelessness/inside-safe-unhoused-encampment-cleared-in-hollywood">LAist</a>)</p>
 <h3>5. Permanent housing placement: RRH vs. PSH</h3>
 <p><strong>Rapid Re-Housing (RRH)</strong> is a short-to-medium-term rental subsidy (HUD guidance: roughly 3 months short-term, 4–24 months medium-term) paired with housing-search and relocation services, meant to move people into permanent housing quickly and taper off as the household stabilizes. HUD does <strong>not</strong> require a disability to qualify — it&#39;s the lower-barrier, faster track for households who mainly need transition help and a temporary financial bridge.</p>
 <p><strong>Permanent Supportive Housing (PSH)</strong> pairs an indefinite/long-term rental subsidy with ongoing supportive services, and — unlike RRH — generally <strong>requires a qualifying disability</strong> in the household. It&#39;s designed for people whose housing stability depends on both a subsidy and ongoing services, potentially for life.</p>
@@ -193,6 +450,32 @@ Because governance power is split evenly, neither government fully owns LAHSA �
 </div>
 
 <p>LAHSA also serves as the <strong>Collaborative Applicant</strong> for the HUD-recognized LA Continuum of Care — meaning it&#39;s not just &quot;a&quot; homeless-services agency but the entity that legally applies for and administers nearly $1 billion in cumulative federal funding on behalf of the entire county&#39;s system. That dual role is why HUD&#39;s 2026 suspension threatens the whole county&#39;s system, not just LAHSA&#39;s own programs.</p>
+<div class="pm">
+<p class="pm-title">Who governs, who funds, who owns nothing fully</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">HUD designates the LA Continuum of Care as the federal funding vehicle; LAHSA is its sole Collaborative Applicant<small>One agency's legal standing determines whether the entire county's ~$1B federal pipeline can be applied for at all.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">LAHSA Commission: 5 seats appointed by the County Board of Supervisors, 5 by the Mayor with Council confirmation<small>Governance power is split exactly evenly by design.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> because neither government fully owns LAHSA, the County can vote to defund it but the joint agreement still nominally gives it equal governing power, and the City can't unilaterally restructure or abolish it either — the structural ambiguity cited repeatedly as why the 2025-2026 breakup turned messy instead of clean.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">County pulls funding and staff into its own new department (HSH, launched Jan. 2026)<small>Directly operates county-funded interim housing, outreach, and prevention — but LAHSA keeps the federal Collaborative Applicant role regardless.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">City keeps funding LAHSA directly (~73% of its FY2026-27 budget) while HUD suspends LAHSA's federal funding over the same institution</p><p class="pm-break-note"><strong>Breaks here:</strong> no reporter or advocate has articulated what happens to CoC compliance if County operating capacity sits at HSH while the federal "lead agency" designation stays with LAHSA — see "Where mandates overlap" below.</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 <h3>Government agencies</h3>
 <table>
 <thead>
@@ -399,6 +682,38 @@ Peer-reviewed and advocacy research found the tool systematically underperforms 
 "The current coordinated entry system is dysfunctional, impractical and inequitable," she's said publicly, noting housing units can sit vacant "for far too long" while the matching process runs. See <a href="#rp-breaks">Where &amp; Why It Breaks</a>.
 </div>
 
+<div class="pm">
+<p class="pm-title">Where a person's data actually lives, and where it stops flowing</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Assessed via VI-SPDAT / LA HAT; scored and entered into HMIS</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">Clarity (Bitfocus), LAHSA's HMIS front end, holds the record and drives CES matching<small>The Community Queue and Points-of-Contact tracking described on <a href="#rp-system">Phases of the Process</a> both live here.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">A separate, proprietary County data system runs in parallel and does not connect to HMIS</p><p class="pm-break-note"><strong>Breaks here:</strong> some providers manually double-enter client data into both systems — "manually double-entering things opens the door for all sorts of errors" — a direct mechanical link between an IT architecture choice and whether a person is correctly recorded as sheltered.</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">DMH's clinical records track mental-health outreach and services separately</p><p class="pm-break-note"><strong>Breaks here:</strong> City and county entities have publicly acknowledged they're still working to connect HMIS/Clarity with DMH's clinical records — an admission this integration hasn't historically existed, even though DMH's HOME teams are one of the outreach paths feeding people into this same pipeline (see <a href="#rp-system">Phases of the Process</a>).</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Program exit is supposed to be logged back into HMIS, closing the loop</p><p class="pm-break-note"><strong>Breaks here:</strong> LAHSA's system lets providers bypass exit logging entirely when someone leaves an Inside Safe motel-shelter placement — meaning the city can keep paying for empty motel rooms for weeks with no enforced requirement to record that the person left. Councilmember Bob Blumenfield: "That's horrifying."</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 <h3>Case management software: Clarity Human Services (Bitfocus)</h3>
 <p>Clarity is the cloud-based platform LAHSA licenses from Bitfocus as LA&#39;s HMIS front end — built to help providers stay compliant with HUD CoC/ESG and other federal-partner reporting requirements, with a client-facing portal.</p>
 <h3>Interoperability failures</h3>
@@ -558,6 +873,122 @@ The April 2024 California State Auditor report found the state spent <strong>$24
 <li>In April 2025, a U.S. Attorney announced a <strong>Homelessness Fraud and Corruption Task Force</strong> combining federal prosecutors, the IRS, FBI, and HUD&#39;s Inspector General — a concrete case tied to the scrutiny: a LAHSA contractor was charged with diverting $23 million in homeless funding for personal use through a nonprofit front.</li>
 <li>The City separately left <strong>$473–513 million</strong> of its own homeless services budget unspent in FY2025, even as it cut nearly $200 million in homeless funding amid a broader budget deficit — underspending and cuts happening in the same year.</li>
 </ul>
+<h3>How the money actually moves, mechanically — and where it jams</h3>
+<p>The audits above establish <em>that</em> huge sums are untracked, unspent, or unverified. This section is about the specific, documented mechanical steps that produce those headline figures — the process level underneath the spending scandal.</p>
+<div class="pm">
+<p class="pm-title">How a dollar is supposed to move from a funder to a frontline service</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">HUD / State (HHAP) / County (Measure A) / City appropriate funds<small>Each layer runs its own fiscal year and accounting method — see <a href="#rp-sopk">The Analytical Frame</a> on why that alone breaks a shared theory of knowledge about "total spending."</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">LAHSA, as HUD's sole Collaborative Applicant, receives and re-grants federal CoC funds; separately submits a "cash request" to the City for city-funded programs<small>LAHSA cannot pay its own providers for city-funded work until the City pays that cash request.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> the court-ordered Alvarez &amp; Marsal audit found this City&#8596;LAHSA cash-request process is "a time-consuming, manual process at risk of human error" — reconciled without a shared information system between the two governments. A discrepancy anywhere in one bundled funding agreement can delay payment for every program bundled under it, whether or not that specific program had the discrepancy. <a href="https://mynewsla.com/government/2025/03/06/report-lack-of-clarity-oversight-hamper-las-homeless-programs-2/">MyNewsLA, on the Alvarez &amp; Marsal audit</a></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Nonprofit provider delivers the service, fronting its own cash, then submits an invoice for reimbursement<small>Standard cost-reimbursement structure: the provider is paid back, not paid up front.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> providers report waiting 3&#8211;4 months in the ordinary course, and specific providers have been owed $12M&#8211;$20M at a time; as of February 2026 LAHSA owed at least $69.3 million to providers system-wide, $26.9 million of it on invoices over two months old. <a href="https://laist.com/news/housing-homelessness/lahsa-late-payments-city-county-homeless-funds">LAist</a></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Frontline</span><p class="pm-label">Case manager, shelter staff, or outreach worker actually delivers the service the dollar was meant to fund</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Frontline / person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+<h4>Why invoices can&#39;t be filed on time in the first place</h4>
+<p>The reimbursement lag isn&#39;t a processing-speed problem so much as a contract-timing problem. At the start of a fiscal year (July 1), LAHSA has historically finalized only <strong>about one-third</strong> of its provider contracts — the rest aren&#39;t finalized until as late as the following February. Providers legally cannot submit an invoice against a contract that isn&#39;t yet executed, so once a contract is finally signed, providers file what LAHSA itself has described as an &quot;avalanche&quot; of invoices covering up to six months of already-delivered services. South LA provider HOPICS was owed nearly $20 million as a direct result of this pattern spanning two budget years. LA City Councilmember Nithya Raman placed &quot;most of the delay this year in contracting&quot; specifically at LAHSA. (<a href="https://laist.com/news/housing-homelessness/lahsa-homeless-agency-late-payments-providers-city-county-crisis-blame-finances">LAist</a>)</p>
+<div class="callout callout-fails">
+<h5>The reimbursement gap isn't hypothetical — it's a specific, dated crisis</h5>
+The People Concern (~$102M revenue, ~85% government-funded) pays roughly <strong>$63,000/month in interest</strong> on a $9 million line of credit taken out purely to bridge the 3&#8211;4 month gap between spending its own cash and getting reimbursed — interest the government will never pay back. CEO John Maceri: <em>"Every month we're going deeper and deeper in the hole."</em> HOPICS director Kelvin Driscoll: <em>"Providers cannot continue operating on uncertainty and IOUs."</em> LA Family Housing CEO Stephanie Klasky-Gamer: <em>"These delays are one of the biggest issues for our organization because if we cannot pay our staff, we don't operate."</em> <a href="https://www.scrippsnews.com/us-news/homeless-service-providers-face-huge-debt-threatening-to-undermine-their-work">Scripps News</a> &middot; <a href="https://laist.com/news/housing-homelessness/lahsa-homeless-agency-late-payments-providers-city-county-crisis-blame-finances">LAist</a>
+</div>
+
+<h4>What happens when a provider&#39;s own documentation is the failure point</h4>
+<p>Providers must retain — not necessarily submit upfront — the receipts and financial records backing every reimbursed cost, produced when LAHSA conducts on-site monitoring (contractually at least quarterly). The more consequential documentation failure sits a level up, in the contracts themselves: the Alvarez &amp; Marsal audit found City/LAHSA/provider contracts &quot;frequently contained broad terms without clear definitions, which created ambiguity about the scope and type of service delivered&quot; — meaning a dispute over whether an activity is even billable is often built into the contract language, not just an invoicing-desk judgment call. (<a href="https://mynewsla.com/government/2025/03/06/report-lack-of-clarity-oversight-hamper-las-homeless-programs-2/">MyNewsLA</a>)</p>
+<p>That same ambiguity shows up as the verification gap already documented on this site: the November 2024 County Auditor-Controller review found LAHSA &quot;failed to verify whether the services invoiced were provided&quot; in a large share of cases, and that <strong>51% of LAHSA&#39;s planned contract-compliance reviews had no method built in to verify a provider&#39;s compliance</strong> — the review process itself wasn&#39;t designed to catch a mismatch between what was billed and what happened on the ground. (<a href="https://laist.com/news/housing-homelessness/los-angeles-homeless-services-authority-lahsa-audit-2024-november-county">LAist</a>)</p>
+<div class="callout callout-fails">
+<h5>What happens when that gap goes unenforced: a $100M case study</h5>
+Weingart Center — a major shelter operator already profiled on <a href="#rp-agencies">Agencies &amp; NGOs</a> — received over <strong>$100 million</strong> in taxpayer funds while continuously out of compliance with federal "single audit" deadlines since early 2022, filing its FY2022 and FY2023 single audits roughly a year and a half late each, with the audits that did surface showing repeat, unremedied accounting failures from one year to the next. That didn't stop a $9 million no-bid 2023 contract, directed by the Mayor's office, to run the City's largest shelter site. <a href="https://laist.com/news/housing-homelessness/la-homelessness-nonprofit-got-over-100-million-from-taxpayers-despite-failing-audit-requirements">LAist</a>
+</div>
+
+<h4>Why &quot;unspent&quot; money accumulates — the mechanics underneath the headline figures</h4>
+<ul>
+<li><strong>LAHSA&#39;s own underspending is now dated and quantified year-over-year</strong>: $108 million underspent in the fiscal year ending June 2025 (attributed by the agency mainly to &quot;program delays&quot;), after underspending nearly $150 million the prior year, on top of at least $7 million in federal dollars left unspent in FY2025 and $3.5 million flagged as unused federal grant money in a January 2022 internal audit. (<a href="https://laist.com/news/housing-homelessness/la-homeless-underspending">LAist</a>)</li>
+<li><strong>City Controller Kenneth Mejia&#39;s office attributed the City&#39;s own $513 million in unspent homelessness funds</strong> to a &quot;sluggish, inefficient approach&quot; driven by four specific mechanical causes: understaffing, homelessness programs spread across multiple City departments <em>and</em> 15 individual council-district offices with no single owner, obsolete technology, and no real-time data — meaning the City structurally cannot see, in the moment, how much of its own homelessness budget has gone out the door. (<a href="https://laist.com/news/housing-homelessness/la-sat-on-nearly-half-a-billion-dollars-in-homelessness-funds-last-year">LAist</a>)</li>
+<li><strong>LAHSA has been structurally unable to audit itself, compounding the tracking problem.</strong> LAHSA completed no internal audits in some recent years; one internal audit specifically investigating why LAHSA failed to spend $7 million in granted federal dollars sat unfinished for over two years because LAHSA management was months late responding to the auditors&#39; own findings, and external auditors separately found &quot;significant&quot; inaccuracies in LAHSA&#39;s financial statements that had to be corrected late in the audit process. (<a href="https://laist.com/news/housing-homelessness/audit-lahsa-management-homeless">LAist</a>)</li>
+<li><strong>At the state level</strong>, the mechanism behind the $24 billion figure already on this site isn&#39;t just &quot;no one checked&quot; — Cal ICH, the state&#39;s own coordinating body, tracked and reported homelessness spending data only through FY2020-21 and stopped updating it even as the state kept awarding large new funding rounds after that point. Three of the five programs the State Auditor reviewed simply lacked enough data to judge cost-effectiveness either way — a data-infrastructure failure sitting underneath what reads as a spending-discipline failure. (<a href="https://information.auditor.ca.gov/reports/2023-102.1/index.html">California State Auditor</a>)</li>
+<li><strong>The older, quieter precedent</strong>: between 2015-2020, LAHSA, HACLA, and LACDA collectively returned nearly $150 million in unspent federal grants to HUD (LAHSA alone: over $29 million). Agency-cited causes on the record: HUD&#39;s own &quot;rigid&quot; and &quot;complex&quot; funding rules that make it hard to redirect money once it can&#39;t be spent on its original purpose; a tight rental market where landlords wouldn&#39;t lease to formerly homeless tenants; poor credit/rental histories among clients; and high client attrition — people leaving the pipeline before a unit could be matched to them. (<a href="https://www.pbssocal.org/news-community/l-a-agencies-returned-nearly-150-million-in-unspent-federal-homeless-grants/">PBS SoCal</a>)</li>
+</ul>
+<h4>The staffing problem behind the 51% verification gap</h4>
+<p>LAHSA&#39;s own finance deputy described the agency&#39;s finance function, at a public LAHSA Commission meeting, as &quot;overworked&quot; and low-morale, destabilized by turnover among the mid-level leaders who held the institutional knowledge needed to keep contracts moving, on top of a broader leadership vacuum. County Supervisor Lindsey Horvath, at that same meeting: <strong>&quot;LAHSA does not have the staffing or expertise to pay its bills.&quot;</strong> (<a href="https://laist.com/news/housing-homelessness/lahsa-homeless-agency-late-payments-providers-city-county-crisis-blame-finances">LAist</a>)</p>
+<div class="callout callout-question">
+<h5>Open gap</h5>
+No source located gives a specific contract-monitor-to-contract ratio or a documented vacancy/turnover rate for LAHSA's Monitoring &amp; Compliance unit specifically — the causal link between "the finance/compliance function is short-staffed" and "51% of compliance reviews couldn't verify service delivery" is strongly implied by every source touching this topic, but not quantitatively demonstrated by any single one found in this research pass. Presented here as a well-supported inference, not a directly sourced fact.
+</div>
+
+<p>Useful because it&#39;s an official naming the mechanism rather than disputing it: LAHSA Commissioner Amy Perkins asked LAHSA finance staff directly, <em>&quot;Providers are submitting invoices for work they&#39;ve completed for the city of Los Angeles and you don&#39;t have that money, and you are not calling out that as a 911?&quot;</em> — then-CEO Gita O&#39;Neill&#39;s response: <em>&quot;LAHSA has been structured for decades as the entity that takes the blame,&quot;</em> adding, <em>&quot;Political incentive has always been to point at LAHSA rather than to address structural issues.&quot;</em> (<a href="https://laist.com/news/housing-homelessness/lahsa-homeless-agency-late-payments-providers-city-county-crisis-blame-finances">LAist</a>)</p>
+<h4>Where the system is trying to fix this</h4>
+<ul>
+<li>California&#39;s <strong>AB 590</strong> now authorizes state agencies to pay nonprofits up to 25% of contracted funds up front — a direct legislative acknowledgment that pure cost-reimbursement structurally underfunds providers&#39; cash-flow needs — alongside companion bills targeting prompt-payment timing (SB 1246), reduced small-grant reporting burden (AB 2322), and indirect-cost reimbursement (SB 336); a broader Prompt Payment Act fix (SB 557) was vetoed. (<a href="https://www.fplglaw.com/insights/ca-grant-reform-third-times-a-charm/">For Purpose Law Group</a>)</li>
+<li>Several LA City departments are reportedly moving away from pure reimbursement toward paying some costs upfront, and the Nonprofit Finance Fund runs a $9 million 0%-interest bridge fund specifically to cover LAHSA payment delays for Hilton Foundation grantees. (<a href="https://nff.org/blog/how-ensure-front-payments-homeless-services-providers-work">Nonprofit Finance Fund</a>)</li>
+<li>The new County Department of Homeless Services and Housing (HSH) completed its transition from LAHSA on January 1, 2026, and began directly managing County-funded provider contracts on July 1, 2026, explicitly committing to &quot;established best practices to ensure providers are reliably paid on time&quot; — itself an implicit admission the prior LAHSA-mediated pass-through wasn&#39;t. Whether that holds up in practice is a live, checkable claim rather than a settled improvement, since the transition only fully completed a few weeks before this research date. (<a href="https://homeless.lacounty.gov/news/la-county-successfully-completes-transition-of-county-funded-homeless-services-contracts-to-streamline-system-and-improve-accountability/">LA County HSH</a>)</li>
+</ul>
+<h4>Summary: mechanism, cause, source</h4>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Documented cause</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Providers front cash 3-4 months before reimbursement</td>
+<td>Standard cost-reimbursement contract structure</td>
+<td><a href="https://calmatters.org/housing/homelessness/2024/10/nonprofit-reimbursements/">CalMatters</a></td>
+</tr>
+<tr>
+<td>Invoices can&#39;t be filed on time</td>
+<td>Only ~1/3 of contracts finalized by the July 1 fiscal-year start; rest not done until February</td>
+<td><a href="https://laist.com/news/housing-homelessness/lahsa-homeless-agency-late-payments-providers-city-county-crisis-blame-finances">LAist</a></td>
+</tr>
+<tr>
+<td>City&#8594;LAHSA payments jam</td>
+<td>Manual &quot;cash request&quot; reconciliation process; a discrepancy in one bundled funding agreement can freeze the whole group</td>
+<td><a href="https://mynewsla.com/government/2025/03/06/report-lack-of-clarity-oversight-hamper-las-homeless-programs-2/">MyNewsLA, on Alvarez &amp; Marsal</a></td>
+</tr>
+<tr>
+<td>Compliance reviews can&#39;t confirm services happened</td>
+<td>51% of planned reviews lacked a verification method</td>
+<td><a href="https://laist.com/news/housing-homelessness/los-angeles-homeless-services-authority-lahsa-audit-2024-november-county">LAist</a></td>
+</tr>
+<tr>
+<td>Money sits unspent at LAHSA</td>
+<td>Program delays; $108M (FY25) and $150M (FY24) underspends</td>
+<td><a href="https://laist.com/news/housing-homelessness/la-homeless-underspending">LAist</a></td>
+</tr>
+<tr>
+<td>Money sits unspent at the City</td>
+<td>No single owner across departments/council offices; obsolete tech; no real-time data</td>
+<td><a href="https://laist.com/news/housing-homelessness/la-sat-on-nearly-half-a-billion-dollars-in-homelessness-funds-last-year">LAist</a></td>
+</tr>
+<tr>
+<td>HUD funds returned unspent, 2015-2020</td>
+<td>HUD&#39;s rigid rules; tight rental market; poor client credit/rental history; high attrition</td>
+<td><a href="https://www.pbssocal.org/news-community/l-a-agencies-returned-nearly-150-million-in-unspent-federal-homeless-grants/">PBS SoCal</a></td>
+</tr>
+<tr>
+<td>State can&#39;t judge $24B cost-effectiveness</td>
+<td>Cal ICH stopped updating tracking data after FY2020-21 despite continued new funding</td>
+<td><a href="https://information.auditor.ca.gov/reports/2023-102.1/index.html">CA State Auditor</a></td>
+</tr>
+</tbody></table>
 <h3>Does the spending correlate with fewer people homeless?</h3>
 <p>LAHSA&#39;s finalized 2025 count found LA County homelessness fell 4% to 72,308 and City of LA fell 3.4% to 43,699 — a second consecutive annual decline, attributed partly to a record ~28,000 permanent housing placements. But 2026&#39;s count reversed that trend (see <a href="#rp-breaks">Where &amp; Why It Breaks</a>), and independent RAND field research has separately questioned the count&#39;s own accuracy.</p>
 <div class="callout callout-question">
@@ -583,6 +1014,33 @@ Reporting variously describes combined City+County annual spending as "about $2 
 Each intervention below is rated by the strength of its outcome evidence: <strong>strong</strong>, <strong>mixed</strong>, or <strong>weak</strong> — and disputed claims are flagged as disputed rather than presented as settled. Ratings describe evidence quality, not political popularity. See <a href="#rp-sources">Sources &amp; Methodology</a>.
 </div>
 
+<div class="pm">
+<p class="pm-title">The funnel: where people are lost at each phase</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Outreach</span><p class="pm-label">~37,000 street-outreach clients tracked in one California Policy Lab cohort<small>Only 17% enrolled in interim housing, RRH, or PSH within a year of first contact.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Interim housing</span><p class="pm-label">Of those who do enroll, fewer than 1 in 5 (under 20%) exit city-funded interim housing into permanent housing<small>More than half of exits go to homelessness or an unknown destination — see <a href="#rp-system">Phases of the Process</a> for the mechanics of "unknown destination."</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">RRH or PSH</span><p class="pm-label">Of those who reach permanent placement, PSH shows 94% one-year retention overall<small>RRH's "subsidy cliff" produces a different, generally worse retention profile for people who needed PSH-level support but were sorted toward RRH instead.</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Aftercare</span><p class="pm-label">Black clients return to homelessness after PSH exit at roughly double the rate of white or Latino clients — a disparity that recurs at every phase of this funnel, not just this one</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-ink-muted)"></span>Process step</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+<p>This funnel is why the interim-housing phase gets singled out repeatedly across this site: it&#39;s not the phase with the worst headline number (RRH&#39;s subsidy cliff and CES&#39;s racial-disparity findings are arguably worse in evidence-quality terms) — it&#39;s the phase where the largest <em>number</em> of people are lost, because outreach has already spent its 17% conversion getting them this far.</p>
 <h3>Prevention &amp; diversion — strong cost-effectiveness, small scale</h3>
 <div class="callout callout-works">
 <h5>Strong evidence of cost-effectiveness</h5>
@@ -714,6 +1172,44 @@ Roughly <strong>3,040 LA County households</strong> housed via Time-Limited Subs
 A federal judge overseeing the <em>LA Alliance v. City of Los Angeles</em> litigation ordered an independent audit that found roughly <strong>$2.4 billion</strong> in city homelessness spending over four years effectively impossible to verify, calling it a "slow train wreck." A separate 2025 county-commissioned review found LAHSA couldn't document the existence of nearly <strong>2,300 housing sites</strong> it was nominally responsible for. <a href="https://laist.com/news/housing-homelessness/audit-homeless-carter-lahsa">LAist, on the Carter-ordered audit</a>
 </div>
 
+<div class="pm">
+<p class="pm-title">The cascade, in sequence</p>
+<div class="pm-flow">
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Feb. 2024</span><p class="pm-label">County Auditor-Controller review finds LAHSA can't produce an accurate contractor list, made payments with no contract in place, recovered only $2.5M of $50.8M in cash advances</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Mar. 2025</span><p class="pm-label">Court-ordered Alvarez &amp; Marsal audit finds $2.3-2.4B in City homelessness spending effectively impossible to verify; Judge Carter calls it a "slow train wreck"</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Apr. 2025</span><p class="pm-label">County Board of Supervisors votes to terminate its ~$300M/year contract with LAHSA; LAHSA lays off 284 employees</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Jan. 2026</span><p class="pm-label">New LA County Department of Homeless Services and Housing (HSH) launches, absorbing County functions and staff formerly run through LAHSA</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">May 2026</span><p class="pm-label">LAist reports 259 of LAHSA's 758 master-leased units (34%) sitting vacant, costing ~$10.6M/year — see <a href="#rp-system">Phases of the Process</a> for the mechanics</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Jun. 2026</span><p class="pm-label">HUD suspends LAHSA's federal funding entirely, citing "a clear pattern of fraud" and the failure to track empty motel/hotel rooms; LAHSA sues HUD</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Aug. 2026</span><p class="pm-label">A judge's stay holds pending an August 6 hearing — genuinely unresolved as of this research date whether LAHSA continues as a reduced joint agency, becomes a compliance shell, or is restructured again</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 <p>The consequences cascaded fast:</p>
 <ul>
 <li><strong>April 2025</strong> — LA County&#39;s Board of Supervisors voted to terminate its ~$300 million/year contract with LAHSA and moved those functions to a new county department. LAHSA laid off 284 employees. (<a href="https://calmatters.org/housing/homelessness/2025/05/la-homeless-agency/">CalMatters</a>)</li>
@@ -782,6 +1278,34 @@ The core design flaw, per City Controller audits: a housing bond alone doesn't f
 
 <h3>Inside Safe (Mayor Bass, launched December 2022)</h3>
 <p>Mayor Bass&#39;s signature encampment-resolution strategy: outreach teams and LAHSA negotiate with an entire encampment at once, offering everyone motel/hotel rooms on the spot. By October 2025, it had served 5,179 people across 114 operations — 1,243 in permanent housing, 1,636 still in interim placements, and 2,300 who&#39;d exited the program with <strong>no public breakdown of what happened to them</strong>. By mid-2026, of roughly 6,000 served cumulatively, about <strong>40% had exited and returned to unsheltered homelessness</strong>. Cost has topped <strong>$322 million</strong> — roughly $259,000 per person actually reaching permanent housing, or $62,000 per person served regardless of outcome.</p>
+<div class="pm">
+<p class="pm-title">Inside Safe, as a case study in how agency, tool, and person interact</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Mayor's Field Intervention Team engages a targeted encampment and offers everyone a motel/hotel room on the spot</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Person accepts and moves into a motel room, tracked as "served"</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">HMIS/Clarity is supposed to log the eventual exit and destination<small>See <a href="#rp-tools">Tools &amp; Systems</a>.</small></p><p class="pm-break-note"><strong>Breaks here:</strong> LAHSA's system lets providers bypass exit logging entirely for this program — the city can keep paying for a motel room for weeks after someone has already left, with no enforced requirement to record it. This is the specific, named mechanism behind the "2,300 people with no public breakdown of what happened to them" figure above.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Person either reaches permanent housing (~1 in 5 of those served) or returns to unsheltered homelessness (~40% of exits)</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 <div class="callout callout-fails">
 <h5>Independent RAND research contradicts the "whack-a-mole" denials</h5>
 RAND's longitudinal LA LEADS study (tracking Hollywood, Venice, Skid Row since 2021) found tent dwelling fell roughly 50% since 2021, but rough sleeping and vehicle dwelling rose to offset it — rough sleeping specifically hit a <strong>four-year high</strong>. Nearly half of surveyed rough sleepers reported losing a dwelling in the past year; 46% of those said it was confiscated or towed by officials. RAND's own summary: sweeps and camping-ban enforcement reduce visible tent homelessness short-term but push people into harder-to-track, often more dangerous forms of unsheltered homelessness rather than into housing. <a href="https://www.rand.org/news/press/2026/05/homelessness-holds-steady-across-three-la-neighborhoods.html">RAND, May 2026</a>
@@ -928,6 +1452,44 @@ A 2025 independent review commissioned by federal Judge Carter found LAHSA's con
 </ul>
 <hr>
 
+<h4>2026-08-01 — Second pass: process-level mechanics, and an explicit analytical frame</h4>
+<p>The first pass established <em>that</em> the system breaks in specific places (interim-to-permanent bottleneck, CES matching delays, untracked spending) and <em>how much</em> it costs. This pass went one level deeper on four of those breaks specifically — the actual mechanical steps underneath the headline stats — and added <a href="#rp-sopk">The Analytical Frame</a>, which states explicitly what this project is and isn&#39;t trying to do: not a spending-scandal writeup, but an attempt to see the system the way Deming&#39;s System of Profound Knowledge would, so the findings point at what would actually have to change rather than who to blame.</p>
+<div class="callout callout-finding">
+<h5>Finding: most of what looks like a "decline" in CES is actually a silent drop-out, not a refusal</h5>
+LAHSA policy requires a household's Point of Contact to be refreshed every 90 days or the CES matching software can no longer match them at all — meaning a household can go from "matched" to "unmatchable" purely because a case manager turned over or a phone number changed, with no formal decline ever recorded. This connects directly to the case-manager turnover already documented on <a href="#rp-breaks">Where &amp; Why It Breaks</a>: a Point of Contact is only as stable as the case manager holding it. See the zoomed-in diagram on <a href="#rp-system">Phases of the Process</a>.
+</div>
+
+<div class="callout callout-finding">
+<h5>Finding: "unknown exit destination" is a tracking artifact, not a mystery</h5>
+HUD's own HMIS Data Standards instruct staff to record "no exit interview completed" whenever a client stops showing up before anyone can ask where they're going — a default the system reaches by timing out, not by investigating. This reframes a number that reads as ominous (someone vanished) into a number that's more precisely a measurement failure (no one was in contact at the moment of exit) — an important distinction for a reader assessing how worried to be about that specific statistic. See <a href="#rp-system">Phases of the Process</a>.
+</div>
+
+<div class="callout callout-finding">
+<h5>Finding: the money mechanics have a genuinely simple villain — a manual, Excel-based reconciliation process between the City and LAHSA</h5>
+The court-ordered Alvarez &amp; Marsal audit found the City-to-LAHSA "cash request" process — the mechanism that determines whether LAHSA has money to pay its own providers — is manual, error-prone, and structured so that one discrepancy anywhere in a bundled funding agreement can delay payment for every program in that bundle, whether or not that program caused the discrepancy. This is about as close to a single, fixable root cause as this research has found anywhere on the site. See <a href="#rp-money">The Money</a>.
+</div>
+
+<div class="callout callout-finding">
+<h5>Finding: LAHSA's own master-leasing program is a live, current illustration of the CES vacancy problem, not just a historical audit finding</h5>
+259 of 758 units LAHSA master-leases sat vacant as of May 2026, costing roughly $10.6M/year, while the agency remained contractually obligated to pay full rent regardless of occupancy — removing the normal financial pressure to solve the vacancy quickly. LAHSA's own fix was to loosen front-end eligibility verification rather than add matching capacity, which is itself a clue about where the agency believes its actual bottleneck lives. This episode is cited as one of the specific triggers for HUD's June 2026 funding suspension. See <a href="#rp-system">Phases of the Process</a>.
+</div>
+
+<div class="callout callout-question">
+<h5>Open question, now more specific than before</h5>
+The single most important unread document surfaced in this pass: LAHSA's current governing document for CES matching, "CES PSH Prioritization and Matching Guidance" (revised 4/24/2026), is publicly linked but its full text could not be fetched in this research pass. It likely answers several of the specific open gaps below directly and should be read before treating this site's description of CES ranking logic as final.
+</div>
+
+<div class="callout callout-question">
+<h5>Open question</h5>
+No source found anywhere in either research pass gives a numeric SLA or cap on how long a CES match can sit unresolved, or how many times a specific unit can be declined before an escalation process is triggered. This was searched for directly and repeatedly and appears to be a genuine gap in LA's public documentation, not a research shortfall — worth asking directly of LAHSA/HSH if this project ever gets a live interview with someone inside the system.
+</div>
+
+<div class="callout callout-question">
+<h5>Methodological note for this pass</h5>
+Direct fetching of several primary-source domains (controller.lacity.gov, laist.com, kqed.org, lahsa.org, cacd.uscourts.gov) was blocked at the network level during this research pass, not by the sources themselves. Findings from those domains are sourced through search-engine-mediated summaries, third-party quotation, or outlets mirroring the same reporting — weaker than a direct primary-document fetch, and flagged inline wherever it applies. Load-bearing claims (the LAHSA master-leasing vacancy figures, the "cash request" mechanism, the Halcyon Selfmade and Yolanda Robins cases) were independently cross-checked against multiple outlets before being included.
+</div>
+
+<hr>
 <h4>2026-08-01 — First full research pass: eight pages populated</h4>
 <p>The site&#39;s core sections — Scope &amp; Scale, Phases of the Process, Agencies &amp; NGOs, Tools &amp; Systems, The Money, What Works/Doesn&#39;t, Where It Breaks, and Solutions Tried — are now researched and sourced. The single biggest surprise: this research landed in the middle of a live, unresolved institutional crisis, and that crisis shows up independently across every section.</p>
 <div class="callout callout-finding">

@@ -18,6 +18,10 @@ This site tracks an ongoing, independent research project on homelessness in Los
 - Where does the process **break**, structurally — not "who's to blame," but where the pipe actually leaks?
 - What **solutions have been tried** — which worked, which didn't, and why?
 
+## The lens this project uses
+
+Before the findings: this project isn't trying to catch anyone doing something wrong, and it isn't a spending-scandal writeup. It uses W. Edwards Deming's **System of Profound Knowledge** — a discipline for seeing a system (not just the people in it) clearly enough to know where it would actually give, if pushed. See <a href="sopk.html">The Analytical Frame</a> before the rest, since every other page is written to be read through it.
+
 ## How this site is organized
 
 This is a research-led project, not a fixed report — the structure will evolve as findings warrant. Right now it's organized in five parts:

@@ -32,6 +32,30 @@ LA's unhoused population roughly **doubled** from the mid-2010s to its 2020/2023
 
 HUD requires a biennial unsheltered count as a condition of Continuum of Care funding; LAHSA has done it **annually** since 2016 to track trends more granularly. It has three components: (1) a physical unsheltered tally — volunteers in teams of ~4 covering assigned census tracts across roughly 4,000 square miles over one to three nights in late January, counting people, tents, vehicles, and makeshift shelters (no interviews during the tally itself); (2) a separate demographic survey and youth count, extrapolated onto the raw tally; (3) HMIS administrative data for the sheltered population, counted by name/record.
 
+<div class="pm">
+<p class="pm-title">How one headline number gets produced — and where measurement theory breaks down</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Volunteer teams of ~4 physically tally people, tents, and vehicles across ~4,000 square miles over 1-3 nights in late January<small>No interviews during the tally itself — a visual count only.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Process</span><p class="pm-label">The raw tally is extrapolated using a separate demographic/youth survey and combined with HMIS records for the sheltered population</p><p class="pm-break-note"><strong>Breaks here — this is a theory-of-knowledge problem, not a data-entry one:</strong> a single-night visual tally structurally cannot see people who are doubled-up, and RAND field research found the official tally captured only about 68% of the unsheltered population in three hot-spot neighborhoods when cross-checked against a more intensive count — as low as 61% in Skid Row. The instrument is being asked to answer "how big is homelessness in LA" when it can only actually answer "how many people were visible to a volunteer team on one specific night." See <a href="sopk.html">The Analytical Frame</a>.</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">LAHSA aggregates, finalizes (sometimes revising totals shortly before release), and reports the countywide/city figure<small>See <a href="breaks.html">Where &amp; Why It Breaks</a> for the disputed 2025 late-revision finding.</small></p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-ink-muted)"></span>Process step</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 ## The count's accuracy is itself a live, documented dispute
 
 <div class="callout callout-fails">

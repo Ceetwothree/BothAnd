@@ -35,6 +35,38 @@ LA HAT is designed to separate "vulnerability" (harm a person faces if unhoused)
 "The current coordinated entry system is dysfunctional, impractical and inequitable," she's said publicly, noting housing units can sit vacant "for far too long" while the matching process runs. See <a href="breaks.html">Where &amp; Why It Breaks</a>.
 </div>
 
+<div class="pm">
+<p class="pm-title">Where a person's data actually lives, and where it stops flowing</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-person"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-person">Person</span><p class="pm-label">Assessed via VI-SPDAT / LA HAT; scored and entered into HMIS</p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">Clarity (Bitfocus), LAHSA's HMIS front end, holds the record and drives CES matching<small>The Community Queue and Points-of-Contact tracking described on <a href="system.html">Phases of the Process</a> both live here.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">A separate, proprietary County data system runs in parallel and does not connect to HMIS</p><p class="pm-break-note"><strong>Breaks here:</strong> some providers manually double-enter client data into both systems — "manually double-entering things opens the door for all sorts of errors" — a direct mechanical link between an IT architecture choice and whether a person is correctly recorded as sheltered.</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-tool"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-tool">Tool</span><p class="pm-label">DMH's clinical records track mental-health outreach and services separately</p><p class="pm-break-note"><strong>Breaks here:</strong> City and county entities have publicly acknowledged they're still working to connect HMIS/Clarity with DMH's clinical records — an admission this integration hasn't historically existed, even though DMH's HOME teams are one of the outreach paths feeding people into this same pipeline (see <a href="system.html">Phases of the Process</a>).</p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-agency"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-agency">Agency</span><p class="pm-label">Program exit is supposed to be logged back into HMIS, closing the loop</p><p class="pm-break-note"><strong>Breaks here:</strong> LAHSA's system lets providers bypass exit logging entirely when someone leaves an Inside Safe motel-shelter placement — meaning the city can keep paying for empty motel rooms for weeks with no enforced requirement to record that the person left. Councilmember Bob Blumenfield: "That's horrifying."</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-teal)"></span>Agency</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-gold)"></span>Tool / system</span>
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:#8a63b0"></span>Person</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
 ## Case management software: Clarity Human Services (Bitfocus)
 
 Clarity is the cloud-based platform LAHSA licenses from Bitfocus as LA's HMIS front end — built to help providers stay compliant with HUD CoC/ESG and other federal-partner reporting requirements, with a client-facing portal.

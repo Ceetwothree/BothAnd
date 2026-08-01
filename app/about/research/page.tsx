@@ -7,6 +7,7 @@ import { RESEARCH_PAPER_HTML } from './paper-content'
 
 const TOC = [
   { id: 'rp-index', label: 'Introduction' },
+  { id: 'rp-sopk', label: 'The Analytical Frame' },
   { id: 'rp-overview', label: 'Scope & Scale' },
   { id: 'rp-system', label: 'Phases of the Process' },
   { id: 'rp-agencies', label: 'Agencies & NGOs' },

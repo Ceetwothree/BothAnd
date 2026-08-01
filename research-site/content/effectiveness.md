@@ -11,6 +11,34 @@ subtitle: By phase of the process — what the evidence says is working, what is
 Each intervention below is rated by the strength of its outcome evidence: <strong>strong</strong>, <strong>mixed</strong>, or <strong>weak</strong> — and disputed claims are flagged as disputed rather than presented as settled. Ratings describe evidence quality, not political popularity. See <a href="sources.html">Sources &amp; Methodology</a>.
 </div>
 
+<div class="pm">
+<p class="pm-title">The funnel: where people are lost at each phase</p>
+<div class="pm-flow">
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Outreach</span><p class="pm-label">~37,000 street-outreach clients tracked in one California Policy Lab cohort<small>Only 17% enrolled in interim housing, RRH, or PSH within a year of first contact.</small></p></div>
+</div>
+<div class="pm-step pm-step-break">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Interim housing</span><p class="pm-label">Of those who do enroll, fewer than 1 in 5 (under 20%) exit city-funded interim housing into permanent housing<small>More than half of exits go to homelessness or an unknown destination — see <a href="system.html">Phases of the Process</a> for the mechanics of "unknown destination."</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span><span class="pm-line"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">RRH or PSH</span><p class="pm-label">Of those who reach permanent placement, PSH shows 94% one-year retention overall<small>RRH's "subsidy cliff" produces a different, generally worse retention profile for people who needed PSH-level support but were sorted toward RRH instead.</small></p></div>
+</div>
+<div class="pm-step">
+<div class="pm-marker"><span class="pm-dot pm-dot-process"></span></div>
+<div class="pm-body"><span class="pm-tag pm-tag-process">Aftercare</span><p class="pm-label">Black clients return to homelessness after PSH exit at roughly double the rate of white or Latino clients — a disparity that recurs at every phase of this funnel, not just this one</p></div>
+</div>
+</div>
+<div class="pm-legend">
+<span class="pm-legend-item"><span class="pm-legend-dot" style="color:var(--site-ink-muted)"></span>Process step</span>
+<span class="pm-legend-item">Dashed red = a documented break point</span>
+</div>
+</div>
+
+This funnel is why the interim-housing phase gets singled out repeatedly across this site: it's not the phase with the worst headline number (RRH's subsidy cliff and CES's racial-disparity findings are arguably worse in evidence-quality terms) — it's the phase where the largest *number* of people are lost, because outreach has already spent its 17% conversion getting them this far.
+
 ## Prevention & diversion — strong cost-effectiveness, small scale
 
 <div class="callout callout-works">
