@@ -14,6 +14,22 @@ This is the working log for the project. New entries go at the top. Each entry i
 
 <hr>
 
+### 2026-08-01 — Third pass: a peer-level Brilliant Corners profile, and where smaller entities fill the gaps the majors don't
+
+Two additions, both held to the same evidentiary bar as everything else on this site. First, <strong>Brilliant Corners</strong> — a housing-subsidy/landlord-engagement intermediary that didn't make the original nonprofit table — gets a full peer-level profile on <a href="agencies.html">Agencies &amp; NGOs</a>, including real, documented workforce and legal findings (a certified 2024 union election, an open wage-and-hour lawsuit) alongside a documented performance concern from a different city (San Francisco's Board of Supervisors found the same organization's contract there averaging 140 days against a 75-day placement target) — flagged explicitly as SF evidence, not LA evidence, since no comparable LA-specific audit exists. Second, a new section maps where DV survivors, eviction defendants, specific racial/ethnic communities, and other populations fall outside what the major agencies and NGOs on this site actually cover, and names the real organizations filling those gaps along with their own limitations.
+
+<div class="callout callout-finding">
+<h4>Finding: the scrutiny gap is itself a finding</h4>
+This research could not determine whether Brilliant Corners' comparatively thin LA-specific public scrutiny (no State Auditor or County Auditor-Controller report found, versus specific finalized audits for LAHSA) reflects genuinely stronger LA performance or simply less oversight attention directed at this organization specifically. Presented as an open question, not resolved either way — the ambiguity is the honest finding.
+</div>
+
+<div class="callout callout-finding">
+<h4>Finding: domestic violence survivors are structurally invisible to the same system that houses everyone else</h4>
+This site's tools.md already established Victim Service Providers are legally barred from HMIS entry. This pass quantified what that means in practice: only about 10% of the nearly 16,000 people who called LA DV hotlines seeking shelter in a recent year got a bed, and how (or whether) a DV survivor's need reaches CES prioritization without an HMIS record remains an open gap. See <a href="agencies.html">Agencies &amp; NGOs</a>.
+</div>
+
+---
+
 ### 2026-08-01 — Second pass: process-level mechanics, and an explicit analytical frame
 
 The first pass established *that* the system breaks in specific places (interim-to-permanent bottleneck, CES matching delays, untracked spending) and *how much* it costs. This pass went one level deeper on four of those breaks specifically — the actual mechanical steps underneath the headline stats — and added <a href="sopk.html">The Analytical Frame</a>, which states explicitly what this project is and isn't trying to do: not a spending-scandal writeup, but an attempt to see the system the way Deming's System of Profound Knowledge would, so the findings point at what would actually have to change rather than who to blame.
