@@ -74,8 +74,8 @@ As of March 2025, **$1.03 billion** of the $1.2B bond had been spent; current tr
 | Homekey (state motel/hotel conversion) | ~$144,000/unit | State Auditor, found "likely cost-effective" |
 | HHH permanent supportive housing (median, 2022 audit) | $580,155/unit | LA City Controller |
 | HHH — high-end outlier project | up to $837,000/unit | LA City Controller, 2022 |
-| Congregate interim shelter | ~$29,000/year per bed (~$79/night) | 2024 City rate documents |
-| Tiny-home / hotel-based interim shelter | ~$57,000/year per bed (~$156/night) | 2024 City rate documents |
+| Congregate interim shelter | approx. $29,000/year per bed (approx. $79/night) | 2024 City rate documents |
+| Tiny-home / hotel-based interim shelter | approx. $57,000/year per bed (approx. $156/night) | 2024 City rate documents |
 
 Homekey's per-unit cost is roughly a **quarter** of HHH's median — the clearest documented evidence that motel/hotel acquisition-and-conversion is a cheaper delivery model than ground-up construction, though the two programs aren't fully apples-to-apples (acquisition vs. new-build, different unit mixes).
 

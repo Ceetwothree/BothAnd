@@ -101,6 +101,13 @@ export default function AboutPage() {
               tracking enough of the flow to know whether a program is working.
             </p>
             <p>
+              That same instinct -- follow the evidence before building anything -- is behind{' '}
+              <Link href="/about/research">an independent research project</Link> tracking
+              homelessness in Los Angeles: the phases someone actually moves through, where the
+              money goes, who runs each part of the system, and what the evidence says actually
+              works.
+            </p>
+            <p>
               The clearest example of that mismatch happened right inside PATH: one site had
               boxes of donated items sitting unused, while another had exactly what it needed a
               few miles away, with no way to know it -- a men&apos;s center holding donated
