@@ -174,6 +174,8 @@ const SITE_CSS = `
       .lp-origin h2 { font-size: clamp(1.75rem, 3.6vw, 2.4rem); line-height: 1.28; }
       .lp-prose { max-width: 62ch; display: flex; flex-direction: column; gap: 1.35rem; }
       .lp-prose p { font-size: 1.07rem; color: var(--site-ink-soft); margin: 0; }
+      .lp-prose a { color: var(--site-teal); }
+      .lp-prose a:hover { color: var(--site-gold); }
 
       .lp-how { padding: clamp(2rem, 6vw, 3.5rem) 0 clamp(2.5rem, 6vw, 4rem); background: var(--site-paper-raised); border-top: 1px solid var(--site-paper-line); border-bottom: 1px solid var(--site-paper-line); }
       .lp-how-heading { max-width: 640px; font-size: clamp(1.4rem, 2.6vw, 1.8rem); line-height: 1.3; margin-top: 0; }
@@ -231,6 +233,94 @@ const SITE_CSS = `
       }
       .lp-advisor-name { font-weight: 600; color: var(--site-ink); margin: 0 0 0.15rem; }
       .lp-advisor-role { font-size: 0.9rem; color: var(--site-ink-muted); margin: 0; }
+
+      /* Research paper (/about/research) -- renders pre-built HTML from
+         research-site/content/*.md (see app/about/research/paper-content.ts).
+         Scoped under .rp-content so these rules can't leak onto other pages,
+         since the source markdown uses plain, unprefixed classes like
+         .callout and .card that would otherwise be too generic to scope safely. */
+      .rp-toc { padding: clamp(2rem, 5vw, 3rem) 0 clamp(1.5rem, 4vw, 2rem); }
+      .rp-toc-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem 1.5rem; margin-top: 1.5rem; max-width: 760px; }
+      .rp-toc-list a { color: var(--site-teal); text-decoration: none; font-size: 0.95rem; }
+      .rp-toc-list a:hover { color: var(--site-gold); text-decoration: underline; }
+
+      .rp-content { padding: 0 0 clamp(3rem, 7vw, 5rem); }
+      .rp-content-inner { max-width: 760px; margin: 0 auto; }
+
+      .rp-section-eyebrow { margin: 3.5rem 0 1rem; padding-top: 2.5rem; border-top: 1px solid var(--site-paper-line); }
+      .rp-section-eyebrow:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+      .rp-page { margin-bottom: 3rem; scroll-margin-top: 1.5rem; }
+      .rp-page h2 { font-size: clamp(1.6rem, 3vw, 2rem); line-height: 1.25; margin: 0 0 0.5rem; }
+      .rp-page h3 { font-size: clamp(1.25rem, 2.2vw, 1.45rem); line-height: 1.3; margin: 2.25rem 0 0.75rem; color: var(--site-ink); }
+      .rp-page h3:first-of-type { margin-top: 0; }
+      .rp-page h4 { font-size: 1.05rem; margin: 1.5rem 0 0.5rem; color: var(--site-ink); }
+      .rp-page h5 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.5rem; color: inherit; }
+      .rp-page p, .rp-page li { color: var(--site-ink-soft); line-height: 1.68; }
+      .rp-page p { margin: 0 0 1.1rem; }
+      .rp-page ul, .rp-page ol { margin: 0 0 1.1rem; padding-left: 1.4rem; }
+      .rp-page li { margin: 0.35rem 0; }
+      .rp-page a { color: var(--site-teal); }
+      .rp-page a:hover { color: var(--site-gold); }
+      .rp-page hr { border: none; border-top: 1px solid var(--site-paper-line); margin: 2.5rem 0; }
+      .rp-page strong { color: var(--site-ink); }
+
+      .rp-subtitle { color: var(--site-ink-muted); font-size: 1.05rem; margin: 0 0 0.85rem; }
+      .rp-meta-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; font-size: 0.8rem; color: var(--site-ink-muted); margin-bottom: 1.75rem; }
+      .rp-status { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2em 0.65em; border-radius: 999px; }
+      .rp-status-researched { background: var(--site-teal); color: var(--site-teal-ink); }
+      .rp-status-in-progress { background: var(--site-gold-soft); color: var(--site-gold); }
+      .rp-status-stub { background: var(--site-paper-raised); color: var(--site-ink-muted); border: 1px solid var(--site-paper-line); }
+
+      .rp-content table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+      .rp-content th, .rp-content td { text-align: left; padding: 0.55em 0.7em; border-bottom: 1px solid var(--site-paper-line); vertical-align: top; }
+      .rp-content th { background: var(--site-paper-raised); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--site-ink-muted); }
+
+      .rp-content .callout { margin: 1.5rem 0; padding: 1rem 1.2rem; border-radius: 8px; font-size: 0.95rem; }
+      .rp-content .callout p:last-child { margin-bottom: 0; }
+      .rp-content .callout-finding { background: var(--site-gold-soft); border: 1px solid var(--site-gold); }
+      .rp-content .callout-question { background: var(--site-paper-raised); border: 1px dashed var(--site-ink-muted); }
+      .rp-content .callout-works { background: rgba(31, 111, 92, 0.12); border: 1px solid var(--site-teal); }
+      .rp-content .callout-fails { background: rgba(161, 61, 47, 0.1); border: 1px solid #a13d2f; }
+      .rp-content .callout-mixed { background: var(--site-gold-soft); border: 1px solid var(--site-gold); }
+
+      .rp-content .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+      .rp-content .card { border: 1px solid var(--site-paper-line); border-radius: 10px; padding: 1rem 1.1rem; background: var(--site-paper-raised); }
+      .rp-content .card a { text-decoration: none; font-weight: 600; }
+
+      /* Process-map diagrams: a hand-authored, dependency-free vertical
+         stepper (no JS/Mermaid) showing who/what touches a process and
+         where it's documented to break. Node "type" (agency/tool/process/
+         person) is conveyed by a colored tag, not position, so the same
+         vocabulary reads consistently across every diagram on the page. */
+      .rp-content .pm { margin: 1.75rem 0; padding: 1.25rem 1.4rem 1.5rem; border: 1px solid var(--site-paper-line); border-radius: 10px; background: var(--site-paper-raised); }
+      .rp-content .pm-title { margin: 0 0 1.25rem; font-weight: 600; color: var(--site-ink); font-size: 1rem; }
+      .rp-content .pm-flow { display: flex; flex-direction: column; }
+      .rp-content .pm-step { display: flex; gap: 0.9rem; align-items: stretch; }
+      .rp-content .pm-marker { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 14px; }
+      .rp-content .pm-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; margin-top: 0.3rem; border: 2px solid var(--site-paper-raised); box-shadow: 0 0 0 2px currentColor; }
+      .rp-content .pm-dot-agency { color: var(--site-teal); }
+      .rp-content .pm-dot-tool { color: var(--site-gold); }
+      .rp-content .pm-dot-process { color: var(--site-ink-muted); }
+      .rp-content .pm-dot-person { color: #8a63b0; }
+      .rp-content .pm-line { flex: 1; width: 2px; min-height: 1.35rem; background: var(--site-paper-line); margin: 0.15rem 0; }
+      .rp-content .pm-step:last-child .pm-line { display: none; }
+      .rp-content .pm-body { flex: 1; padding-bottom: 1.35rem; min-width: 0; }
+      .rp-content .pm-step:last-child .pm-body { padding-bottom: 0; }
+      .rp-content .pm-tag { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.12em 0.55em; border-radius: 999px; margin-bottom: 0.4rem; }
+      .rp-content .pm-tag-agency { background: rgba(31, 111, 92, 0.15); color: var(--site-teal); }
+      .rp-content .pm-tag-tool { background: var(--site-gold-soft); color: var(--site-gold); }
+      .rp-content .pm-tag-process { background: var(--site-paper-line); color: var(--site-ink-muted); }
+      .rp-content .pm-tag-person { background: rgba(138, 99, 176, 0.15); color: #8a63b0; }
+      .rp-content .pm-label { margin: 0; font-size: 0.95rem; color: var(--site-ink); line-height: 1.5; }
+      .rp-content .pm-label small { display: block; margin-top: 0.3rem; font-size: 0.85rem; color: var(--site-ink-soft); font-weight: 400; }
+      .rp-content .pm-step-break .pm-line { background: repeating-linear-gradient(to bottom, #a13d2f, #a13d2f 4px, transparent 4px, transparent 8px); }
+      .rp-content .pm-break-note { margin: 0.6rem 0 0; padding: 0.65rem 0.85rem; border-radius: 6px; background: rgba(161, 61, 47, 0.1); border: 1px solid #a13d2f; font-size: 0.88rem; color: var(--site-ink-soft); }
+      .rp-content .pm-break-note strong { color: #a13d2f; }
+
+      .rp-content .pm-legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 1rem 0 0.5rem; font-size: 0.85rem; color: var(--site-ink-soft); }
+      .rp-content .pm-legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+      .rp-content .pm-legend-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 0 2px currentColor; }
 `
 
 export function SiteStyles() {
